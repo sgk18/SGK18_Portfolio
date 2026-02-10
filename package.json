@@ -1,0 +1,30 @@
+{
+  "name": "sgk18_portfolio",
+  "version": "1.0.0",
+  "description": "",
+  "main": "script.js",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sgk18/SGK18_Portfolio.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sgk18/SGK18_Portfolio/issues"
+  },
+  "homepage": "https://github.com/sgk18/SGK18_Portfolio#readme",
+  "dependencies": {
+    "next": "^16.1.6",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "react-tsparticles": "^2.12.2",
+    "tsparticles": "^3.9.1"
+  }
+}
