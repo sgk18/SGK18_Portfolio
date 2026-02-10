@@ -2,7 +2,6 @@
   "name": "sgk18_portfolio",
   "version": "1.0.0",
   "description": "",
-  "main": "script.js",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
