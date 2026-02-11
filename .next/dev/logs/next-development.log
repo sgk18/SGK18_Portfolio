@@ -1,1 +1,10 @@
-[00:00:02.507] Server  LOG     ✓ Ready in 1745ms
+[00:00:02.107] Server  LOG     ✓ Ready in 1377ms
+[00:00:46.972] Server  WARN    Do not add stylesheets using next/head (see <link rel="stylesheet"> tag with href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Outfit:wght@300;400;500;700&family=Space+Grotesk:wght@300;400;600;700&display=swap"). Use Document instead. 
+See more info here: https://nextjs.org/docs/messages/no-stylesheets-in-head-component
+[00:00:46.973] Server  WARN    Do not add <script> tags using next/head (see <script> tag with src="https://kit.fontawesome.com/a076d05399.js"). Use next/script instead. 
+See more info here: https://nextjs.org/docs/messages/no-script-tags-in-head-component
+[00:00:47.711] Browser ERROR   unhandledRejection: TypeError: engine.checkVersion is not a function
+[00:00:47.711] Browser WARN    Do not add stylesheets using next/head (see <link rel="stylesheet"> tag with href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Outfit:wght@300;400;500;700&family=Space+Grotesk:wght@300;400;600;700&display=swap"). Use Document instead. 
+See more info here: https://nextjs.org/docs/messages/no-stylesheets-in-head-component
+[00:00:47.711] Browser WARN    Do not add <script> tags using next/head (see <script> tag with src="https://kit.fontawesome.com/a076d05399.js"). Use next/script instead. 
+See more info here: https://nextjs.org/docs/messages/no-script-tags-in-head-component
