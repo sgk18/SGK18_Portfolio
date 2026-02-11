@@ -1,6 +1,6 @@
 import Head from 'next/head'
 import { useEffect, useState } from 'react'
-import Particles from 'react-tsparticles'
+import Particles from '@tsparticles/react'
 import { loadFull } from 'tsparticles'
 
 export default function Home() {
