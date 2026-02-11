@@ -1,11 +1,22 @@
 import Head from 'next/head'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import Particles from 'react-tsparticles'
 import { loadFull } from 'tsparticles'
 
 export default function Home() {
   const particlesInit = async (engine) => {
     await loadFull(engine)
+  }
+
+  const [formStatus, setFormStatus] = useState('')
+
+  const handleFormSubmit = (e) => {
+    e.preventDefault()
+    // For now, just show a success message
+    // In a real app, you'd send this to a backend
+    setFormStatus('Thank you for your message! I\'ll get back to you soon.')
+    e.target.reset()
+    setTimeout(() => setFormStatus(''), 5000)
   }
 
   useEffect(() => {
@@ -447,8 +458,8 @@ export default function Home() {
                     <span>Responsive Design</span>
                   </div>
                   <div className="project-links">
-                    <a href="#" className="link-item">Demo</a>
-                    <a href="#" className="link-item">Code</a>
+                    <a href="/" className="link-item">Demo</a>
+                    <a href="https://github.com/sgk18/SGK18_Portfolio" target="_blank" rel="noopener noreferrer" className="link-item">Code</a>
                   </div>
                 </div>
               </article>
@@ -507,7 +518,7 @@ export default function Home() {
               <a href="mailto:suryachalam18@gmail.com" className="link-item" style={{fontSize: '1.2rem', color: 'var(--primary)'}}>suryachalam18@gmail.com</a>
             </div>
             <div className="contact-wrapper">
-              <form className="contact-form">
+              <form className="contact-form" onSubmit={handleFormSubmit}>
                 <div className="form-group">
                   <input type="text" placeholder="Name" required />
                 </div>
@@ -518,6 +529,7 @@ export default function Home() {
                   <textarea placeholder="Message" rows="5" required></textarea>
                 </div>
                 <button type="submit" className="btn btn-primary">Send Message</button>
+                {formStatus && <p style={{marginTop: '1rem', color: 'var(--primary)'}}>{formStatus}</p>}
               </form>
             </div>
           </div>
@@ -530,7 +542,6 @@ export default function Home() {
           <div className="social-links">
             <a href="https://github.com/sgk18" target="_blank" rel="noopener noreferrer">Github</a>
             <a href="https://www.linkedin.com/in/suryachalam/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
-            <a href="#" >Twitter</a>
           </div>
         </div>
       </footer>

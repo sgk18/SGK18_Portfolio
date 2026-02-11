@@ -3,8 +3,8 @@ globalThis.__BUILD_MANIFEST = {
     "/": [
       "static/chunks/f0f80087fbe3be9f.js",
       "static/chunks/79776dcd2a920a45.js",
-      "static/chunks/f46c114e6c35a451.js",
-      "static/chunks/turbopack-242d9b951a0e5809.js"
+      "static/chunks/d3beee1c1e969c23.js",
+      "static/chunks/turbopack-02b114a26a36eab8.js"
     ],
     "/_app": [
       "static/chunks/0f5148f5c1ae5a8f.js",
