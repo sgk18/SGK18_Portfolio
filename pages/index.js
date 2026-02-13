@@ -514,7 +514,7 @@ export default function Home() {
           <div className="container">
             <h2 className="section-title">Get In Touch</h2>
             <p className="contact-subtitle">Have a project in mind or just want to say hi?</p>
-            <div style={{marginBottom: '2rem', textAlign: 'left'}}>
+            <div style={{marginBottom: '2rem'}}>
               <a href="mailto:suryachalam18@gmail.com" className="link-item" style={{fontSize: '1.2rem', color: 'var(--primary)'}}>suryachalam18@gmail.com</a>
             </div>
             <div className="contact-wrapper">
