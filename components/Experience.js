@@ -18,17 +18,26 @@ export default function Experience() {
       <div className="container mx-auto px-6">
         <h2 className="section-title">Experience</h2>
         
-        <div className="relative border-l-4 border-primary ml-2 md:ml-4 space-y-12">
+        <div className="relative border-l-2 border-primary/30 ml-3 md:ml-6 space-y-12">
           {experiences.map((exp, index) => (
-            <div key={index} className="relative pl-8 md:pl-12">
-              <div className="absolute -left-3.5 top-1.5 w-6 h-6 bg-background border-4 border-primary rounded-full"></div>
-              <div className="glass-card">
-                <h3 className="text-2xl font-bold text-white mb-1">{exp.role}</h3>
-                <h4 className="text-xl text-primary mb-2">{exp.company}</h4>
-                <p className="text-text-secondary text-sm mb-4 italic">{exp.duration}</p>
-                <ul className="list-disc list-inside space-y-2 text-text-secondary">
+            <div key={index} className="relative pl-8 md:pl-12 group">
+              {/* Timeline Dot */}
+              <div className="absolute -left-[9px] top-0 w-5 h-5 bg-background border-4 border-primary rounded-full group-hover:scale-125 transition-transform duration-300"></div>
+              
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
+                  <div>
+                    <h3 className="text-2xl font-bold text-white mb-1 group-hover:text-primary transition-colors">{exp.role}</h3>
+                    <h4 className="text-lg text-text-secondary font-medium">{exp.company}</h4>
+                  </div>
+                  <span className="text-sm font-semibold px-3 py-1 bg-primary/10 text-primary rounded-full w-fit mt-2 sm:mt-0 border border-primary/20">
+                    {exp.duration}
+                  </span>
+              </div>
+
+              <div className="glass-card p-6 hover:bg-white/5 transition-colors">
+                <ul className="list-disc list-inside space-y-2 text-text-secondary marker:text-primary">
                   {exp.responsibilities.map((resp, idx) => (
-                    <li key={idx}>{resp}</li>
+                    <li key={idx} className="leading-relaxed">{resp}</li>
                   ))}
                 </ul>
               </div>

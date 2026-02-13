@@ -94,26 +94,41 @@ export default function Hero() {
             />
         )}
       
-      <div className="absolute inset-0 z-0 opacity-20">
-         <video autoPlay loop muted playsInline className="w-full h-full object-cover">
-            <source src="/public/Minimalist_Mathematical_Graph_Animation.mp4" type="video/mp4" />
-         </video>
-      </div>
+      {/* Background Overlay */}
+      <div className="absolute inset-0 z-0 bg-background/80"></div>
 
-      <div className="relative z-10 text-center px-4">
-        <h1 className="text-5xl md:text-7xl font-bold mb-4 glitch" data-text="Hello, I’m Suryachalam V M">
-          Hello, I’m Suryachalam V M
-        </h1>
-        <p className="text-xl md:text-3xl text-text-secondary mb-8">
-          Frontend Web Developer Intern
-        </p>
-        <div className="flex justify-center space-x-6">
-          <Link href="#projects" className="btn btn-primary">
-            View Projects
-          </Link>
-          <Link href="#contact" className="btn">
-            Contact Me
-          </Link>
+      <div className="container mx-auto px-6 relative z-10">
+        <div className="flex flex-col md:flex-row items-center justify-center gap-12">
+            
+            {/* Left Column: Profile Photo */}
+            <div className="w-48 h-48 md:w-64 md:h-64 relative rounded-full overflow-hidden border-4 border-primary shadow-[0_0_30px_rgba(0,243,255,0.3)]">
+                <img 
+                    src="/profile.jpg" 
+                    alt="Suryachalam V M" 
+                    className="w-full h-full object-cover"
+                />
+            </div>
+
+            {/* Right Column: Text & Buttons */}
+            <div className="text-center md:text-left">
+                <h1 className="text-4xl md:text-6xl font-bold mb-4 glitch" data-text="Hello, I’m Suryachalam V M">
+                Hello, I’m Suryachalam V M
+                </h1>
+                <p className="text-xl md:text-2xl text-primary font-semibold mb-4">
+                Frontend Web Developer Intern
+                </p>
+                <p className="text-text-secondary mb-8 max-w-lg mx-auto md:mx-0 leading-relaxed">
+                Building responsive, user-centric web experiences with modern tech. Passionate about clean code and creative solutions.
+                </p>
+                <div className="flex flex-col md:flex-row gap-4 justify-center md:justify-start">
+                    <Link href="#projects" className="btn btn-primary">
+                        View Projects
+                    </Link>
+                    <Link href="#contact" className="btn">
+                        Contact Me
+                    </Link>
+                </div>
+            </div>
         </div>
       </div>
     </section>

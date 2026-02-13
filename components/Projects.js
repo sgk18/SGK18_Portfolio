@@ -47,32 +47,33 @@ export default function Projects() {
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {projects.map((project, index) => (
-                <div key={index} className="glass-card group hover:bg-surface/50 transition-all duration-300 flex flex-col h-full">
-                    <div className="h-48 rounded-t-lg bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center mb-4 group-hover:from-gray-800 group-hover:to-primary/20 transition-all duration-500">
-                        <span className="text-4xl font-bold text-gray-700 group-hover:text-primary transition-colors">{project.title[0]}</span>
+                <div key={index} className="glass-card group hover:bg-surface/50 transition-all duration-300 flex flex-col h-full hover:-translate-y-2 border border-white/5 hover:border-primary/30">
+                    <div className="h-48 rounded-t-lg bg-gradient-to-br from-gray-900 to-black/50 flex items-center justify-center mb-4 group-hover:from-gray-800 group-hover:to-primary/10 transition-all duration-500 overflow-hidden relative">
+                        <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                        <span className="text-5xl font-bold text-gray-800 group-hover:text-primary transition-colors z-10">{project.title[0]}</span>
                     </div>
                     
-                    <div className="flex-grow p-2">
-                        <h3 className="text-2xl font-bold text-white mb-2 group-hover:text-primary transition-colors">{project.title}</h3>
-                        <p className="text-text-secondary mb-4 text-sm leading-relaxed">{project.description}</p>
+                    <div className="flex-grow p-4">
+                        <h3 className="text-2xl font-bold text-white mb-3 group-hover:text-primary transition-colors">{project.title}</h3>
+                        <p className="text-text-secondary mb-6 text-sm leading-relaxed line-clamp-3">{project.description}</p>
                         
                         <div className="flex flex-wrap gap-2 mb-6">
                             {project.tech.map((t, i) => (
-                                <span key={i} className="text-xs font-semibold px-2 py-1 bg-background rounded-full text-primary border border-primary/30">
+                                <span key={i} className="text-xs font-semibold px-3 py-1 bg-white/5 rounded-full text-primary border border-primary/20">
                                     {t}
                                 </span>
                             ))}
                         </div>
                     </div>
 
-                    <div className="flex justify-between items-center mt-auto pt-4 border-t border-gray-800">
-                        <a href={project.github} className="flex items-center space-x-2 text-sm text-text-secondary hover:text-white transition-colors">
-                            <FaGithub className="text-lg" />
-                            <span>Code</span>
-                        </a>
-                        <a href={project.live} className="flex items-center space-x-2 text-sm text-primary hover:text-accent transition-colors">
+                    <div className="p-4 pt-0 mt-auto flex gap-4">
+                        <a href={project.live} className="flex-1 btn btn-primary py-2 text-sm flex items-center justify-center gap-2">
                             <span>Live Demo</span>
-                            <FaExternalLinkAlt />
+                            <FaExternalLinkAlt className="text-xs" />
+                        </a>
+                        <a href={project.github} className="flex-1 btn py-2 text-sm flex items-center justify-center gap-2 border-white/20 text-white hover:border-primary">
+                            <FaGithub className="text-lg" />
+                            <span>GitHub</span>
                         </a>
                     </div>
                 </div>
