@@ -79,28 +79,31 @@ export default function Skills() {
                         {category.title}
                     </h3>
                     
-                    {/* Horizontal Scrolling Row */}
-                    <motion.div 
-                        className="flex flex-row overflow-x-auto space-x-6 pb-4 no-scrollbar items-center w-full"
-                        variants={containerVariants}
-                        initial="hidden"
-                        whileInView="visible"
-                        viewport={{ once: true, amount: 0.2 }}
-                    >
-                        {category.skills.map((skill, index) => (
-                            <motion.div 
-                                key={index} 
-                                variants={itemVariants}
-                                whileHover={{ y: -5, boxShadow: "0 5px 15px rgba(0, 243, 255, 0.2)" }}
-                                className="flex-shrink-0 flex items-center p-4 space-x-3 border border-white/10 bg-surface/40 backdrop-blur-md rounded-xl min-w-[170px] hover:border-primary/50 transition-all duration-300 select-none cursor-pointer"
-                            >
-                                <div className="text-3xl p-2 bg-white/5 rounded-lg text-white">
-                                    {skill.icon}
-                                </div>
-                                <span className="font-medium text-text-primary whitespace-nowrap">{skill.name}</span>
-                            </motion.div>
-                        ))}
-                    </motion.div>
+                    {/* Horizontal Scrolling Row - Explicitly Enforced */}
+                    <div className="w-full overflow-hidden">
+                        <motion.div 
+                            className="flex flex-row flex-nowrap overflow-x-auto space-x-6 pb-4 no-scrollbar items-center w-full"
+                            variants={containerVariants}
+                            initial="hidden"
+                            whileInView="visible"
+                            viewport={{ once: true, amount: 0.2 }}
+                            style={{ display: 'flex', flexDirection: 'row', flexWrap: 'nowrap', overflowX: 'auto' }} // Inline styles to force override
+                        >
+                            {category.skills.map((skill, index) => (
+                                <motion.div 
+                                    key={index} 
+                                    variants={itemVariants}
+                                    whileHover={{ y: -5, boxShadow: "0 5px 15px rgba(0, 243, 255, 0.2)" }}
+                                    className="flex-shrink-0 flex items-center p-4 space-x-3 border border-white/10 bg-surface/40 backdrop-blur-md rounded-xl min-w-[170px] hover:border-primary/50 transition-all duration-300 select-none cursor-pointer"
+                                >
+                                    <div className="text-3xl p-2 bg-white/5 rounded-lg text-white">
+                                        {skill.icon}
+                                    </div>
+                                    <span className="font-medium text-text-primary whitespace-nowrap">{skill.name}</span>
+                                </motion.div>
+                            ))}
+                        </motion.div>
+                    </div>
                 </div>
             ))}
         </div>
