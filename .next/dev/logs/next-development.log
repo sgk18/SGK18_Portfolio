@@ -1,9 +1,0 @@
-[00:00:03.043] Server  LOG     ✓ Ready in 1956ms
-[00:00:06.090] Server  WARN    Do not add stylesheets using next/head (see <link rel="stylesheet"> tag with href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Outfit:wght@300;400;500;700&family=Space+Grotesk:wght@300;400;600;700&display=swap"). Use Document instead. 
-See more info here: https://nextjs.org/docs/messages/no-stylesheets-in-head-component
-[00:00:06.090] Server  WARN    Do not add <script> tags using next/head (see <script> tag with src="https://kit.fontawesome.com/a076d05399.js"). Use next/script instead. 
-See more info here: https://nextjs.org/docs/messages/no-script-tags-in-head-component
-[00:00:07.675] Browser WARN    Do not add stylesheets using next/head (see <link rel="stylesheet"> tag with href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Outfit:wght@300;400;500;700&family=Space+Grotesk:wght@300;400;600;700&display=swap"). Use Document instead. 
-See more info here: https://nextjs.org/docs/messages/no-stylesheets-in-head-component
-[00:00:07.675] Browser WARN    Do not add <script> tags using next/head (see <script> tag with src="https://kit.fontawesome.com/a076d05399.js"). Use next/script instead. 
-See more info here: https://nextjs.org/docs/messages/no-script-tags-in-head-component
