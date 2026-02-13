@@ -21,30 +21,31 @@ export default function About() {
           
           <div className="w-full md:w-2/3">
             <p className="text-lg text-text-secondary mb-6 leading-relaxed">
-              I am a <span className="text-primary font-semibold">B.Sc. Mathematics & Computer Science student</span> with a deep passion for frontend development, problem-solving, and building interactive systems. 
-              My journey involves working on various university and startup projects, honing my skills in HTML, CSS, JavaScript, and Next.js.
+              Frontend Web Developer fresher with hands-on experience building responsive websites using HTML, CSS,
+              JavaScript, and Next.js. Led and contributed to <span className="text-primary font-semibold">real-world projects</span> including official university websites
+              and startup concepts. Actively seeking frontend or web development internship opportunities.
             </p>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
               <div className="flex items-center space-x-3 text-text-secondary">
                 <FaMapMarkerAlt className="text-primary" />
-                <span>Bengaluru</span>
+                <span>Mahalakshmi Layout, Bengaluru – 560086</span>
               </div>
               <div className="flex items-center space-x-3 text-text-secondary">
                 <FaEnvelope className="text-primary" />
-                <a href="mailto:your-email@example.com" className="hover:text-primary transition-colors">your-email@example.com</a>
+                <a href="mailto:suryachalam18@gmail.com" className="hover:text-primary transition-colors">suryachalam18@gmail.com</a>
               </div>
               <div className="flex items-center space-x-3 text-text-secondary">
                 <FaPhone className="text-primary" />
-                <span>+91 XXXXX XXXXX</span>
+                <span>+91 98445 88551</span>
               </div>
             </div>
 
             <div className="flex space-x-6 mb-8">
-              <a href="#" target="_blank" rel="noopener noreferrer" className="text-2xl hover:text-primary transition-transform hover:-translate-y-1">
+              <a href="https://linkedin.com/in/suryachalam" target="_blank" rel="noopener noreferrer" className="text-2xl hover:text-primary transition-transform hover:-translate-y-1">
                 <FaLinkedin />
               </a>
-              <a href="#" target="_blank" rel="noopener noreferrer" className="text-2xl hover:text-primary transition-transform hover:-translate-y-1">
+              <a href="https://github.com/sgk18" target="_blank" rel="noopener noreferrer" className="text-2xl hover:text-primary transition-transform hover:-translate-y-1">
                 <FaGithub />
               </a>
             </div>
@@ -55,8 +56,8 @@ export default function About() {
                     <p className="text-sm text-text-secondary">Experience</p>
                 </div>
                 <div className="glass-card text-center p-4 min-w-[120px]">
-                    <h3 className="text-3xl font-bold text-primary">10+</h3>
-                    <p className="text-sm text-text-secondary">Projects Completed</p>
+                    <h3 className="text-3xl font-bold text-primary">5+</h3>
+                    <p className="text-sm text-text-secondary">Projects</p>
                 </div>
             </div>
           </div>

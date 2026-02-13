@@ -4,28 +4,23 @@ export default function Languages() {
       <div className="container mx-auto px-6">
         <h2 className="section-title">Languages</h2>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 w-full">
-            <div className="glass-card p-6">
-                <h3 className="text-2xl font-bold text-primary mb-6 border-b border-gray-700 pb-2">Professional</h3>
-                <div className="flex flex-wrap gap-3">
-                    {['English', 'Kannada', 'Tamil', 'Hindi'].map((lang) => (
-                        <span key={lang} className="px-4 py-2 bg-background rounded-full text-white border border-gray-700 hover:border-primary transition-colors">
-                            {lang}
-                        </span>
-                    ))}
+        <div className="space-y-12">
+            {[
+                { title: 'Full Professional', languages: ['English', 'Hindi'] },
+                { title: 'Native / Bilingual', languages: ['Kannada', 'Tamil'] },
+                { title: 'Elementary', languages: ['French', 'Japanese'] }
+            ].map((category, idx) => (
+                <div key={idx} className="relative">
+                    <h3 className="text-2xl font-bold mb-6 text-text-primary border-l-4 border-primary pl-4">{category.title}</h3>
+                    <div className="flex overflow-x-auto space-x-6 pb-4 no-scrollbar items-stretch">
+                        {category.languages.map((lang) => (
+                            <div key={lang} className="glass-card flex-shrink-0 px-6 py-4 border border-white/5 bg-surface/40 backdrop-blur-md min-w-[150px] hover:border-primary/50 transition-all duration-300 select-none cursor-pointer text-center">
+                                <span className="text-lg font-medium text-white">{lang}</span>
+                            </div>
+                        ))}
+                    </div>
                 </div>
-            </div>
-
-            <div className="glass-card p-6">
-                <h3 className="text-2xl font-bold text-accent mb-6 border-b border-gray-700 pb-2">Elementary</h3>
-                <div className="flex flex-wrap gap-3">
-                    {['French', 'Japanese'].map((lang) => (
-                        <span key={lang} className="px-4 py-2 bg-background rounded-full text-white border border-gray-700 hover:border-accent transition-colors">
-                            {lang}
-                        </span>
-                    ))}
-                </div>
-            </div>
+            ))}
         </div>
       </div>
     </section>

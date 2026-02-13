@@ -5,9 +5,10 @@ export default function Experience() {
       company: 'Centre for Peace Praxis, CHRIST University',
       duration: 'Jul 2025 – Present',
       responsibilities: [
-        'Developed and maintained official website.',
-        'Improved usability and responsiveness.',
-        'Used Git & GitHub for collaboration.',
+        'Developed and maintained the official website using HTML5, CSS3, and responsive design principles.',
+        'Improved usability and mobile responsiveness for cross-device compatibility.',
+        'Collaborated with core committee members to support academic and peacebuilding events.',
+        'Used Git & GitHub for version control and collaborative development.',
       ],
     },
   ];

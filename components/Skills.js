@@ -1,7 +1,6 @@
-import { FaHtml5, FaCss3Alt, FaJs, FaReact, FaGitAlt, FaGithub, FaFigma, FaBootstrap, FaPython, FaDatabase, FaFileExcel, FaJava, FaBrain } from 'react-icons/fa';
-import { SiNextdotjs, SiTailwindcss, SiC, SiOpenai } from 'react-icons/si';
+import { FaHtml5, FaCss3Alt, FaJs, FaReact, FaGitAlt, FaGithub, FaFigma, FaBootstrap, FaPython, FaDatabase, FaFileExcel, FaBrain, FaServer } from 'react-icons/fa';
+import { SiNextdotjs, SiTailwindcss, SiC } from 'react-icons/si';
 import { motion } from 'framer-motion';
-import { useRef } from 'react';
 
 export default function Skills() {
   const skillCategories = [
@@ -10,7 +9,7 @@ export default function Skills() {
       skills: [
         { name: 'HTML5', icon: <FaHtml5 className="text-orange-500" /> },
         { name: 'CSS3', icon: <FaCss3Alt className="text-blue-500" /> },
-        { name: 'JavaScript', icon: <FaJs className="text-yellow-400" /> },
+        { name: 'JavaScript (ES6+)', icon: <FaJs className="text-yellow-400" /> },
         { name: 'React', icon: <FaReact className="text-blue-400" /> },
         { name: 'Next.js', icon: <SiNextdotjs className="text-white" /> },
         { name: 'Responsive Design', icon: <span className="text-2xl">📱</span> },
@@ -29,7 +28,8 @@ export default function Skills() {
       skills: [
         { name: 'Python', icon: <FaPython className="text-blue-300" /> },
         { name: 'C', icon: <SiC className="text-blue-500" /> },
-        { name: 'SQL', icon: <FaDatabase className="text-gray-400" /> },
+        { name: 'SQL (Basic)', icon: <FaDatabase className="text-gray-400" /> },
+        { name: 'REST API Basics', icon: <FaServer className="text-green-400" /> },
       ],
     },
     {
@@ -72,15 +72,16 @@ export default function Skills() {
       <div className="container mx-auto px-6">
         <h2 className="section-title">Skills</h2>
         
-        <div className="space-y-12">
+        <div className="flex flex-col space-y-12">
             {skillCategories.map((category, idx) => (
-                <div key={idx} className="relative">
+                <div key={idx} className="relative w-full">
                     <h3 className="text-2xl font-bold mb-6 text-text-primary border-l-4 border-primary pl-4">
                         {category.title}
                     </h3>
                     
+                    {/* Horizontal Scrolling Row */}
                     <motion.div 
-                        className="flex overflow-x-auto space-x-6 pb-4 no-scrollbar items-stretch"
+                        className="flex flex-row overflow-x-auto space-x-6 pb-4 no-scrollbar items-center w-full"
                         variants={containerVariants}
                         initial="hidden"
                         whileInView="visible"
@@ -91,9 +92,9 @@ export default function Skills() {
                                 key={index} 
                                 variants={itemVariants}
                                 whileHover={{ y: -5, boxShadow: "0 5px 15px rgba(0, 243, 255, 0.2)" }}
-                                className="glass-card flex-shrink-0 flex items-center p-4 space-x-3 border border-white/5 bg-surface/40 backdrop-blur-md min-w-[200px] hover:border-primary/50 transition-all duration-300 select-none cursor-pointer"
+                                className="flex-shrink-0 flex items-center p-4 space-x-3 border border-white/10 bg-surface/40 backdrop-blur-md rounded-xl min-w-[170px] hover:border-primary/50 transition-all duration-300 select-none cursor-pointer"
                             >
-                                <div className="text-3xl p-2 bg-white/5 rounded-lg">
+                                <div className="text-3xl p-2 bg-white/5 rounded-lg text-white">
                                     {skill.icon}
                                 </div>
                                 <span className="font-medium text-text-primary whitespace-nowrap">{skill.name}</span>

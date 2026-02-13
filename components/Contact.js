@@ -29,15 +29,15 @@ export default function Contact() {
             </p>
             
             <div className="space-y-4">
-              <a href="mailto:your-email@example.com" className="flex items-center space-x-3 text-text-secondary hover:text-primary transition-colors glass-card p-4">
+              <a href="mailto:suryachalam18@gmail.com" className="flex items-center space-x-3 text-text-secondary hover:text-primary transition-colors glass-card p-4">
                 <FaEnvelope className="text-xl" />
-                <span>Send an email</span>
+                <span>suryachalam18@gmail.com</span>
               </a>
-              <a href="#" target="_blank" rel="noopener noreferrer" className="flex items-center space-x-3 text-text-secondary hover:text-primary transition-colors glass-card p-4">
+              <a href="https://linkedin.com/in/suryachalam" target="_blank" rel="noopener noreferrer" className="flex items-center space-x-3 text-text-secondary hover:text-primary transition-colors glass-card p-4">
                 <FaLinkedin className="text-xl" />
                 <span>LinkedIn</span>
               </a>
-              <a href="#" target="_blank" rel="noopener noreferrer" className="flex items-center space-x-3 text-text-secondary hover:text-primary transition-colors glass-card p-4">
+              <a href="https://github.com/sgk18" target="_blank" rel="noopener noreferrer" className="flex items-center space-x-3 text-text-secondary hover:text-primary transition-colors glass-card p-4">
                 <FaGithub className="text-xl" />
                 <span>GitHub</span>
               </a>

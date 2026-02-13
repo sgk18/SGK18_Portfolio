@@ -4,14 +4,14 @@ export default function Awards() {
   const awards = [
     {
       title: '2nd Place – Frontend Frenzy',
-      event: 'Xactitude 2026',
+      event: 'Xactitude 2026 IT Fest',
       organizer: 'Kristu Jayanti University',
       year: '2026',
     },
     {
       title: 'SEQUENCE 2025 MPL Winner',
       event: 'SEQUENCE 2025',
-      organizer: '',
+      organizer: 'Christ University',
       year: '2025',
     },
   ];
