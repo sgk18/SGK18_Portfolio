@@ -10,6 +10,8 @@ type Project = {
   title: string;
   description: string;
   image: string;
+  imageFit?: "cover" | "contain";
+  imageBg?: string;
   tags: string[];
   github: string;
   live: string;
@@ -21,7 +23,9 @@ const projects: Project[] = [
     title: "NoteNova",
     description:
       "A campus resource sharing platform with a real-time Direct Messaging system and AI-powered learning tools. Built with a scalable backend and user authentication using MongoDB and Supabase.",
-    image: "https://placehold.co/600x340/0d1f0f/22c55e?text=NoteNova",
+    image: "/notenova.png",
+    imageFit: "contain",
+    imageBg: "bg-white",
     tags: ["Next.js", "TypeScript", "MongoDB", "Supabase", "REST APIs", "Tailwind CSS"],
     github: "https://github.com/sgk18/NoteNova",
     live: "https://note-nova-khaki.vercel.app",
@@ -31,7 +35,9 @@ const projects: Project[] = [
     title: "Centre for Peace Praxis",
     description:
       "A multi-page web application for a peace research centre — featuring event pages, alumni records, faculty profiles, a dashboard with auth, and a gallery. Built with static HTML/CSS/JS, Tailwind CSS, and PWA support via a web manifest.",
-    image: "https://placehold.co/600x340/0a1628/3b82f6?text=Centre+for+Peace+Praxis",
+    image: "/cpp_logo.png",
+    imageFit: "contain",
+    imageBg: "bg-[#0a1628]",
     tags: ["HTML5", "CSS3", "JavaScript", "Tailwind CSS", "TypeScript", "PWA", "PostCSS"],
     github: "https://github.com/sgk18/Centre-for-Peace-Praxis",
     live: "https://sgk18.github.io/CPP",
@@ -64,13 +70,26 @@ const projects: Project[] = [
     image: "https://placehold.co/600x340/0f1a2e/06b6d4?text=BottleStory",
     tags: ["Next.js", "TypeScript", "CSS Modules", "App Router", "ESLint"],
     github: "https://github.com/sgk18/BottleStory",
-    live: "#",
+    live: "https://bottle-story-cww1.vercel.app",
+  },
+  {
+    title: "GreenCart",
+    description:
+      "An e-commerce web application with a clean, responsive UI for browsing and purchasing products. Built and deployed on Vercel with a focus on smooth shopping UX.",
+    image: "/greencart.png",
+    imageFit: "contain",
+    imageBg: "bg-white",
+    tags: ["Next.js", "TypeScript", "Tailwind CSS", "Vercel"],
+    github: "https://github.com/sgk18",
+    live: "https://green-cart-ten-kappa.vercel.app",
   },
   {
     title: "Portfolio Website",
     description:
       "Personal portfolio showcasing frontend projects, 3D elements via Three.js, and technical skills. Built with Next.js, TypeScript, and Framer Motion with a focus on performance and visual polish.",
-    image: "https://placehold.co/600x340/0d0d1a/6366f1?text=Portfolio",
+    image: "/logo.png",
+    imageFit: "contain",
+    imageBg: "bg-black",
     tags: ["Next.js", "TypeScript", "Three.js", "Framer Motion", "Tailwind CSS"],
     github: "https://github.com/sgk18",
     live: "https://sgk-18-portfolio.vercel.app",
@@ -108,13 +127,18 @@ export default function Projects() {
               className="card-bg rounded-2xl overflow-hidden group hover:border-indigo-500/30 hover:-translate-y-1 transition-all duration-300"
             >
               {/* Project image */}
-              <div className="relative h-44 overflow-hidden bg-[var(--card)]">
+              <div className={`relative w-full aspect-video overflow-hidden ${project.imageBg ?? "bg-[var(--card)]"}`}>
                 <Image
                   src={project.image}
                   alt={project.title}
                   fill
-                  className="object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500"
+                  className={`${
+                    project.imageFit === "contain"
+                      ? "object-contain p-6"
+                      : "object-cover object-top group-hover:scale-105"
+                  } opacity-80 group-hover:opacity-100 transition-all duration-500`}
                   sizes="(max-width: 768px) 100vw, 50vw"
+                  quality={90}
                 />
                 {project.featured && (
                   <div className="absolute top-3 left-3 px-2 py-1 rounded-full bg-indigo-500/80 backdrop-blur-sm text-white text-[10px] font-semibold uppercase tracking-wider border border-indigo-400/30">

@@ -1,11 +1,10 @@
 "use client";
 
-import { Github, Linkedin, Twitter, Code2, Heart } from "lucide-react";
+import { Github, Linkedin, Code2, Heart } from "lucide-react";
 
 const socials = [
   { href: "https://github.com/sgk18", icon: <Github size={18} />, label: "GitHub" },
   { href: "https://linkedin.com/in/yourprofile", icon: <Linkedin size={18} />, label: "LinkedIn" }, // TODO
-  { href: "https://twitter.com/yourhandle", icon: <Twitter size={18} />, label: "Twitter/X" }, // TODO
 ];
 
 const navLinks = [
