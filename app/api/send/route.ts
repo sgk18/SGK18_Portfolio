@@ -10,7 +10,7 @@ export async function POST(req: Request) {
       from: 'Portfolio <onboarding@resend.dev>', // Use your verified domain later
       to: ['suryachalam18@gmail.com'],
       subject: `New Message from ${name}`,
-      reply_to: email,
+      replyTo: email,
       text: message,
     });
 
