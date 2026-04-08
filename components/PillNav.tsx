@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
+import { smoothScrollTo } from '@/lib/smoothScroll';
 
 export type PillNavItem = {
   label: string;
@@ -119,8 +120,7 @@ const PillNav: React.FC<PillNavProps> = ({
     if (href.startsWith('#')) {
       e.preventDefault();
       onNavClick?.(href);
-      const el = document.querySelector(href);
-      if (el) el.scrollIntoView({ behavior: 'smooth' });
+      smoothScrollTo(href);
       setIsMobileMenuOpen(false);
     }
   };

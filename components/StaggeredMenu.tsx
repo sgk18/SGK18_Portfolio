@@ -2,6 +2,7 @@
 
 import React, { useCallback, useLayoutEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
+import { smoothScrollTo } from '@/lib/smoothScroll';
 
 export interface StaggeredMenuItem {
   label: string;
@@ -304,8 +305,7 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     if (href.startsWith('#')) {
       e.preventDefault();
-      const el = document.querySelector(href);
-      if (el) el.scrollIntoView({ behavior: 'smooth' });
+      smoothScrollTo(href);
       closeMenu();
     }
   };

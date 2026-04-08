@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import { motion } from "framer-motion";
 import { ArrowDown, Download, Sparkles } from "lucide-react";
 import Hyperspeed from "./Hyperspeed";
+import { smoothScrollTo } from "@/lib/smoothScroll";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
@@ -56,7 +57,7 @@ const hyperspeedOptions = {
 
 export default function Hero() {
   const scrollToProjects = () => {
-    document.getElementById("projects")?.scrollIntoView({ behavior: "smooth" });
+    smoothScrollTo("#projects");
   };
 
   // Memoize so the WebGL scene isn't recreated on every render
@@ -153,9 +154,7 @@ export default function Hero() {
             animate={{ y: [0, 8, 0] }}
             transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
             className="flex flex-col items-center gap-2 text-slate-600 cursor-pointer"
-            onClick={() =>
-              document.getElementById("about")?.scrollIntoView({ behavior: "smooth" })
-            }
+            onClick={() => smoothScrollTo("#about")}
           >
             <span className="text-xs uppercase tracking-widest">Scroll</span>
             <ArrowDown size={14} />

@@ -1,6 +1,7 @@
 "use client";
 
 import { Github, Linkedin, Code2, Heart } from "lucide-react";
+import { smoothScrollTo } from "@/lib/smoothScroll";
 
 const socials = [
   { href: "https://github.com/sgk18", icon: <Github size={18} />, label: "GitHub" },
@@ -47,7 +48,7 @@ export default function Footer() {
                     href={link.href}
                     onClick={(e) => {
                       e.preventDefault();
-                      document.querySelector(link.href)?.scrollIntoView({ behavior: "smooth" });
+                      smoothScrollTo(link.href);
                     }}
                     className="text-slate-500 hover:text-indigo-400 text-sm transition-colors"
                   >
