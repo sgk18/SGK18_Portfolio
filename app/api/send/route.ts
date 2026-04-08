@@ -1,9 +1,24 @@
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 export async function POST(req: Request) {
   const { name, email, message } = await req.json();
+  const apiKey = process.env.RESEND_API_KEY;
+
+  if (!apiKey) {
+    return Response.json(
+      { error: 'Email service is not configured.' },
+      { status: 500 }
+    );
+  }
+
+  if (!name || !email || !message) {
+    return Response.json(
+      { error: 'Name, email, and message are required.' },
+      { status: 400 }
+    );
+  }
+
+  const resend = new Resend(apiKey);
 
   try {
     const data = await resend.emails.send({
@@ -15,7 +30,10 @@ export async function POST(req: Request) {
     });
 
     return Response.json(data);
-  } catch (error) {
-    return Response.json({ error });
+  } catch {
+    return Response.json(
+      { error: 'Failed to send email.' },
+      { status: 500 }
+    );
   }
 }
