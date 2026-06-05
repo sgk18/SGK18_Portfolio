@@ -1,391 +1,383 @@
-# SGK18 Portfolio — High-Performance Creative Development Engine
+# SGK18 Portfolio
 
-A state-of-the-art, visually immersive personal portfolio and engineering hub. Built with Next.js 16, custom WebGL/Three.js fragment shader systems, GSAP animation orchestration, global inertial smooth scrolling, and dynamic LaTeX resume previews with edge cache-busting.
+## 1. Project Overview
 
----
-
-## Section 1: Project Story
-
-### The Problem
-Traditional developer portfolios are static, template-driven, and fail to convey true engineering depth. They describe accomplishments in bullet points but fail to prove the developer's capability in managing low-level rendering pipelines, asset payload optimization, low-latency API handling, and production-grade state synchronization. Recruiters and engineering managers are forced to read text resumes without experiencing the builder's actual code in action.
-
-### The Solution & Vision
-This portfolio is a live, high-performance production site built to prove technical capabilities through experience. It serves as:
-* **A Visual Engineering Playground**: Showcasing custom WebGL GLSL shaders running at 60 FPS instead of heavy, static images or generic video tags.
-* **A Real-Time Proof-of-Work**: Presenting a synchronized experience where the resume, interactive site components, and live compiled LaTeX documents are in perfect, automated sync.
-* **An Architectural Sandbox**: Demonstrating modern rendering strategies, global inertial scroll coordination, client-side animation staging, and serverless API gateways.
-
----
-
-## Section 2: Recruiter Snapshot
-
-## Why This Project Matters
-
-### Engineering Challenges Solved
-* **Custom GLSL Shader Distortions**: Engineered a custom WebGL warp system (`components/Hyperspeed.tsx`) using Three.js and the `postprocessing` library. It translates mathematical equations (like turbulent and mountain distortions) into GPU-accelerated vertex offsets, achieving highly performant visual effects with near-zero CPU overhead.
-* **Global Smooth Scroll Coordination**: Integrated a global inertial scroll wrapper using `lenis` to synchronize native scroll progress with GSAP ScrollTriggers and Framer Motion animation triggers. This ensures zero frame jitter and smooth momentum scrolling across both mobile and desktop screens.
-* **Interactive PDF Cache-Busting**: Resolved Google Doc Viewer and browser-level PDF caching issues by building a client-side dynamic query validator (`?v=timestamp`) that forces the client iframe to refresh the compiled LaTeX CV without manual CDN invalidations.
-
-### Scalability Considerations
-* **Edge-First Static Architecture**: Built utilizing Next.js static exports and edge routes to render static page shells. Hydration boundaries are kept tight, allowing the site to scale to millions of concurrent hits on Vercel's global CDN without database queries or CPU choke points.
-* **Serverless API Decoupling**: Offloaded the contact form's mail delivery logic to a serverless API route using Resend, preventing the need to deploy and manage dedicated SMTP servers or mail-queuing microservices.
-
-### Architecture Highlights
-* **Hybrid Server-Client Staging**: Leveraging Next.js App Router. High-priority metadata, headers, and basic content compile statically at build time (RSC). Interactive components (WebGL canvas, custom menus, forms) are dynamically instantiated on the client only when in view.
-* **Declarative Motion Orchestration**: Used GSAP for complex timeline animations (such as the Pill Navigation tracking) and Framer Motion for scroll-driven fade-ins and scale transitions.
-
-### Security Features
-* **Strict Runtime Isolation**: All API operations are isolated in serverless environments. The Resend API key is never exposed to the client bundle; inputs are parsed and validated server-side to prevent cross-site scripting (XSS) via form inputs.
-* **Content Security Policies (CSP)**: Designed to load fonts exclusively from Google Fonts and external resources strictly from defined domains.
-
-### Performance Optimizations
-* **Instanced Geometry Rendering**: Avoided high draw-calls in the WebGL scene by using `InstancedBufferGeometry` for car lights and road markers. Thousands of individual geometric objects are drawn in a single draw-call on the GPU.
-* **Bundle Budgeting via Dynamic Loading**: The heavy Three.js, postprocessing, and custom rendering engines are loaded dynamically only when client rendering is verified, keeping the initial JS load light.
-
-### Product Impact
-* **Unified Presentation**: Seamlessly merges the visitor's focus from web UI animations into a direct review of the developer's PDF resume, which compiles directly from TeX markup.
-* **Direct Feedback Loop**: High-priority contact channel connects recruiters directly to the developer's inbox within seconds.
+**Project Name:** SGK18 Portfolio
+**Description:** A highly polished, visually stunning personal portfolio showcasing projects, experience, and skills using cutting-edge web technologies like Next.js 16, React 19, Three.js, and GSAP. It features a custom-built analytics engine, a protected admin dashboard, and a seamless contact system.
+**Problem Statement:** Developers often rely on generic templates or third-party analytics (like Google Analytics) that compromise user privacy and look identical to others. This project solves the need for a highly personalized, performant, and privacy-respecting portfolio with its own integrated management system.
+**Business Objective:** To serve as a high-impact digital resume and lead-generation tool that captures recruiter and client interest, while tracking engagement through a proprietary backend system without relying on invasive third-party cookies.
+**Target Users:** Recruiters, hiring managers, potential clients, and other developers interested in modern web architecture.
+**Key Features:**
+- Interactive 3D WebGL backgrounds (`Hyperspeed.tsx`)
+- Smooth scrolling and complex scroll-triggered animations (Lenis & GSAP)
+- Custom-built page view, project view, and resume download tracking
+- Secure Admin Dashboard for reviewing messages and analytics
+- Email integration with Resend
+- Honeypot and rate-limiting security on forms
 
 ---
 
-## Section 3: Technical Highlights
+## 2. Architecture Overview
 
-| Area | Implementation Details |
-| :--- | :--- |
-| **Frontend Architecture** | Next.js 16.1.6 App Router, React 19.2.4 Client/Server Component split |
-| **Backend Architecture** | Serverless Next.js API route running on Node.js/Edge |
-| **Styling & CSS** | Tailwind CSS v4, PostCSS, Custom HSL color variables with cyber-tech palette |
-| **Animation Engine** | GSAP 3.14.2, Framer Motion 12.34.4, Lenis 1.3.21 for smooth inertial scrolling |
-| **WebGL & 3D Rendering** | Three.js 0.183.2, `postprocessing` for high-performance bloom and SMAA antialiasing |
-| **Mail & Contact API** | Resend API 6.9.3 for serverless email dispatch |
-| **Document Compiling** | Custom LaTeX template (`resume.tex`) compiled via `pdflatex` to `public/resume.pdf` |
-| **Hosting & CI/CD** | Vercel platform with automatic git integration and deploy previews |
+### High-Level Architecture
+The application is built on the Next.js App Router paradigm. It uses React Server Components where possible for performance, and Client Components for interactive 3D and GSAP animations. The backend uses Next.js Route Handlers (API routes) connected to an SQLite database via Prisma and the LibSQL adapter.
 
----
+### System Flow
+1. **User visits site:** Analytics API is pinged in the background to record the visit.
+2. **User interacts:** Interactions (e.g., viewing a project, downloading a resume) trigger specific tracking API calls.
+3. **User submits contact form:** Data is validated, rate-limited, checked against a honeypot, saved to the database, and an email is dispatched via Resend.
+4. **Admin logs in:** The admin accesses `/admin`, authenticates via header-based password matching, and fetches aggregated database records.
 
-## Section 4: System Architecture
+### Data Flow Diagram
 
-### Core Render & Animation Pipeline
 ```mermaid
 flowchart TD
-    subgraph Client [Browser / Client Thread]
-        Scroll[Lenis Scroll Engine] -->|Window Event| GlobalScroll[window.__lenis]
-        GlobalScroll -->|Updates progress| GSAP[GSAP ScrollTrigger]
-        GlobalScroll -->|Triggers viewport| FM[Framer Motion In-View]
-        
-        GSAP -->|Animates UI| PillNav[PillNav Indicator]
-        FM -->|Animate Content| Cards[Project & Experience Cards]
-        
-        GLCanvas[Three.js Canvas] -->|RequestAnimationFrame| RenderLoop[Render Loop]
-        RenderLoop -->|Updates Uniforms| GLSL[GLSL Custom Shaders]
-        RenderLoop -->|Bloom / SMAA| PostProc[Postprocessing Composer]
-        PostProc -->|Output to Screen| WebGLCanvas[WebGL Background Visuals]
-    end
+    Client[Client Browser] --> |Renders UI, Triggers Animations| NextApp[Next.js React 19 Frontend]
+    NextApp --> |API Calls| APIRoutes[Next.js API Routes]
+    APIRoutes --> |Uses| DBService[lib/db.ts Data Access Layer]
+    DBService --> |Prisma Queries| Prisma[Prisma Client]
+    Prisma --> |LibSQL Adapter| SQLite[(SQLite Database)]
+    APIRoutes -.-> |Sends Emails| Resend[Resend Email API]
 ```
 
-### Serverless Contact & API Flow
-```mermaid
-sequenceDiagram
-    actor ClientUI as Contact Component
-    participant EdgeRouter as Next.js Serverless API (/api/send)
-    participant ResendAPI as Resend API Gateway
-    actor DeveloperInbox as suryachalam18@gmail.com
-    
-    ClientUI->>EdgeRouter: POST JSON Payload (name, email, message)
-    Note over EdgeRouter: Validate Payload & API Key Config
-    alt Missing Fields / No API Key
-        EdgeRouter-->>ClientUI: Return 400/500 JSON Error
-    else Valid Config & Input
-        EdgeRouter->>ResendAPI: Send Email request (ReplyTo: Client Email)
-        ResendAPI-->>EdgeRouter: Return Email ID / Dispatch confirmation
-        EdgeRouter-->>ClientUI: Return 200 JSON Success Response
-        ResendAPI->>DeveloperInbox: Deliver raw text email
-    end
-```
+---
 
-### Architectural Decisions
+## 3. Technology Stack
 
-* **Next.js App Router (RSC) vs. React SPA**: Next.js App Router was selected to achieve instant initial paint times. Content blocks (About, Skills, Experience headers) are generated on the server and sent as static HTML. Client-side JS is deferred, loading heavy rendering packages (Three.js, GSAP) asynchronously without delaying page rendering.
-* **Custom WebGL Shaders vs. GLTF Models**: Loading heavy 3D files (GLTF/OBJ) introduces massive network payloads and layout shifts. Instead, custom procedural vertex and fragment shaders (`components/Hyperspeed.tsx`) generate complex visual elements mathematically inside the GPU, keeping the asset footprint under 80KB.
-* **Resend API Integration vs. Dedicated SMTP Backend**: Building a contact backend requires monitoring processes, rate-limiting threads, and setting up DKIM/SPF records. Offloading to Resend API routes keeps the portfolio completely stateless while maintaining high deliverability rates.
+### Frontend
+| Technology | Purpose | Why it is used | Location |
+|---|---|---|---|
+| **Next.js 16** | Meta-framework | App Router, SSR, Server Components | Core |
+| **React 19** | UI Library | Latest hooks and concurrent features | `app/`, `components/` |
+| **Three.js** | 3D Graphics | Renders the immersive background | `components/Hyperspeed.tsx` |
+
+### Backend
+| Technology | Purpose | Why it is used | Location |
+|---|---|---|---|
+| **Next.js Route Handlers** | API Layer | Serverless backend execution | `app/api/` |
+| **Node.js** | Runtime | Backend logic execution | Server |
+
+### Database
+| Technology | Purpose | Why it is used | Location |
+|---|---|---|---|
+| **SQLite (dev.db)** | Relational DB | Lightweight, zero-config local development | `prisma/dev.db` |
+| **Prisma 7.8** | ORM | Type-safe database queries | `lib/prisma.ts` |
+| **LibSQL Adapter** | DB Driver | Allows transitioning to Turso edge databases | `lib/prisma.ts` |
+
+### Styling & UI Libraries
+| Technology | Purpose | Why it is used | Location |
+|---|---|---|---|
+| **Tailwind CSS 4** | Styling | Utility-first, fast prototyping | `app/globals.css` |
+| **GSAP & Framer Motion** | Animation | Industry standard for complex timeline animations | `components/` |
+| **Lucide React / React Icons** | Iconography | Lightweight, customizable SVG icons | `components/` |
+| **Lenis** | Smooth Scrolling | Overrides native scroll for cinematic feel | `components/LenisProvider.tsx` |
+
+### Third-Party Services
+| Technology | Purpose | Why it is used | Location |
+|---|---|---|---|
+| **Resend** | Email Delivery | Reliable transactional emails for the contact form | `app/api/contact/route.ts` |
 
 ---
 
-## Section 5: Complete Project Structure
-
-```
-SGK18_Portfolio/
-├── app/                  # Next.js App Router directory (Pages, Layouts, API endpoints)
-├── components/           # Modular React components (UI elements, WebGL Canvas, Previewers)
-├── lib/                  # Helper modules and utility functions
-├── public/               # Static assets (images, logos, pre-compiled PDF resume)
-├── resume.tex            # Single-page LaTeX resume source code
-├── package.json          # Dependency configurations and scripts
-└── vercel.json           # Vercel deployment parameters
-```
-
-### Component Architecture & Rationale
-
-* [app/](file:///C:/projects/SGK18_Portfolio/app/): Coordinates routing and global stylesheets.
-  * `api/send/route.ts`: Isolated Node.js edge endpoint acting as a secure gateway for mail delivery.
-  * `globals.css`: Implements the HSL design tokens, setting dark mode defaults (`#09090e`), custom typography, and CSS utility filters.
-* [components/](file:///C:/projects/SGK18_Portfolio/components/): Modular UI chunks.
-  * `Hyperspeed.tsx`: Initializes the WebGL canvas, configures instanced geometries, creates shader programs, compiles custom distortion vertex shaders, and sets up postprocessing filters (Bloom, SMAA).
-  * `ResumePreview.tsx`: Coordinates dynamic iframe embeds, switching dynamically between local object rendering and the Google Viewer interface.
-  * `LenisProvider.tsx`: Establishes the inertial smooth scrolling singleton on the `window` object.
-* [lib/](file:///C:/projects/SGK18_Portfolio/lib/): Code utilities.
-  * `smoothScroll.ts`: Interface linking UI clicks (such as navbar items) directly to the window's Lenis scroll engine.
-
----
-
-## Section 6: File-by-File Technical Deep Dive
-
-### [app/api/send/route.ts](file:///C:/projects/SGK18_Portfolio/app/api/send/route.ts)
-* **Purpose**: Handles contact form submissions.
-* **Responsibilities**: Checks for the existence of `RESEND_API_KEY`, parses incoming JSON, validates email fields, instantiates a Resend client, and dispatches email notifications.
-* **Dependencies**: `resend` package.
-* **Used By**: Called via HTTP POST from client components.
-* **Potential Risks**: Lack of client-side rate limiting or anti-spam verification (e.g. CAPTCHA) could lead to spam submissions and exhaust the Resend free tier limits.
-* **Extension Points**: Wire in a Zod validation schema or implement Cloudflare Turnstile token verification.
-* **Maintenance Notes**: Ensure the `from` address remains `'Portfolio <onboarding@resend.dev>'` unless a verified custom domain is configured.
-
-### [components/Hyperspeed.tsx](file:///C:/projects/SGK18_Portfolio/components/Hyperspeed.tsx)
-* **Purpose**: Orchestrates the 3D WebGL background speed simulation.
-* **Responsibilities**: Configures WebGL render environments, compiles dynamic GLSL shader materials, binds animation ticks to CPU performance, and renders instanced light cylinders.
-* **Dependencies**: `three`, `postprocessing`.
-* **Used By**: [components/Hero.tsx](file:///C:/projects/SGK18_Portfolio/components/Hero.tsx).
-* **Potential Risks**: High GPU memory allocation if materials are not properly garbage collected on component unmount.
-* **Extension Points**: Introduce additional distortion algorithms (e.g., noise-based wave fields) by writing new GLSL fragment templates.
-* **Maintenance Notes**: Verify Three.js camera calculations when updating container sizes or padding.
-
-### [components/ResumePreview.tsx](file:///C:/projects/SGK18_Portfolio/components/ResumePreview.tsx)
-* **Purpose**: Embeds and manages the interactive PDF resume.
-* **Responsibilities**: Toggles between direct browser PDF rendering and Google Docs Viewer; injects timestamp query arguments to prevent cached preview loads.
-* **Dependencies**: `lucide-react`, `framer-motion`.
-* **Used By**: [app/page.tsx](file:///C:/projects/SGK18_Portfolio/app/page.tsx).
-* **Potential Risks**: Google Viewer relies on public domain availability. In local environments, it falls back to the production deployment URL to fetch the PDF.
-* **Extension Points**: Add a page-zoom controller or search options directly inside the preview UI.
-* **Maintenance Notes**: Check mobile width break-points (`sm:hidden`) when editing container margins.
-
-### [components/LenisProvider.tsx](file:///C:/projects/SGK18_Portfolio/components/LenisProvider.tsx)
-* **Purpose**: Configures inertial momentum scrolling.
-* **Responsibilities**: Hooks into DOM scroll events, handles custom anchors, and binds the scroll singleton to the window scope.
-* **Dependencies**: `lenis`.
-* **Used By**: [app/layout.tsx](file:///C:/projects/SGK18_Portfolio/app/layout.tsx).
-* **Potential Risks**: If `destroy()` fails to execute on unmount, listeners remain bound, causing scroll lockups.
-* **Maintenance Notes**: Keep `autoRaf` enabled to let Lenis handle scroll ticks automatically.
-
----
-
-## Section 7: Architectural Decisions (ADRs)
-
-### 1. Next.js App Router (RSC) & Turbopack
-* **Context**: The portfolio requires rich interactive elements alongside high-performance page scores.
-* **Decision**: Selected Next.js 16 with App Router.
-* **Trade-offs**: React Server Components require a mental shift in structuring component hooks, but allow sending minimal javascript to the client.
-* **Benefits**: High SEO optimization, built-in metadata rendering, fast local builds with Turbopack compilation.
-
-### 2. Custom Procedural Shaders over 3D Models
-* **Context**: Need a complex futuristic simulation backdrop without introducing page load latency.
-* **Decision**: Wrote custom GLSL vertex and fragment shaders computed on GPU threads.
-* **Alternatives considered**: Loading an animated `.gltf` model of a futuristic city.
-* **Trade-offs**: Procedural rendering requires writing low-level matrix transformations, but keeps code extremely lightweight.
-* **Benefits**: 60 FPS performance, fast loads, zero assets download size.
-
-### 3. Dynamic PDF Cache-Busting
-* **Context**: Google Docs Viewer aggressively caches PDF documents. Updating the CV via LaTeX rebuilds would not display immediately on the portfolio preview.
-* **Decision**: Injected query arguments (`?v=timestamp`) generated on component mount.
-* **Trade-offs**: Increases requests to the static file server, but guarantees recruiters always view the latest resume version.
-
----
-
-## Section 8: Database & Data Flow Design
+## 4. Project Structure
 
 ```
-+-------------------------------------------------------------+
-|                     Stateless Edge Design                   |
-|  - The portfolio is intentionally database-free.            |
-|  - Content is compiled statically to static pages.           |
-|  - Contact actions use transient REST requests to the API.  |
-+-------------------------------------------------------------+
+C:\projects\SGK18_Portfolio\
+├── app/                  # Next.js App Router (Pages & APIs)
+│   ├── admin/            # Admin dashboard UI
+│   ├── api/              # Backend API Route Handlers
+│   ├── globals.css       # Global Tailwind v4 styles
+│   ├── layout.tsx        # Root layout, fonts, and metadata
+│   └── page.tsx          # Main landing page
+├── components/           # Reusable React UI Components
+│   ├── About.tsx         # About section
+│   ├── Contact.tsx       # Contact form component
+│   ├── Hero.tsx          # Hero section with 3D background
+│   ├── Hyperspeed.tsx    # Three.js 3D effect component
+│   ├── LenisProvider.tsx # Smooth scrolling wrapper
+│   └── ...               # Other UI sections
+├── data/                 # Static data
+│   └── caseStudies.ts    # JSON/TS data for projects
+├── lib/                  # Utilities & Services
+│   ├── db.ts             # Database access service layer
+│   ├── prisma.ts         # Prisma client instantiation
+│   └── smoothScroll.ts   # Scroll utility helpers
+├── prisma/               # Database Configuration
+│   ├── schema.prisma     # Database schema definition
+│   └── dev.db            # Local SQLite database
+└── public/               # Static assets (images, PDFs)
 ```
 
-### Data Synchronization Flow
-1. **Source Document**: The developer writes and maintains professional accomplishments inside the LaTeX file `resume.tex`.
-2. **Compilation**: Running `pdflatex resume.tex` compiles the document into `public/resume.pdf`.
-3. **Synchronization**: Experience lists (`components/Experience.tsx`), skills categories (`components/Skills.tsx`), and project descriptions (`components/Projects.tsx`) are mirrored in local TypeScript configurations.
-4. **Hydration**: Next.js compiles the site, generating static HTML bundles matching the PDF structure.
-5. **Interactive Preview**: Visitors can view the visual site sections or interact directly with the compiled PDF using the PDF Viewer component.
+---
+
+## 5. File-by-File Documentation
+
+### `lib/db.ts`
+- **Purpose:** Acts as the primary Data Access Layer (DAL) separating database logic from API routes.
+- **Responsibilities:** Executes typed queries for Contacts, Visits, Downloads, and Project Views. Aggregates data for the admin dashboard.
+- **Used By:** `app/api/**/*.ts`
+- **Important Notes:** Contains the `getAnalyticsSummary` function which performs in-memory grouping of referrers and page views to minimize complex SQL queries.
+
+### `lib/prisma.ts`
+- **Purpose:** Instantiates a singleton instance of the Prisma Client.
+- **Responsibilities:** Connects Prisma to the LibSQL adapter pointing to the local `dev.db`. Prevents multiple instances during hot-reloads in development.
+- **Dependencies:** `@prisma/client`, `@prisma/adapter-libsql`.
+
+### `app/api/contact/route.ts`
+- **Purpose:** Handles contact form submissions.
+- **Responsibilities:** Validates input, checks the honeypot field, enforces IP-based rate limiting, saves the submission to the DB, and dispatches an email via Resend.
+- **Security:** In-memory rate limiting map (resets on server restart).
+
+### `components/Hyperspeed.tsx`
+- **Purpose:** Renders the 3D hyperspeed background effect.
+- **Dependencies:** `three.js`.
+- **Important Notes:** Heavily relies on browser APIs (WebGL). Must be rendered client-side only.
 
 ---
 
-## Section 9: API Design
-
-### Post Message Route (`POST /api/send`)
-Allows visitors to submit a message to the developer.
-
-* **Purpose**: Validates contact form inputs and dispatches email via Resend.
-* **Authentication**: Requires a valid `RESEND_API_KEY` configured in the system environment.
-* **Input Validation**:
-  * Fields must be present in the request body.
-  * Standard string verification on name, email format check, and non-empty message requirements.
-* **Request Payload**:
-  ```json
-  {
-    "name": "Jane Doe",
-    "email": "jane@example.com",
-    "message": "Hi Surya, let's connect for an interview!"
-  }
-  ```
-* **Success Response (200 OK)**:
-  ```json
-  {
-    "id": "e3b8a1c9-5d2f-4c8a-9e1b-3f4c5d6e7f8g"
-  }
-  ```
-* **Failure Responses**:
-  * **400 Bad Request**: Missing mandatory fields.
-    ```json
-    { "error": "Name, email, and message are required." }
-    ```
-  * **500 Internal Server Error**: Missing API configuration or Resend gateway error.
-    ```json
-    { "error": "Email service is not configured." }
-    ```
-
----
-
-## Section 10: Security Review
-
-An audit of security aspects implemented in the portfolio:
-
-### Authentication & Authorization
-* **Portfolio**: Purely public, read-only content. No client-side login flows are required.
-* **API Route**: Standard CORS blocks direct external POST requests outside the deployment origin. Serverless API keys are isolated on Vercel environment configurations.
-
-### Input Validation & XSS Protections
-* **Email Forms**: Form fields require text parsing. Input validation checks string properties before compiling the Resend payload.
-* **XSS Prevention**: React automatically escapes rendering variables, preventing execution of injected `<script>` tags. The Resend endpoint passes variables strictly into raw text fields, rendering them harmless in mail clients.
-
-### Missing Protections / Security Vulnerabilities
-* **No Endpoint Rate Limiting**: The `/api/send` endpoint lacks built-in rate-limiting. A malicious script could spam submissions and exhaust monthly email quotas.
-* **No Anti-Spam Check**: The contact form lacks bot-detection metrics (e.g. hCaptcha or Honeypot fields), making it vulnerable to automated web scrapers.
-
----
-
-## Section 11: Performance Review
-
-A review of performance metrics and optimizations:
-
-### Rendering Strategy
-* **Static Generation (SSG)**: Static layout structures compile at build-time.
-* **Edge Hydration Boundaries**: Components requiring WebGL contexts or animation engines are flagged with `"use client"` and execute their initialization on Mount, preventing server-render bottlenecks.
-
-### Shader & Rendering Performance
-* **Instanced Attributes**: Used instanced rendering for visual elements. Custom geometries like road shoulder markers reuse a single buffer geometry, minimizing memory bandwidth constraints.
-* **Optimized Postprocessing Passes**: Combined Bloom and SMAA antialiasing in a single `EffectComposer` pass, preventing redundant frame buffer copies on GPU hardware.
-
-### Bundle Budget Analysis
-* **Dynamic Icon Imports**: Import only utilized icons from `lucide-react` and `react-icons`, reducing bundle overhead.
-* **Lenis Smooth Scroll Raf Loop**: The render loop is bound to the browser's requestAnimationFrame pipeline to prevent animation conflicts.
-
----
-
-## Section 12: Developer Experience
-
-Follow this guide to get a local development instance of the portfolio running within 15 minutes.
+## 6. Installation Guide
 
 ### Prerequisites
-Ensure you have the following installed:
-* **Node.js** (v18 or higher)
-* **npm** (v9 or higher)
-* **LaTeX Distribution** (e.g., MiKTeX on Windows or TeX Live on macOS/Linux) for compiling resume documents.
+- Node.js (v20+ recommended)
+- npm (v10+)
 
-### Installation & Local Setup
-
-1. **Clone the Repository**:
+### Local Setup
+1. Clone the repository:
    ```bash
    git clone https://github.com/sgk18/SGK18_Portfolio.git
    cd SGK18_Portfolio
    ```
 
-2. **Install Node Dependencies**:
+2. Install dependencies:
    ```bash
    npm install
    ```
 
-3. **Configure Environment Variables**:
+3. Environment Setup:
    Create a `.env.local` file in the root directory:
    ```env
-   RESEND_API_KEY=re_your_api_key_here
+   ADMIN_PASSWORD=your_secure_password_here
+   RESEND_API_KEY=re_your_resend_api_key
    ```
 
-4. **Compile the Resume (LaTeX)**:
-   Ensure your LaTeX compiler is available in your shell PATH, then run:
+4. Database Setup:
+   Initialize the SQLite database with Prisma:
    ```bash
-   pdflatex -output-directory=public resume.tex
+   npx prisma generate
+   npx prisma db push
    ```
-   This will output the compiled resume directly into the `public/resume.pdf` location.
 
-5. **Start Development Server**:
+5. Run Development Server:
    ```bash
    npm run dev
    ```
-   Open [http://localhost:3000](http://localhost:3000) in your browser to view the portfolio.
-
-6. **Build for Production**:
-   Confirm there are no TypeScript or compilation errors:
-   ```bash
-   npm run build
-   ```
 
 ---
 
-## Section 13: Deployment Architecture
+## 7. Environment Variables
 
-The application is deployed on **Vercel** to take advantage of global CDN edge-caching and serverless execution environments.
+| Variable | Required | Description | Example |
+| -------- | -------- | ----------- | ------- |
+| `ADMIN_PASSWORD` | Yes | Password used to authenticate the `/admin` route. | `supersecret123` |
+| `RESEND_API_KEY` | No | API key for sending emails via Resend. Contact API will skip emails if not present. | `re_123456789` |
 
+*(Note: `DATABASE_URL` is omitted as the codebase hardcodes the connection to `file:dev.db` via `process.cwd()` in `lib/prisma.ts`.)*
+
+---
+
+## 8. Database Documentation
+
+### Database Architecture
+The application uses SQLite powered by the LibSQL adapter. It tracks user interactions (Visits, Downloads, Project Views) and stores Contact Form submissions.
+
+### Entity Relationship Diagram
+
+```mermaid
+erDiagram
+    CONTACT {
+        String id PK
+        String name
+        String email
+        String subject
+        String message
+        String status "pending, reviewed, ignored"
+        DateTime createdAt
+    }
+    VISIT {
+        String id PK
+        String page
+        String referrer
+        String ipHash
+        DateTime createdAt
+    }
+    RESUME_DOWNLOAD {
+        String id PK
+        DateTime createdAt
+    }
+    PROJECT_VIEW {
+        String id PK
+        String projectId
+        DateTime createdAt
+    }
 ```
-                  [ Git Push / Main Branch ]
-                              │
-                              ▼
-                   [ Vercel Build Pipeline ]
-                              │
-            ┌─────────────────┴─────────────────┐
-            ▼                                   ▼
-[ Static Assets Edge Cache ]          [ Serverless API Gateway ]
-  - globals.css                         - POST /api/send
-  - resume.pdf                          - Resend Dispatch
-  - Static HTML Shells
-```
-
-### Production Deploy Process
-* **CI/CD Integration**: Every commit pushed to the `main` branch triggers an automated Vercel build pipeline.
-* **Edge Deployment**: Static pages and public assets (like the re-compiled `resume.pdf`) are cached on edge networks, ensuring instant loading speeds globally.
-* **Runtime Routing**: Static requests are handled directly by the CDN, while API triggers redirect requests to edge execution environments.
 
 ---
 
-## Section 14: Known Limitations
+## 9. API Documentation
 
-* **Contact UI Connection**: The submission handler inside [Contact.tsx](file:///C:/projects/SGK18_Portfolio/components/Contact.tsx) currently implements a simulated delay (`setTimeout` resolution) and does not call the `/api/send` endpoint directly.
-* **Missing API Rate-Limiting**: The `/api/send` API endpoint has no protection against spam or rate exploitation.
-* **Google Docs Preview Lag**: The Google Docs PDF preview requires access to a public domain. On local servers, it falls back to the Vercel production URL, meaning updates made locally in `resume.tex` will not reflect in the Google preview tab until deployed.
-* **WebGL Memory Consumption**: Low-spec mobile browsers may experience memory warnings if the WebGL Speed component fails to dispose of Three.js scenes upon window switching.
+### `POST /api/contact`
+- **Method:** POST
+- **Purpose:** Submit a contact form message.
+- **Request Body:** `{ "name": "John", "email": "john@ex.com", "subject": "Hi", "message": "...", "hp_field": "" }`
+- **Response:** `200 OK { "success": true }`
+- **Error Responses:** `400 Bad Request`, `429 Too Many Requests`.
+
+### `GET /api/admin/analytics`
+- **Method:** GET
+- **Purpose:** Retrieve aggregated analytics for the admin dashboard.
+- **Authentication:** Requires `x-admin-password` header matching `ADMIN_PASSWORD` env var.
+- **Response:** JSON object containing `totalVisitors`, `pageViews`, `recentVisits`, etc.
+
+### `PATCH /api/admin/contacts`
+- **Method:** PATCH
+- **Purpose:** Update the status of a contact submission (`pending` -> `reviewed`).
+- **Request Body:** `{ "id": "cuid...", "status": "reviewed" }`
 
 ---
 
-## Section 15: Future Roadmap
+## 10. Authentication & Authorization
 
-### Short-Term (1-3 Months)
-* **API Client Connection**: Update [Contact.tsx](file:///C:/projects/SGK18_Portfolio/components/Contact.tsx) to perform a fetch request targeting `/api/send` to enable genuine email communication.
-* **Spam Prevention**: Integrate Cloudflare Turnstile inside the contact form component to block automated spam submissions.
-* **Upgraded Caching**: Implement a Next.js middleware rate-limiter to protect the mail endpoint from request flooding.
+The project utilizes a lightweight, header-based authentication strategy tailored for a single-user portfolio dashboard.
+- **Login Flow:** The user enters a password on `/admin`. The client sends a request to `/api/admin/analytics` with the `x-admin-password` header. If it returns 200, the client sets an `authed` state to true.
+- **Route Protection:** Every request to `/api/admin/*` checks the header against `process.env.ADMIN_PASSWORD`.
+- **Security:** There are no sessions or JWTs. The password is kept in React state and passed with every admin API request.
 
-### Mid-Term (3-6 Months)
-* **Automated CI LaTeX Compilation**: Configure a GitHub Action that triggers on push events, automatically compiling `resume.tex` using `pdflatex` and updating the `public/resume.pdf` file in the build bundle.
-* **Dark Mode Customization**: Add a theme switcher using custom HSL colors, allowing users to toggle between Cyberpunk Neon, Sleek Gray, and Light Mode layouts.
+---
 
-### Long-Term (6+ Months)
-* **Dynamic Three.js Interaction**: Extend the WebGL background scene to bind mouse movement coordinates and speed parameters, allowing users to click and drag to warp visual fields.
-* **Privacy-Friendly Analytics**: Connect a lightweight, self-hosted analytics package to monitor scroll depth and project link click rates.
+## 11. Core Modules
+
+### Analytics Module
+- **Purpose:** Silently track user behavior.
+- **Workflow:** When a user lands on the page, a `useEffect` hook in a client component triggers `POST /api/analytics/visit`. The IP address is hashed using SHA-256 before storage to preserve anonymity.
+- **Business Logic:** Referrers are parsed down to hostnames. Unique visitors are calculated based on distinct IP hashes.
+
+### Contact Module
+- **Purpose:** Handle incoming messages.
+- **Workflow:** Form UI -> Validation -> API -> Rate Limit Check -> Honeypot Check -> DB Save -> Resend Email.
+
+---
+
+## 12. Frontend Documentation
+
+- **Routing:** Handled entirely by Next.js 16 App Router.
+- **Component Hierarchy:** `page.tsx` renders modular sections (`Hero`, `About`, `Experience`, `Projects`, `Contact`).
+- **Animations:** Employs a dual approach:
+  - **GSAP:** Used for complex timeline animations and scroll-triggered element reveals (`@gsap/react`).
+  - **Framer Motion & Three.js:** Used for micro-interactions and the 3D hyperspeed canvas.
+- **Responsive Design:** Utilizes Tailwind v4 utilities (`sm:`, `md:`, `lg:`) to adjust grid layouts and font sizes across devices.
+
+---
+
+## 13. Backend Documentation
+
+- **Services:** `lib/db.ts` isolates all Prisma queries. This ensures that API controllers only handle HTTP requests and validation, adhering to separation of concerns.
+- **Middleware:** No Next.js middleware is currently utilized; authentication and rate-limiting are handled directly within the route handlers.
+- **Error Handling:** Try-catch blocks wrap database and Resend operations, returning clean JSON 500 errors to the client to prevent application crashes.
+
+---
+
+## 14. Development Workflow
+
+- **Code Style:** Enforced via standard ESLint and TypeScript compilation checks.
+- **Typing:** Strict TypeScript interfaces (defined in `lib/db.ts` and `app/admin/page.tsx`).
+- **Build Process:** Uses Turbopack for rapid local development and standard Webpack for production builds (`npm run build`).
+
+---
+
+## 15. Testing
+
+Currently, no automated testing frameworks (Jest/Playwright/Cypress) are configured. 
+- **Manual Testing:** Recommended to verify the 3D canvas on multiple browsers (Safari, Chrome, Firefox) due to WebGL constraints.
+- **Build Checks:** Next.js `build` script acts as the primary type-checker and linter prior to deployment.
+
+---
+
+## 16. CI/CD Pipeline
+
+- **Vercel Integration:** Configured via `vercel.json`.
+- **Deployment Flow:** Pushes to the `main` branch on GitHub automatically trigger a Vercel build and deployment.
+- **Build Process:** Vercel runs `npm install`, then `npm run build`. The `.next` output directory is cached and deployed to Vercel's Edge Network.
+
+---
+
+## 17. Security Considerations
+
+- **Rate Limiting:** IP-based rate limiting on the `/api/contact` route prevents email spam (max 3 requests per minute).
+- **Honeypot:** A hidden field (`hp_field`) traps automated bots that blindly fill out all form inputs.
+- **Data Protection:** Visitor IPs are hashed with SHA-256 before being stored in the database. Raw IPs are never persisted.
+- **Secrets Management:** Passwords and API keys are strictly kept in `.env.local` and never exposed to the client bundle.
+
+---
+
+## 18. Performance Optimizations
+
+- **Next.js Features:** Utilizes native Next.js `<Image>` components for optimized WebP delivery.
+- **Server Components:** Most layout elements are rendered on the server to reduce JavaScript bundle sizes.
+- **Three.js Optimization:** The 3D canvas is contained within its own client component and relies on requestAnimationFrame for smooth execution.
+- **Database:** Local SQLite ensures <5ms query response times.
+
+---
+
+## 19. Troubleshooting
+
+### Common Errors
+1. **Prisma Client not found:**
+   *Issue:* `Error: @prisma/client did not initialize yet.`
+   *Solution:* Run `npx prisma generate` to build the local typings.
+
+2. **Database Locked / Path Issues:**
+   *Issue:* SQLite `dev.db` cannot be written to.
+   *Solution:* Ensure the `prisma` folder has write permissions. Delete `dev.db` and run `npx prisma db push` to recreate it.
+
+3. **Admin Dashboard Unauthorized:**
+   *Issue:* Cannot log in even with the correct password.
+   *Solution:* Verify that `.env.local` is present in the root directory and contains `ADMIN_PASSWORD=...`. Restart the Next.js server.
+
+---
+
+## 20. Deployment Guide
+
+### Vercel (Recommended)
+1. Push the repository to GitHub.
+2. Import the project into Vercel.
+3. Add the environment variables (`ADMIN_PASSWORD`, `RESEND_API_KEY`) in the Vercel dashboard.
+4. **Important for DB in Serverless:** The current project uses a local file (`file:dev.db`). In a serverless environment like Vercel, the local file system is read-only and ephemeral. You **must** transition to a remote database (like Turso) for production.
+   - Set up a Turso database.
+   - Update `lib/prisma.ts` to use the Turso URL and Auth Token via the LibSQL adapter.
+
+---
+
+## 21. Future Improvements
+
+1. **Architecture:** Transition the in-memory rate-limiter to Redis (Upstash) to support serverless deployments seamlessly.
+2. **Database:** Fully migrate to Turso DB for edge-ready persistent data.
+3. **Security:** Upgrade the Admin dashboard authentication to use NextAuth.js (Auth.js) with session cookies instead of passing the password header on every request.
+4. **Testing:** Implement Cypress for E2E testing of the contact form and GSAP animations.
+
+---
+
+## 22. Contribution Guide
+
+1. Fork the project.
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`).
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`).
+4. Push to the branch (`git push origin feature/AmazingFeature`).
+5. Open a Pull Request.
+
+Ensure that `npm run build` succeeds locally before opening a PR.
+
+---
+
+## 23. License
+
+This project is licensed under the **ISC License**. See the `package.json` for details.
