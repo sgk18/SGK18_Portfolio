@@ -20,13 +20,47 @@ type Project = {
 
 const projects: Project[] = [
   {
+    title: "SOCIO — Official Website",
+    description:
+      "A comprehensive university event and operations platform for Christ University. Covers public event discovery, organizer tools, individual/team registrations, automated QR ticketing, attendance tracking, and 9+ role-gated operational workflows (HOD, Dean, CFO, Volunteer, Catering, and Venue dashboards). Built as a monorepo.",
+    image: "/socio.png",
+    imageFit: "contain",
+    imageBg: "bg-white",
+    tags: ["Next.js 15", "Express 5", "Supabase", "PostgreSQL", "React 19", "Tailwind CSS 4"],
+    github: "https://github.com/sgk18",
+    live: "https://socio.christuniversity.in",
+    featured: true,
+  },
+  {
+    title: "SOCIO Mobile",
+    description:
+      "A Next.js 16 + Capacitor hybrid app spanning 22 routes. Features student portals, role-gated volunteer and catering dashboards, offline ticket caching via IndexedDB, shake-to-scan accelerometer binding, a WebRTC QR scanner, VAPID/OneSignal push notifications, and native device camera/torch integrations.",
+    image: "/socio.png",
+    imageFit: "contain",
+    imageBg: "bg-white",
+    tags: ["Next.js 16", "Capacitor", "IndexedDB", "WebRTC", "OneSignal", "PWA"],
+    github: "https://github.com/sgk18/sociomobilev2",
+    live: "https://app.withsocio.com",
+    featured: true,
+  },
+  {
+    title: "FacultyApp — Institutional Workflow",
+    description:
+      "A full-stack workflow management platform featuring a Flutter + Riverpod/GoRouter mobile app and a Next.js web portal. Integrates Prisma and Supabase with JWT auth, Google OAuth, Gmail/Calendar API integrations, FCM push notifications, Resend email, and role-based ADMIN/HOD/FACULTY access control.",
+    image: "https://placehold.co/600x340/09090e/10b981?text=FacultyApp+Flutter",
+    tags: ["Flutter", "Riverpod", "Next.js", "Supabase", "Prisma", "Google APIs"],
+    github: "https://github.com/sgk18/Facultyapp",
+    live: "https://github.com/sgk18/Facultyapp",
+    featured: true,
+  },
+  {
     title: "NoteNova",
     description:
-      "A campus resource sharing platform with a real-time Direct Messaging system and AI-powered learning tools. Built with a scalable backend and user authentication using MongoDB and Supabase.",
+      "A multi-user academic resource-sharing platform featuring real-time Direct Messaging, AI-powered learning tools, secure user authentication, and a highly scalable PostgreSQL/Supabase database architecture.",
     image: "/notenova.png",
     imageFit: "contain",
     imageBg: "bg-white",
-    tags: ["Next.js", "TypeScript", "MongoDB", "Supabase", "REST APIs", "Tailwind CSS"],
+    tags: ["Next.js", "TypeScript", "PostgreSQL", "Supabase", "AI Integrations", "Tailwind CSS"],
     github: "https://github.com/sgk18/NoteNova",
     live: "https://note-nova-khaki.vercel.app",
     featured: true,
@@ -34,65 +68,31 @@ const projects: Project[] = [
   {
     title: "Centre for Peace Praxis",
     description:
-      "A multi-page web application for a peace research centre — featuring event pages, alumni records, faculty profiles, a dashboard with auth, and a gallery. Built with static HTML/CSS/JS, Tailwind CSS, and PWA support via a web manifest.",
+      "A multi-page web application for a university peace research centre — featuring event schedules, alumni directories, faculty databases, a secure dashboard with authentication, and image galleries. Built with static HTML/CSS/JS, Tailwind CSS, and full PWA support.",
     image: "/cpp_logo.png",
     imageFit: "contain",
     imageBg: "bg-[#0a1628]",
-    tags: ["HTML5", "CSS3", "JavaScript", "Tailwind CSS", "TypeScript", "PWA", "PostCSS"],
+    tags: ["HTML5", "CSS3", "JavaScript", "Tailwind CSS", "TypeScript", "PWA"],
     github: "https://github.com/sgk18/Centre-for-Peace-Praxis",
     live: "https://sgk18.github.io/CPP",
-    featured: true,
   },
   {
-    title: "Arcadia",
+    title: "Arcadia RPG",
     description:
-      "A fantasy RPG built across two parallel layers: a native C game (terminal CLI + Win32 GUI) using custom DSA — linked lists, graphs, priority queues, and circular buffers — and a browser port powered by a stateless Next.js API + HTML5 Canvas renderer with sprite animations for real-time 2D combat.",
-    image: "https://placehold.co/600x340/0d0d1a/7c3aed?text=Arcadia+RPG",
-    tags: ["C99", "Win32 API", "Next.js", "TypeScript", "HTML5 Canvas", "REST API", "Tailwind CSS"],
+      "A fantasy RPG built in two layers: a native C version using custom DSA (linked lists, graphs, priority queues, circular buffers) with a Win32 GUI, and a browser port powered by a Next.js API and HTML5 Canvas renderer with sprite animations.",
+    image: "https://placehold.co/600x340/09090e/8b5cf6?text=Arcadia+C+RPG",
+    tags: ["C99", "Win32 API", "Next.js", "TypeScript", "HTML5 Canvas"],
     github: "https://github.com/sgk18/Arcadia",
     live: "#",
-    featured: true,
   },
   {
-    title: "Techleons",
+    title: "Techleons Event Platform",
     description:
-      "A visually immersive Next.js event platform with a Stranger Things-inspired theme — featuring custom cursor tracking via React Context, particle backgrounds, glitch text, flashlight effects, and a retro overlay, all driven by modular TypeScript components.",
-    image: "https://placehold.co/600x340/0d0d0d/ef4444?text=Techleons",
-    tags: ["Next.js", "TypeScript", "React Context", "Tailwind CSS", "PostCSS"],
+      "A visually immersive event landing page with a Stranger Things theme. Features custom cursor tracking using React Context, canvas particle backgrounds, glitch text, flashlight effect, and a CRT retro overlay.",
+    image: "https://placehold.co/600x340/09090e/ef4444?text=Techleons+Event+Platform",
+    tags: ["Next.js", "TypeScript", "React Context", "Framer Motion", "Tailwind CSS"],
     github: "https://github.com/sgk18/Techleons",
     live: "https://techleons-weld.vercel.app",
-    featured: true,
-  },
-  {
-    title: "BottleStory",
-    description:
-      "A modern Next.js 13+ web app built with the App Router, TypeScript, and CSS Modules. Follows clean architecture with a root layout, scoped page styles, and static asset management — structured for scalability and fast iteration.",
-    image: "https://placehold.co/600x340/0f1a2e/06b6d4?text=BottleStory",
-    tags: ["Next.js", "TypeScript", "CSS Modules", "App Router", "ESLint"],
-    github: "https://github.com/sgk18/BottleStory",
-    live: "https://bottle-story-cww1.vercel.app",
-  },
-  {
-    title: "GreenCart",
-    description:
-      "An e-commerce web application with a clean, responsive UI for browsing and purchasing products. Built and deployed on Vercel with a focus on smooth shopping UX.",
-    image: "/greencart.png",
-    imageFit: "contain",
-    imageBg: "bg-white",
-    tags: ["Next.js", "TypeScript", "Tailwind CSS", "Vercel"],
-    github: "https://github.com/sgk18",
-    live: "https://green-cart-ten-kappa.vercel.app",
-  },
-  {
-    title: "Portfolio Website",
-    description:
-      "Personal portfolio showcasing frontend projects, 3D elements via Three.js, and technical skills. Built with Next.js, TypeScript, and Framer Motion with a focus on performance and visual polish.",
-    image: "/logo.png",
-    imageFit: "contain",
-    imageBg: "bg-black",
-    tags: ["Next.js", "TypeScript", "Three.js", "Framer Motion", "Tailwind CSS"],
-    github: "https://github.com/sgk18",
-    live: "https://sgk-18-portfolio.vercel.app",
   },
 ];
 
@@ -163,15 +163,17 @@ export default function Projects() {
                     >
                       <Github size={16} />
                     </a>
-                    <a
-                      href={project.live}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label="Live site"
-                      className="p-1.5 rounded-lg text-slate-500 hover:text-slate-200 hover:bg-white/5 transition-colors"
-                    >
-                      <ExternalLink size={16} />
-                    </a>
+                    {project.live !== "#" && (
+                      <a
+                        href={project.live}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label="Live site"
+                        className="p-1.5 rounded-lg text-slate-500 hover:text-slate-200 hover:bg-white/5 transition-colors"
+                      >
+                        <ExternalLink size={16} />
+                      </a>
+                    )}
                   </div>
                 </div>
 

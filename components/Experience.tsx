@@ -16,13 +16,26 @@ type Job = {
 
 const jobs: Job[] = [
   {
+    title: "Product Engineering Intern",
+    company: "SOCIO — Campus Event Platform (CHRIST Incubation and Consultancy Foundation)",
+    location: "Bengaluru, India",
+    dates: "Apr 2026 – Present",
+    type: "Internship",
+    achievements: [
+      "Implemented a Valkey (Redis-compatible) caching layer for session management, notification queuing, real-time attendance counters, and PostgreSQL load reduction.",
+      "Built push notification infrastructure with OneSignal, FCM, Web Push/VAPID, and Service Workers for simultaneous PWA and Native Android delivery.",
+      "Developed an offline-first QR scanner using IndexedDB/Dexie.js with background sync, cooldown-based duplicate prevention, and conflict resolution.",
+      "Shipped features across Web, PWA, and Native Android (Capacitor) simultaneously under high-tempo agile sprint workflows.",
+    ],
+  },
+  {
     title: "Web Developer & Organising Committee Member",
     company: "Centre for Peace Praxis, CHRIST University",
     location: "Bengaluru, India",
     dates: "Jul 2025 – Present",
     type: "Part-time",
     achievements: [
-      "Developed and maintained the official website using HTML5 and CSS3, including custom intro animations.",
+      "Developed and maintained the official website using HTML5 and CSS3, including custom animations.",
       "Enhanced mobile responsiveness and improved cross-device compatibility across all pages.",
       "Collaborated with organising committees to support academic initiatives and event coordination.",
       "Managed structured version control workflows using Git and GitHub.",

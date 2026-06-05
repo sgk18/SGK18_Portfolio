@@ -1,0 +1,141 @@
+\documentclass[10pt,a4paper]{article}
+
+\usepackage[left=0.60in,top=0.42in,right=0.60in,bottom=0.42in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{charter}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{titlesec}
+\usepackage{microtype}
+
+\hypersetup{hidelinks, colorlinks=false}
+
+% Slightly tighter line spacing
+\renewcommand{\baselinestretch}{0.96}
+
+% Bullet list spacing
+\setlist[itemize]{noitemsep, topsep=2pt, leftmargin=1.3em, itemsep=1pt, parsep=0pt}
+
+% Section: bold, ruled, tight spacing
+\titleformat{\section}{\normalsize\bfseries\uppercase}{}{0em}{}[\titlerule]
+\titlespacing*{\section}{0pt}{5pt}{3pt}
+
+% Role macro: title + org left, dates right, all on two lines
+\newcommand{\role}[4]{%
+  \noindent\textbf{#1} \hfill \textit{#3 -- #4}\\[-3pt]
+  \noindent\textit{#2}\par
+}
+
+% Project header: name left, link right
+\newcommand{\project}[3]{%
+  \noindent\textbf{#1} \hfill \href{#2}{\texttt{\small #3}}\par
+}
+
+\begin{document}
+\pagestyle{empty}
+
+%-----------------------------------------------------------
+% HEADER — centred block for clean alignment
+%-----------------------------------------------------------
+\begin{center}
+  {\LARGE\bfseries Suryachalam V M}\\[3pt]
+  \small
+  \href{mailto:suryachalam18@gmail.com}{suryachalam18@gmail.com}
+  \,\textbar\,
+  +91 98445 88551
+  \,\textbar\,
+  \href{https://sgk-18-portfolio.vercel.app}{sgk-18-portfolio.vercel.app}
+  \,\textbar\,
+  \href{https://github.com/sgk18}{github.com/sgk18}
+  \,\textbar\,
+  \href{https://www.linkedin.com/in/suryachalam}{linkedin.com/in/suryachalam}
+  \,\textbar\,
+  Bengaluru, India
+\end{center}
+
+\vspace{-2pt}
+
+%-----------------------------------------------------------
+\section*{Profile}
+Full-Stack and Product Engineer with hands-on production experience building scalable hybrid
+platforms, real-time systems, and offline-first mobile applications. Currently interning at
+SOCIO (startup-grade campus event platform) across the full stack — from Valkey caching and
+push notification infrastructure to native Android (Capacitor) and PWA systems. Pursuing BSc
+Computer Science \& Mathematics at CHRIST University.
+
+%-----------------------------------------------------------
+\section*{Education}
+\noindent\textbf{Christ University, Bengaluru} \hfill 2025 -- 2029\\[-3pt]
+\noindent\textit{BSc Computer Science and Mathematics}\\[-3pt]
+\noindent\small Coursework: Data Structures \& Algorithms,\ Graph Theory,\ Linear Algebra,\
+Discrete Mathematics,\ OOP,\ Database Systems
+
+%-----------------------------------------------------------
+\section*{Experience}
+
+\role{Product Engineering Intern}{SOCIO -- Campus Event Platform, CHRIST Incubation and Consultancy Foundation (CICF)}{Apr 2026}{Present}
+\vspace{1pt}
+\begin{itemize}
+  \item Implemented a Valkey (Redis-compatible) caching layer for session management,
+        notification queuing, real-time attendance counters, and PostgreSQL load reduction
+  \item Built push notification infrastructure with OneSignal, FCM, Web Push/VAPID, and
+        Service Workers for simultaneous PWA and Native Android delivery
+  \item Developed an offline-first QR scanner using IndexedDB/Dexie.js with background sync,
+        cooldown-based duplicate prevention, and conflict resolution
+  \item Shipped across web, PWA, and Native Android (Capacitor) simultaneously at
+        50+ hrs/week using agile sprint workflows
+\end{itemize}
+
+%-----------------------------------------------------------
+\section*{Projects}
+
+\project{SOCIO V2 -- Campus Event \& Operations Platform}{https://socio.christuniversity.in}{socio.christuniversity.in}
+\begin{itemize}
+  \item Monorepo (Next.js 15 client + Express 5 API, Supabase Auth/PostgreSQL) with automated QR ticketing, attendance tracking, and 9+ role-gated operational workflows (HOD, Dean, CFO, Volunteer, Catering)
+  \item Implemented real-time analytical dashboards using Recharts and secure JWT session hydration on the server side
+\end{itemize}
+
+\vspace{2pt}
+\project{SOCIO Mobile}{https://app.withsocio.com}{app.withsocio.com}
+\begin{itemize}
+  \item Next.js 16 + Capacitor hybrid app (22 routes) spanning student portals, volunteer dashboards, offline ticket caching via IndexedDB, WebRTC QR scanner, OneSignal push, and native camera/torch plugins
+  \item Implemented shake-to-scan accelerometer bindings and push notifications via VAPID and OneSignal
+\end{itemize}
+
+\vspace{2pt}
+\project{FacultyApp -- Institutional Workflow Management}{https://github.com/sgk18/Facultyapp}{github.com/sgk18/Facultyapp}
+\begin{itemize}
+  \item Full-stack platform (Flutter + Riverpod/GoRouter, Next.js, Prisma, Supabase) with JWT auth, Google OAuth, Gmail/Calendar API, FCM push, Resend email, and role-based ADMIN/HOD/FACULTY access control
+  \item Integrated Google Calendar/Gmail APIs, FCM push alerts, Resend email notifications, and OAuth
+\end{itemize}
+
+\vspace{2pt}
+\project{Centre for Peace Praxis}{https://sgk18.github.io/CPP}{sgk18.github.io/CPP}
+\begin{itemize}
+  \item Developed the official academic portal using HTML5, CSS3, and JavaScript, incorporating custom animations, cross-device responsiveness, and static PWA manifest support
+  \item Optimized mobile responsiveness and page performance to achieve high-performance auditing scores
+\end{itemize}
+
+%-----------------------------------------------------------
+\section*{Technical Skills}
+\begin{itemize}
+  \item \textbf{Languages:} TypeScript, JavaScript, Python, Java, Dart, SQL, PL/SQL, C++
+  \item \textbf{Frontend \& Mobile:} React, Next.js, Flutter, Capacitor, Tailwind CSS, PWA, Service Workers
+  \item \textbf{Backend \& Infra:} Node.js, Express, PostgreSQL, Oracle Database, Supabase, Prisma, MongoDB, Valkey, MySQL HeatWave, Docker, OCI
+  \item \textbf{Integrations \& Tools:} CI/CD, FCM, OneSignal, Google OAuth, Gmail API, Resend, Git, Vercel, Figma
+\end{itemize}
+
+%-----------------------------------------------------------
+\section*{Achievements \& Certifications}
+\begin{itemize}
+  \item \textbf{Oracle Data Platform 2025 Foundations Associate} -- Oracle University (ID: 328494602OCI25DCFA)
+  \item \textbf{Runner-Up} -- Frontend Frenzy, Xactitude IT Fest 2026, Kristu Jayanti University
+  \item \textbf{1st Place} -- Mathematics Premier League (MPL), SEQUENCE 2026, CHRIST University
+  \item \textbf{3rd Prize} -- National Science Day Exhibition, School of Sciences, CHRIST University
+  \item \textbf{Finisher} -- 24-Hour Solo Hackathon, CHRIST $\times$ Pod.ai (2026);\
+        Participant -- YUGASTR Hackathon, Ramaiah
+  \item \textbf{Certifications:} Graph Theory (CHRIST) \textbullet\ HackerRank Python Basic
+        \textbullet\ C Programming (Infosys Springboard) \textbullet\ AI Prompt Engineering (Microsoft)
+\end{itemize}
+
+\end{document}

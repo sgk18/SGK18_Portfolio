@@ -4,13 +4,13 @@ import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef } from "react";
 import {
-  Layout,
+  Code2,
+  Smartphone,
   Server,
   Wrench,
-  Users,
 } from "lucide-react";
 
-type Skill = { name: string; level?: number };
+type Skill = { name: string };
 type Category = {
   title: string;
   icon: React.ReactNode;
@@ -20,64 +20,71 @@ type Category = {
 
 const categories: Category[] = [
   {
-    title: "Frontend",
-    icon: <Layout size={16} />,
+    title: "Languages",
+    icon: <Code2 size={16} />,
     color: "from-blue-500/20 to-indigo-500/20 border-indigo-500/20",
     skills: [
-      { name: "HTML5 & CSS3" },
-      { name: "JavaScript (ES6+)" },
       { name: "TypeScript" },
-      { name: "Next.js" },
-      { name: "Tailwind CSS" },
-      { name: "Three.js" },
+      { name: "JavaScript" },
+      { name: "Python" },
+      { name: "Java" },
+      { name: "Dart" },
+      { name: "SQL" },
+      { name: "PL/SQL" },
+      { name: "C++" },
     ],
   },
   {
-    title: "Backend & Data",
+    title: "Frontend & Mobile",
+    icon: <Smartphone size={16} />,
+    color: "from-pink-500/20 to-rose-500/20 border-pink-500/20",
+    skills: [
+      { name: "React" },
+      { name: "Next.js" },
+      { name: "Flutter" },
+      { name: "Capacitor" },
+      { name: "Tailwind CSS" },
+      { name: "PWA" },
+      { name: "Service Workers" },
+    ],
+  },
+  {
+    title: "Backend & Infra",
     icon: <Server size={16} />,
     color: "from-emerald-500/20 to-teal-500/20 border-emerald-500/20",
     skills: [
-      { name: "Python" },
-      { name: "C" },
-      { name: "SQL" },
+      { name: "Node.js" },
+      { name: "Express" },
+      { name: "PostgreSQL" },
+      { name: "Oracle DB" },
       { name: "MongoDB" },
-      { name: "Supabase" },
-      { name: "REST APIs" },
+      { name: "Valkey" },
+      { name: "MySQL HeatWave" },
+      { name: "Docker" },
     ],
   },
   {
-    title: "Tools & Platforms",
+    title: "Integrations & Tools",
     icon: <Wrench size={16} />,
     color: "from-orange-500/20 to-amber-500/20 border-orange-500/20",
     skills: [
+      { name: "OCI" },
+      { name: "CI/CD" },
+      { name: "FCM" },
+      { name: "OneSignal" },
+      { name: "Google OAuth" },
+      { name: "Resend" },
       { name: "Git & GitHub" },
-      { name: "Figma" },
       { name: "Vercel" },
-      { name: "Bootstrap" },
-      { name: "Responsive Web Design" },
-      { name: "3D Modeling Integration" },
-    ],
-  },
-  {
-    title: "Soft Skills",
-    icon: <Users size={16} />,
-    color: "from-pink-500/20 to-rose-500/20 border-pink-500/20",
-    skills: [
-      { name: "Problem Solving" },
-      { name: "Communication" },
-      { name: "Team Collaboration" },
-      { name: "Leadership" },
-      { name: "Event Organisation" },
-      { name: "Version Control" },
     ],
   },
 ];
 
 const pillColors: Record<string, string> = {
-  Frontend: "bg-indigo-500/10 text-indigo-300 border-indigo-500/20 hover:bg-indigo-500/20",
-  "Backend & Data": "bg-emerald-500/10 text-emerald-300 border-emerald-500/20 hover:bg-emerald-500/20",
-  "Tools & Platforms": "bg-orange-500/10 text-orange-300 border-orange-500/20 hover:bg-orange-500/20",
-  "Soft Skills": "bg-pink-500/10 text-pink-300 border-pink-500/20 hover:bg-pink-500/20",
+  Languages: "bg-indigo-500/10 text-indigo-300 border-indigo-500/20 hover:bg-indigo-500/20",
+  "Frontend & Mobile": "bg-pink-500/10 text-pink-300 border-pink-500/20 hover:bg-pink-500/20",
+  "Backend & Infra": "bg-emerald-500/10 text-emerald-300 border-emerald-500/20 hover:bg-emerald-500/20",
+  "Integrations & Tools": "bg-orange-500/10 text-orange-300 border-orange-500/20 hover:bg-orange-500/20",
 };
 
 export default function Skills() {

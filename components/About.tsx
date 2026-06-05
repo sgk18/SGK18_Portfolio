@@ -3,10 +3,10 @@
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef } from "react";
-import { User, MapPin, Coffee } from "lucide-react";
+import { User, MapPin, Coffee, Trophy } from "lucide-react";
 
 const stats = [
-  { label: "Years Coding", value: "2+" },
+  { label: "Year Coding", value: "1+" },
   { label: "Projects Built", value: "6+" },
   { label: "Hackathons", value: "3" },
   { label: "Cups of Coffee", value: "∞" },
@@ -44,22 +44,21 @@ export default function About() {
           >
             <div className="flex items-center gap-2 text-slate-400 text-sm">
               <User size={14} className="text-indigo-400" />
-              <span>Creative Developer · Builder · Problem Solver</span>
+              <span>Full-Stack & Product Engineer · Undergrad · Builder</span>
             </div>
 
             <p className="text-slate-300 leading-relaxed text-lg">
-              I&apos;m a Creative Developer and undergrad in Mathematics and Computer Science at
-              CHRIST (Deemed to be University), Bengaluru. I specialise in frontend development,
-              3D web integration, and building scalable, AI-enhanced web applications using
-              Next.js, Python, MongoDB, and Supabase.
+              I&apos;m a Full-Stack and Product Engineer with hands-on production experience
+              building scalable hybrid platforms, real-time systems, and offline-first mobile applications.
+              I specialise in building performant systems across the full stack, currently interning at
+              SOCIO (startup-grade campus event platform) — from Valkey caching and push notifications to Capacitor hybrid apps.
             </p>
 
             <p className="text-slate-400 leading-relaxed">
-              I&apos;ve led university-level web initiatives — from the official Centre for Peace
-              Praxis website to large-scale event platforms — and I thrive in collaborative
-              environments where great engineering meets thoughtful user experience. When I&apos;m
-              not pushing commits, you&apos;ll find me at a hackathon or experimenting with
-              Three.js and interactive 3D experiences.
+              I&apos;m pursuing a BSc in Computer Science and Mathematics at CHRIST (Deemed to be University), Bengaluru.
+              My academic coursework includes Data Structures &amp; Algorithms, Graph Theory, Linear Algebra,
+              Discrete Mathematics, Object-Oriented Programming, and Database Systems. I thrive in high-paced sprint workflows
+              where elegant architecture meets excellent user experience.
             </p>
 
             <div className="flex flex-wrap gap-4 pt-2">
@@ -74,26 +73,70 @@ export default function About() {
             </div>
           </motion.div>
 
-          {/* Stats grid */}
-          <motion.div
-            initial={{ opacity: 0, x: 30 }}
-            animate={inView ? { opacity: 1, x: 0 } : {}}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            className="grid grid-cols-2 gap-4"
-          >
-            {stats.map((stat, i) => (
-              <motion.div
-                key={stat.label}
-                initial={{ opacity: 0, y: 20 }}
-                animate={inView ? { opacity: 1, y: 0 } : {}}
-                transition={{ duration: 0.5, delay: 0.3 + i * 0.08 }}
-                className="card-bg rounded-2xl p-6 glow hover:border-indigo-500/30 transition-colors"
-              >
-                <p className="text-3xl font-bold gradient-text mb-1">{stat.value}</p>
-                <p className="text-slate-400 text-sm leading-snug">{stat.label}</p>
-              </motion.div>
-            ))}
-          </motion.div>
+          {/* Stats & Achievements */}
+          <div className="space-y-8">
+            {/* Stats grid */}
+            <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              animate={inView ? { opacity: 1, x: 0 } : {}}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              className="grid grid-cols-2 gap-4"
+            >
+              {stats.map((stat, i) => (
+                <motion.div
+                  key={stat.label}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={inView ? { opacity: 1, y: 0 } : {}}
+                  transition={{ duration: 0.5, delay: 0.3 + i * 0.08 }}
+                  className="card-bg rounded-2xl p-6 glow hover:border-indigo-500/30 transition-colors"
+                >
+                  <p className="text-3xl font-bold gradient-text mb-1">{stat.value}</p>
+                  <p className="text-slate-400 text-sm leading-snug">{stat.label}</p>
+                </motion.div>
+              ))}
+            </motion.div>
+
+            {/* Achievements & Certifications */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={inView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.6, delay: 0.4 }}
+              className="card-bg rounded-2xl p-6 border border-indigo-500/10 hover:border-indigo-500/20 transition-all duration-300"
+            >
+              <h3 className="text-lg font-bold text-slate-100 mb-4 flex items-center gap-2">
+                <Trophy size={18} className="text-indigo-400" />
+                Achievements & Certifications
+              </h3>
+              <ul className="space-y-3 text-slate-400 text-sm">
+                <li className="flex items-start gap-2 text-indigo-300">
+                  <span className="text-indigo-400 font-bold shrink-0">·</span>
+                  <span><strong>Oracle Data Platform 2025 Foundations Associate</strong> — Issued by Oracle University (ID: 328494602OCI25DCFA, Valid through May 2028)</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-indigo-400 font-bold shrink-0">·</span>
+                  <span><strong>Runner-Up</strong> — Frontend Frenzy, Xactitude IT Fest 2026</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-indigo-400 font-bold shrink-0">·</span>
+                  <span><strong>1st Place</strong> — Mathematics Premier League (MPL), SEQUENCE 2026</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-indigo-400 font-bold shrink-0">·</span>
+                  <span><strong>3rd Prize</strong> — National Science Day Exhibition, CHRIST University</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-indigo-400 font-bold shrink-0">·</span>
+                  <span><strong>Finisher</strong> — 24-Hour Solo Hackathon, CHRIST × Pod.ai (2026)</span>
+                </li>
+                <li className="flex items-start gap-2 border-t border-slate-800/60 pt-2.5">
+                  <span className="text-indigo-400 font-bold shrink-0">·</span>
+                  <span className="text-xs text-slate-500 leading-relaxed">
+                    <strong>Certifications:</strong> Oracle Data Platform 2025 Foundations Associate • Graph Theory (CHRIST) • HackerRank Python Basic • C Programming (Infosys Springboard) • AI Prompt Engineering (Microsoft)
+                  </span>
+                </li>
+              </ul>
+            </motion.div>
+          </div>
         </div>
       </div>
     </section>
