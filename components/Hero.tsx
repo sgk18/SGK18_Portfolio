@@ -86,7 +86,7 @@ export default function Hero() {
           className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-sm font-medium mb-8"
         >
           <Sparkles size={14} className="animate-pulse" />
-          Available for new opportunities
+          Product Engineer Intern @ SOCIO
         </motion.div>
 
         {/* Heading */}
@@ -143,23 +143,7 @@ export default function Hero() {
           </a>
         </motion.div>
 
-        {/* Scroll indicator */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1.2, duration: 0.8 }}
-          className="absolute bottom-12 left-1/2 -translate-x-1/2"
-        >
-          <motion.div
-            animate={{ y: [0, 8, 0] }}
-            transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-            className="flex flex-col items-center gap-2 text-slate-600 cursor-pointer"
-            onClick={() => smoothScrollTo("#about")}
-          >
-            <span className="text-xs uppercase tracking-widest">Scroll</span>
-            <ArrowDown size={14} />
-          </motion.div>
-        </motion.div>
+
       </div>
     </section>
   );

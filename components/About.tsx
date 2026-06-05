@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef } from "react";
+import Image from "next/image";
 import { User, MapPin, Coffee, Trophy } from "lucide-react";
 
 const stats = [
@@ -34,13 +35,33 @@ export default function About() {
           </h2>
         </motion.div>
 
-        <div className="grid lg:grid-cols-2 gap-16 items-start">
+        <div className="grid lg:grid-cols-12 gap-12 items-start">
+          {/* Profile Photo */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={inView ? { opacity: 1, scale: 1 } : {}}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="col-span-12 md:col-span-4 lg:col-span-3 flex justify-center"
+          >
+            <div className="relative w-full max-w-[280px] aspect-square rounded-2xl overflow-hidden border border-indigo-500/20 shadow-2xl group card-bg">
+              <Image
+                src="/surya.png"
+                alt="Suryachalam V M"
+                fill
+                className="object-cover object-center group-hover:scale-105 transition-transform duration-500"
+                sizes="(max-width: 768px) 280px, (max-width: 1024px) 220px, 280px"
+                priority
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#09090e]/60 via-transparent to-transparent" />
+            </div>
+          </motion.div>
+
           {/* Bio */}
           <motion.div
-            initial={{ opacity: 0, x: -30 }}
+            initial={{ opacity: 0, x: -20 }}
             animate={inView ? { opacity: 1, x: 0 } : {}}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="space-y-6"
+            transition={{ duration: 0.6, delay: 0.25 }}
+            className="col-span-12 md:col-span-8 lg:col-span-5 space-y-6"
           >
             <div className="flex items-center gap-2 text-slate-400 text-sm">
               <User size={14} className="text-indigo-400" />
@@ -74,10 +95,10 @@ export default function About() {
           </motion.div>
 
           {/* Stats & Achievements */}
-          <div className="space-y-8">
+          <div className="col-span-12 lg:col-span-4 space-y-8">
             {/* Stats grid */}
             <motion.div
-              initial={{ opacity: 0, x: 30 }}
+              initial={{ opacity: 0, x: 20 }}
               animate={inView ? { opacity: 1, x: 0 } : {}}
               transition={{ duration: 0.6, delay: 0.3 }}
               className="grid grid-cols-2 gap-4"
