@@ -4,8 +4,8 @@ import About from "@/components/About";
 import Skills from "@/components/Skills";
 import Experience from "@/components/Experience";
 import Projects from "@/components/Projects";
+import GitHubStats from "@/components/GitHubStats";
 import Philosophy from "@/components/Philosophy";
-import Timeline from "@/components/Timeline";
 import ResumePreview from "@/components/ResumePreview";
 import Contact from "@/components/Contact";
 import Footer from "@/components/Footer";
@@ -21,8 +21,8 @@ export default function Home() {
       <Skills />
       <Experience />
       <Projects />
+      <GitHubStats />
       <Philosophy />
-      <Timeline />
       <ResumePreview />
       <Contact />
       <Footer />

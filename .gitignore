@@ -54,3 +54,7 @@ next-env.d.ts
 # Local analytics database (auto-generated at runtime)
 /data/db.json
 
+# Prisma SQLite database
+/prisma/dev.db
+/prisma/dev.db-journal
+

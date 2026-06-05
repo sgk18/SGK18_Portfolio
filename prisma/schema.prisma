@@ -1,0 +1,44 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Contact {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  subject   String
+  message   String
+  status    String   @default("pending")
+  createdAt DateTime @default(now())
+
+  @@map("contacts")
+}
+
+model Visit {
+  id        String   @id @default(cuid())
+  page      String
+  referrer  String   @default("direct")
+  ipHash    String
+  createdAt DateTime @default(now())
+
+  @@map("visits")
+}
+
+model ResumeDownload {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  @@map("resume_downloads")
+}
+
+model ProjectView {
+  id        String   @id @default(cuid())
+  projectId String
+  createdAt DateTime @default(now())
+
+  @@map("project_views")
+}
