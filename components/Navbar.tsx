@@ -11,6 +11,7 @@ const navItems = [
   { label: "Skills", href: "#skills" },
   { label: "Projects", href: "#projects" },
   { label: "Experience", href: "#experience" },
+  { label: "Philosophy", href: "#philosophy" },
   { label: "Resume", href: "#resume" },
   { label: "Contact", href: "#contact" },
 ];
@@ -23,7 +24,7 @@ const staggeredItems = navItems.map((item) => ({
 
 const socialItems = [
   { label: "GitHub", link: "https://github.com/sgk18" },
-  { label: "LinkedIn", link: "https://linkedin.com/in/yourprofile" },
+  { label: "LinkedIn", link: "https://linkedin.com/in/suryachalam" },
 ];
 
 const LogoIcon = (

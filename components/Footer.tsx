@@ -5,7 +5,7 @@ import { smoothScrollTo } from "@/lib/smoothScroll";
 
 const socials = [
   { href: "https://github.com/sgk18", icon: <Github size={18} />, label: "GitHub" },
-  { href: "https://linkedin.com/in/yourprofile", icon: <Linkedin size={18} />, label: "LinkedIn" }, // TODO
+  { href: "https://linkedin.com/in/suryachalam", icon: <Linkedin size={18} />, label: "LinkedIn" },
 ];
 
 const navLinks = [

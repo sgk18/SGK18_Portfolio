@@ -51,3 +51,6 @@ next-env.d.ts
 *.toc
 *.synctex.gz
 
+# Local analytics database (auto-generated at runtime)
+/data/db.json
+

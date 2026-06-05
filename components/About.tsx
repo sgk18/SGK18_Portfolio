@@ -8,7 +8,7 @@ import { User, MapPin, Coffee, Trophy } from "lucide-react";
 
 const stats = [
   { label: "Year Coding", value: "1+" },
-  { label: "Projects Built", value: "6+" },
+  { label: "Projects Built", value: "10+" },
   { label: "Hackathons", value: "3" },
   { label: "Cups of Coffee", value: "∞" },
 ];
@@ -140,6 +140,10 @@ export default function About() {
                 <li className="flex items-start gap-2">
                   <span className="text-indigo-400 font-bold shrink-0">·</span>
                   <span><strong>1st Place</strong> — Mathematics Premier League (MPL), SEQUENCE 2026</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-indigo-400 font-bold shrink-0">·</span>
+                  <span><strong>Participant</strong> — Madhava Mathematics Competition 2026</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-indigo-400 font-bold shrink-0">·</span>

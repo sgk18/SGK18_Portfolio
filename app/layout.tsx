@@ -15,6 +15,15 @@ export const metadata: Metadata = {
     "Personal portfolio of Surya — Software Engineer specializing in building scalable web applications and digital experiences.",
   keywords: ["Software Engineer", "Full Stack Developer", "React", "Next.js", "Portfolio"],
   authors: [{ name: "Surya" }],
+  icons: {
+    icon: [
+      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+    ],
+    shortcut: "/favicon.ico",
+    apple: "/apple-touch-icon.png",
+  },
+  manifest: "/site.webmanifest",
   openGraph: {
     title: "Surya | Software Engineer",
     description: "Building scalable web applications and digital experiences.",
