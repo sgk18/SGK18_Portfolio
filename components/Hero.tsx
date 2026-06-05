@@ -187,9 +187,7 @@ export default function Hero() {
             id="hero-resume-download-btn"
             href="/resume.pdf"
             download="Suryachalam_VM_Resume.pdf"
-            onClick={() => {
-              fetch('/api/analytics/download', { method: 'POST' }).catch(() => {});
-            }}
+            onClick={() => fetch('/api/analytics/download', { method: 'POST' }).catch(() => {})}
             className="group flex items-center gap-2 px-6 py-3.5 rounded-xl border border-slate-700/60 bg-black/30 backdrop-blur-sm text-slate-300 font-semibold text-sm hover:border-indigo-500/50 hover:text-indigo-300 hover:bg-indigo-500/5 transition-all duration-200 hover:-translate-y-0.5"
           >
             <Download size={15} />

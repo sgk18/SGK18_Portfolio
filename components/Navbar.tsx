@@ -87,7 +87,8 @@ export default function Navbar() {
           />
           <a
             href="/resume.pdf"
-            download
+            download="Suryachalam_VM_Resume.pdf"
+            onClick={() => fetch('/api/analytics/download', { method: 'POST' }).catch(() => {})}
             className="hidden md:inline-flex items-center ml-3 px-4 py-2 rounded-full text-xs font-semibold uppercase tracking-wider text-indigo-400 border border-indigo-500/30 bg-[#12121a] hover:bg-indigo-500/10 hover:border-indigo-500/50 transition-all duration-200 whitespace-nowrap flex-shrink-0"
             style={{ height: "42px" }}
           >

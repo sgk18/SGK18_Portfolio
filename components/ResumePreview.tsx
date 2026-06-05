@@ -100,8 +100,9 @@ export default function ResumePreview() {
               {/* Actions */}
               <div className="space-y-3 pt-4 border-t border-slate-800/80">
                 <a
-                  href={`/resume.pdf?v=${pdfVersion}`}
+                  href="/resume.pdf"
                   download="Suryachalam_VM_Resume.pdf"
+                  onClick={() => fetch('/api/analytics/download', { method: 'POST' }).catch(() => {})}
                   className="w-full flex items-center justify-center gap-2 px-5 py-3.5 rounded-xl bg-indigo-500 hover:bg-indigo-600 text-white font-semibold text-sm transition-all duration-200 shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/35 hover:-translate-y-0.5"
                 >
                   <Download size={16} />
@@ -184,8 +185,9 @@ export default function ResumePreview() {
               </div>
               <div className="grid grid-cols-1 gap-3 pt-2">
                 <a
-                  href={`/resume.pdf?v=${pdfVersion}`}
+                  href="/resume.pdf"
                   download="Suryachalam_VM_Resume.pdf"
+                  onClick={() => fetch('/api/analytics/download', { method: 'POST' }).catch(() => {})}
                   className="flex items-center justify-center gap-2 px-5 py-4 rounded-xl bg-indigo-500 text-white font-semibold text-sm"
                 >
                   <Download size={16} />

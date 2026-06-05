@@ -288,7 +288,11 @@ const PillNav: React.FC<PillNavProps> = ({
           <li>
             <a
               href="/resume.pdf"
-              download
+              download="Suryachalam_VM_Resume.pdf"
+              onClick={() => {
+                fetch('/api/analytics/download', { method: 'POST' }).catch(() => {});
+                setIsMobileMenuOpen(false);
+              }}
               className="block py-3 px-5 text-[14px] font-semibold uppercase tracking-wider rounded-[50px] text-center transition-colors duration-200"
               style={{ background: hoveredPillTextColor + '22', color: hoveredPillTextColor }}
             >

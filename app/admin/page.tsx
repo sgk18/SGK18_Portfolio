@@ -177,8 +177,7 @@ export default function AdminPage() {
           </form>
 
           <p className="text-center text-xs text-slate-600 mt-6">
-            Default password: <code className="text-slate-500">admin123</code> — set{" "}
-            <code className="text-slate-500">ADMIN_PASSWORD</code> env var in production.
+            Password is set via <code className="text-slate-500">ADMIN_PASSWORD</code> environment variable.
           </p>
         </div>
       </div>

@@ -2,7 +2,11 @@ import { db } from '@/lib/db';
 import { NextRequest } from 'next/server';
 
 function isAuthenticated(req: NextRequest): boolean {
-  const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
+  const adminPassword = process.env.ADMIN_PASSWORD;
+  if (!adminPassword) {
+    console.error('ADMIN_PASSWORD env var is not set.');
+    return false;
+  }
   const authHeader = req.headers.get('x-admin-password');
   return authHeader === adminPassword;
 }
