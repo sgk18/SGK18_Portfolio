@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server';
+import { Resend } from 'resend';
 import { db } from '@/lib/db';
 import { prisma } from '@/lib/prisma';
 
