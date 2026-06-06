@@ -79,7 +79,7 @@ export default function Contact() {
       }
 
       setStatus("success");
-      setForm({ name: "", email: "", subject: "", message: "", hp_field: "" });
+      setForm({ name: "", email: "", subject: "", message: "", company: "", role: "", linkedin: "", hp_field: "" });
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Something went wrong.";
       setStatus("error");
