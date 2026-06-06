@@ -193,7 +193,7 @@ export default function CRMDashboard() {
     } catch (err) {
       console.error("Failed to load logs:", err);
     }
-  }, []);
+  }, [password]);
 
   const fetchAnalytics = useCallback(async () => {
     try {
