@@ -2,14 +2,15 @@ import crypto from 'crypto';
 import { NextRequest } from 'next/server';
 import { Resend } from 'resend';
 import { db } from '@/lib/db';
+import { prisma } from '@/lib/prisma';
 
-// In-memory rate limiter (resets on server restart, sufficient for most use cases)
+// In-memory rate limiter
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
 
 function isRateLimited(ipHash: string): boolean {
   const now = Date.now();
-  const windowMs = 60_000; // 1 minute window
-  const maxRequests = 3;
+  const windowMs = 60_000; // 1 minute
+  const maxRequests = 5;
 
   const entry = rateLimitMap.get(ipHash);
   if (!entry || now > entry.resetAt) {
@@ -26,11 +27,11 @@ function isRateLimited(ipHash: string): boolean {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { name, email, subject, message, hp_field } = body;
+    const { name, email, subject, message, company, role, linkedin, hp_field } = body;
 
     // Honeypot: bots fill hidden fields; humans don't
     if (hp_field) {
-      return Response.json({ success: true }); // Silently accept to confuse bots
+      return Response.json({ success: true });
     }
 
     // IP-based rate limiting
@@ -58,54 +59,91 @@ export async function POST(req: NextRequest) {
       return Response.json({ error: 'Input exceeds maximum allowed length.' }, { status: 400 });
     }
 
-    // Save to database
-    await db.saveContactSubmission(name, email, subject, message);
+    // Save to relational database
+    const { contact, conversation, message: dbMessage } = await db.saveContactSubmission(
+      name,
+      email,
+      subject,
+      message,
+      company,
+      role,
+      linkedin
+    );
 
     // Track analytics
     await db.trackVisit('/contact-submit', '', '', ipHash);
 
     // Send emails if Resend is configured
     const apiKey = process.env.RESEND_API_KEY;
+    const fromDomain = process.env.RESEND_FROM_EMAIL || 'Portfolio Contact <onboarding@resend.dev>';
+    const replyToEmail = process.env.RESEND_INBOUND_EMAIL || 'suryachalam18@gmail.com';
+
     if (apiKey) {
       const resend = new Resend(apiKey);
 
-      // Notify Surya
-      await resend.emails.send({
-        from: 'Portfolio Contact <onboarding@resend.dev>',
-        to: ['suryachalam18@gmail.com'],
-        subject: `[Portfolio] New message from ${name}: ${subject}`,
-        replyTo: email,
+      // 1. Confirm to sender (this will set the message-id they reply to)
+      const confirmEmail = await resend.emails.send({
+        from: fromDomain,
+        to: [email],
+        replyTo: replyToEmail,
+        subject: `Re: ${subject}`,
         html: `
-          <div style="font-family: sans-serif; max-width: 600px;">
-            <h2 style="color: #6366f1;">New Contact Submission</h2>
-            <p><strong>From:</strong> ${name} (${email})</p>
-            <p><strong>Subject:</strong> ${subject}</p>
-            <hr style="border: 1px solid #e2e8f0;" />
-            <p style="white-space: pre-wrap;">${message}</p>
+          <div style="font-family: sans-serif; max-width: 600px; color: #1e293b; line-height: 1.6;">
+            <h2 style="color: #6366f1; font-weight: 700; margin-bottom: 24px;">Thanks for reaching out!</h2>
+            <p>Hi ${name},</p>
+            <p>I have received your message and will get back to you as soon as possible.</p>
+            
+            <div style="background-color: #f8fafc; border-left: 4px solid #6366f1; padding: 16px; margin: 24px 0; border-radius: 4px;">
+              <p style="margin: 0; font-weight: 600; font-size: 14px; color: #475569;">Your message:</p>
+              <p style="margin: 8px 0 0 0; color: #64748b; font-style: italic; white-space: pre-wrap;">${message}</p>
+            </div>
+            
+            <p style="margin-top: 24px;">Best regards,<br/><strong>Suryachalam V M</strong></p>
+            <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 32px 0;" />
+            <p style="font-size: 11px; color: #94a3b8; text-align: center;">
+              This conversation is managed via Surya's Recruiter CRM. You can reply directly to this email to thread future messages.
+            </p>
           </div>
         `,
       });
 
-      // Confirm to sender
+      // Save the email message ID of this confirmation email
+      // We will match inbound replies' In-Reply-To header with this ID!
+      if (confirmEmail.data?.id) {
+        await prisma.message.update({
+          where: { id: dbMessage.id },
+          data: { emailMessageId: confirmEmail.data.id },
+        });
+      }
+
+      // 2. Notify Surya
       await resend.emails.send({
-        from: 'Surya <onboarding@resend.dev>',
-        to: [email],
-        subject: `Got your message, ${name}!`,
+        from: fromDomain,
+        to: ['suryachalam18@gmail.com'],
+        replyTo: email,
+        subject: `[CRM] New Thread: ${name} (${company || 'No Company'}) - ${subject}`,
         html: `
-          <div style="font-family: sans-serif; max-width: 600px;">
-            <h2 style="color: #6366f1;">Thanks for reaching out!</h2>
-            <p>Hi ${name},</p>
-            <p>I received your message and will get back to you as soon as possible.</p>
-            <blockquote style="border-left: 3px solid #6366f1; padding-left: 1rem; color: #64748b;">
-              ${message}
-            </blockquote>
-            <p>Best,<br/>Surya</p>
+          <div style="font-family: sans-serif; max-width: 600px; color: #1e293b;">
+            <h2 style="color: #6366f1; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px;">New CRM Lead</h2>
+            <p><strong>Recruiter Name:</strong> ${name}</p>
+            <p><strong>Email:</strong> ${email}</p>
+            <p><strong>Company:</strong> ${company || 'N/A'}</p>
+            <p><strong>Role:</strong> ${role || 'N/A'}</p>
+            <p><strong>LinkedIn:</strong> ${linkedin || 'N/A'}</p>
+            <p><strong>Subject:</strong> ${subject}</p>
+            <div style="background: #f1f5f9; padding: 15px; border-radius: 8px; margin-top: 20px; white-space: pre-wrap;">${message}</div>
+            <p style="margin-top: 25px;">
+              <a href="${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3001'}/admin/crm?id=${contact.id}" 
+                 style="background: #6366f1; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">
+                Open in CRM Dashboard
+              </a>
+            </p>
           </div>
         `,
       });
     }
 
-    return Response.json({ success: true });
+    return Response.json({ success: true, contactId: contact.id });
   } catch (err) {
     console.error('Contact API error:', err);
     return Response.json({ error: 'Internal server error.' }, { status: 500 });

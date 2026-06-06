@@ -159,7 +159,7 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
 
     openTlRef.current = tl;
     return tl;
-  }, [position]);
+  }, []);
 
   const playOpen = useCallback(() => {
     if (busyRef.current) return;
@@ -302,6 +302,26 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [closeOnClickAway, open, closeMenu]);
 
+  React.useEffect(() => {
+    if (isFixed && open) {
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      
+      const lenis = (window as any).__lenis;
+      if (lenis && typeof lenis.stop === "function") {
+        lenis.stop();
+      }
+
+      return () => {
+        document.body.style.overflow = originalOverflow;
+        const lenis = (window as any).__lenis;
+        if (lenis && typeof lenis.start === "function") {
+          lenis.start();
+        }
+      };
+    }
+  }, [open, isFixed]);
+
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     if (href.startsWith('#')) {
       e.preventDefault();
@@ -311,7 +331,7 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
   };
 
   return (
-    <div className={`sm-scope ${isFixed ? 'fixed top-0 left-0 w-screen h-screen overflow-hidden' : 'w-full h-full'} z-40`}>
+    <div className={`sm-scope ${isFixed ? 'fixed top-0 left-0 w-screen h-screen overflow-hidden' : 'w-full h-full'} z-40 ${open ? 'pointer-events-auto' : 'pointer-events-none'}`}>
       <div
         className={(className ? className + ' ' : '') + 'staggered-menu-wrapper pointer-events-none relative w-full h-full z-40'}
         style={{ ['--sm-accent' as any]: accentColor } as React.CSSProperties}

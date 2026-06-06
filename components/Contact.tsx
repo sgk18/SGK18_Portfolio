@@ -10,6 +10,9 @@ type FormState = {
   email: string;
   subject: string;
   message: string;
+  company: string;
+  role: string;
+  linkedin: string;
   hp_field: string; // Honeypot — hidden from real users
 };
 
@@ -24,6 +27,9 @@ export default function Contact() {
     email: "",
     subject: "",
     message: "",
+    company: "",
+    role: "",
+    linkedin: "",
     hp_field: "",
   });
   const [status, setStatus] = useState<SubmitStatus>("idle");
@@ -244,6 +250,51 @@ export default function Contact() {
                     {fieldErrors.email && (
                       <p className="text-rose-400 text-xs mt-1">{fieldErrors.email}</p>
                     )}
+                  </div>
+                </div>
+
+                <div className="grid sm:grid-cols-3 gap-4">
+                  <div>
+                    <label htmlFor="company" className="block text-sm font-medium text-slate-400 mb-1.5">
+                      Company <span className="text-slate-600">(Optional)</span>
+                    </label>
+                    <input
+                      id="contact-company"
+                      name="company"
+                      type="text"
+                      placeholder="e.g. Microsoft"
+                      value={form.company}
+                      onChange={handleChange}
+                      className={inputNormal}
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="role" className="block text-sm font-medium text-slate-400 mb-1.5">
+                      Your Role <span className="text-slate-600">(Optional)</span>
+                    </label>
+                    <input
+                      id="contact-role"
+                      name="role"
+                      type="text"
+                      placeholder="e.g. Tech Recruiter"
+                      value={form.role}
+                      onChange={handleChange}
+                      className={inputNormal}
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="linkedin" className="block text-sm font-medium text-slate-400 mb-1.5">
+                      LinkedIn URL <span className="text-slate-600">(Optional)</span>
+                    </label>
+                    <input
+                      id="contact-linkedin"
+                      name="linkedin"
+                      type="text"
+                      placeholder="linkedin.com/in/..."
+                      value={form.linkedin}
+                      onChange={handleChange}
+                      className={inputNormal}
+                    />
                   </div>
                 </div>
 

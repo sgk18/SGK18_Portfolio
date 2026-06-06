@@ -7,15 +7,54 @@ datasource db {
 }
 
 model Contact {
-  id        String   @id @default(cuid())
-  name      String
-  email     String
-  subject   String
-  message   String
-  status    String   @default("pending")
-  createdAt DateTime @default(now())
+  id            String         @id @default(cuid())
+  name          String
+  email         String         @unique
+  company       String?
+  role          String?
+  linkedin      String?
+  status        String         @default("NEW")
+  source        String?        @default("PORTAL")
+  notes         String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  conversations Conversation[]
 
   @@map("contacts")
+}
+
+model Conversation {
+  id            String    @id @default(cuid())
+  contactId     String
+  contact       Contact   @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  subject       String
+  lastMessageAt DateTime  @default(now())
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  messages      Message[]
+
+  @@map("conversations")
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  senderType     String       // "CONTACT" | "SURYA"
+  content        String
+  emailMessageId String?
+  createdAt      DateTime     @default(now())
+
+  @@map("messages")
+}
+
+model ActivityLog {
+  id        String   @id @default(cuid())
+  action    String
+  metadata  String?  // JSON stringified metadata
+  createdAt DateTime @default(now())
+
+  @@map("activity_logs")
 }
 
 model Visit {

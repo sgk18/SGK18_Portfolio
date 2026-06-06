@@ -13,7 +13,7 @@ import VisitTracker from "@/components/VisitTracker";
 
 export default function Home() {
   return (
-    <main className="relative">
+    <main className="relative overflow-x-hidden w-full">
       <VisitTracker />
       <Navbar />
       <Hero />

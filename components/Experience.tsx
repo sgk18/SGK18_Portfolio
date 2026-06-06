@@ -57,7 +57,7 @@ export default function Experience() {
           transition={{ duration: 0.6 }}
           className="mb-16"
         >
-          <p className="text-indigo-400 font-mono text-sm font-medium mb-2">04. Experience</p>
+          <p className="text-indigo-400 font-mono text-sm font-medium mb-2">03. Experience</p>
           <h2 className="text-4xl md:text-5xl font-bold text-slate-100">
             Where I&apos;ve{" "}
             <span className="gradient-text">worked</span>

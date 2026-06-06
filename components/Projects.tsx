@@ -169,7 +169,7 @@ export default function Projects() {
             transition={{ duration: 0.6 }}
             className="mb-16"
           >
-            <p className="text-indigo-400 font-mono text-sm font-medium mb-2">03. Projects</p>
+            <p className="text-indigo-400 font-mono text-sm font-medium mb-2">04. Projects</p>
             <h2 className="text-4xl md:text-5xl font-bold text-slate-100">
               Things I&apos;ve{" "}
               <span className="gradient-text">built</span>

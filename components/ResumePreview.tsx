@@ -15,8 +15,10 @@ export default function ResumePreview() {
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      setOrigin(window.location.origin);
-      setPdfVersion(Date.now());
+      queueMicrotask(() => {
+        setOrigin(window.location.origin);
+        setPdfVersion(Date.now());
+      });
     }
   }, []);
 
@@ -40,7 +42,7 @@ export default function ResumePreview() {
           transition={{ duration: 0.6 }}
           className="mb-12"
         >
-          <p className="text-indigo-400 font-mono text-sm font-medium mb-2">05. Resume</p>
+          <p className="text-indigo-400 font-mono text-sm font-medium mb-2">07. Resume</p>
           <h2 className="text-4xl md:text-5xl font-bold text-slate-100">
             Interactive{" "}
             <span className="gradient-text">Preview</span>
