@@ -280,6 +280,19 @@ export default function CRMDashboard() {
     await fetchActivityLogs();
   };
 
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    verifyAuth(password);
+  };
+
+  const handleSignOut = () => {
+    localStorage.removeItem("portfolio_crm_pw");
+    setAuthed(false);
+    setPassword("");
+    setContacts([]);
+    setActiveContact(null);
+  };
+
   // ─── Actions ────────────────────────────────────────────────────────────────
   const handleStatusChange = async (status: string) => {
     if (!activeContact) return;
