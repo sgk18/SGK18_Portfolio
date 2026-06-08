@@ -25,7 +25,7 @@ export default function ResumePreview() {
   // Compute Google Docs viewer URL based on current deployment
   // Falling back to the Vercel domain if on localhost
   const publicPdfUrl = origin.includes("localhost") || origin.includes("127.0.0.1")
-    ? `https://sgk-18-portfolio.vercel.app/resume.pdf?v=${pdfVersion}`
+    ? `https://suryachalam.vercel.app/resume.pdf?v=${pdfVersion}`
     : `${origin}/resume.pdf?v=${pdfVersion}`;
 
   const googleViewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(publicPdfUrl)}&embedded=true`;

@@ -23,6 +23,12 @@ const certifications = [
     iconName: "code"
   },
   {
+    name: "HackerRank SQL Basic",
+    issuer: "HackerRank",
+    details: "Verified proficiency in simple queries, relationships, and aggregations",
+    iconName: "database"
+  },
+  {
     name: "C Programming",
     issuer: "Infosys Springboard",
     details: "Foundational software development, memory management, and systems building in C",
