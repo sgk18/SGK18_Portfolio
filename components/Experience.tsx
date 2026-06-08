@@ -1,9 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { useInView } from "framer-motion";
-import { useRef } from "react";
-import { Briefcase, Calendar, MapPin } from "lucide-react";
+import ScrollReveal from "./ScrollReveal";
 
 type Job = {
   title: string;
@@ -44,103 +41,65 @@ const jobs: Job[] = [
 ];
 
 export default function Experience() {
-  const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-80px" });
-
   return (
-    <section id="experience" className="section-padding">
-      <div className="max-w-7xl mx-auto">
-        <motion.div
-          ref={ref}
-          initial={{ opacity: 0, y: 20 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6 }}
-          className="mb-16"
-        >
-          <p className="text-indigo-400 font-mono text-sm font-medium mb-2">03. Experience</p>
-          <h2 className="text-4xl md:text-5xl font-bold text-slate-100">
-            Where I&apos;ve{" "}
-            <span className="gradient-text">worked</span>
-          </h2>
-        </motion.div>
+    <section id="experience" className="section-padding bg-white border-b-2 border-[#0A0A0A]">
+      <ScrollReveal>
+        <div className="max-w-7xl mx-auto">
+          {/* Section header */}
+          <div className="flex items-center gap-3 mb-10">
+            <span className="w-4 h-4 bg-[#E3000F] border-2 border-[#0A0A0A] inline-block" />
+            <h2 className="font-black text-3xl md:text-4xl uppercase tracking-tight text-[#0A0A0A]">EXPERIENCE</h2>
+          </div>
 
-        {/* Timeline */}
-        <div className="relative">
-          {/* Vertical line */}
-          <div className="absolute left-[7px] md:left-1/2 md:-translate-x-px top-0 bottom-0 w-px bg-gradient-to-b from-indigo-500/60 via-indigo-500/20 to-transparent" />
-
-          <div className="flex flex-col gap-12">
+          {/* Timeline container */}
+          <div className="relative border-l-4 border-[#E3000F] pl-6 ml-2 space-y-10">
             {jobs.map((job, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, x: i % 2 === 0 ? -30 : 30 }}
-                animate={inView ? { opacity: 1, x: 0 } : {}}
-                transition={{ duration: 0.6, delay: i * 0.15 }}
-                className={`relative grid md:grid-cols-2 gap-6 md:gap-12 ${
-                  i % 2 !== 0 ? "md:[&>*:first-child]:col-start-2" : ""
-                }`}
-              >
+              <div key={i} className="relative">
                 {/* Timeline dot */}
-                <div
-                  className={`absolute top-6 left-0 md:left-1/2 md:-translate-x-1/2 w-3.5 h-3.5 rounded-full bg-indigo-500 border-2 border-[var(--background)] z-10 shadow-[0_0_0_4px_rgba(99,102,241,0.15)]`}
-                />
+                <div className="absolute -left-[32px] top-6 w-3 h-3 bg-[#E3000F] border-2 border-[#0A0A0A] rounded-none" />
 
-                {/* Card */}
-                <div
-                  className={`ml-8 md:ml-0 ${
-                    i % 2 === 0 ? "md:pr-12 md:text-right" : "md:col-start-2 md:pl-12"
-                  }`}
-                >
-                  <div className="card-bg rounded-2xl p-6 hover:border-indigo-500/30 transition-colors group">
-                    {/* Header */}
-                    <div className={`mb-4 ${i % 2 === 0 ? "md:text-right" : ""}`}>
-                      <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-medium mb-3">
-                        <Briefcase size={11} />
+                {/* Experience card */}
+                <div className="border-2 border-[#0A0A0A] bg-[#FFF5F5] p-5 shadow-[5px_5px_0px_#0A0A0A] hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[7px_7px_0px_#0A0A0A] rounded-none transition-all">
+                  {/* Header */}
+                  <div className="flex flex-col md:flex-row md:items-start justify-between gap-3 mb-4">
+                    <div>
+                      <span className="inline-block px-2 py-0.5 border border-[#0A0A0A] bg-white text-xs font-mono font-bold text-[#0A0A0A] shadow-[1.5px_1.5px_0px_#0A0A0A] mb-2">
                         {job.type}
-                      </div>
-                      <h3 className="text-lg font-bold text-slate-100">{job.title}</h3>
-                      <p className="text-indigo-400 font-medium text-sm">{job.company}</p>
+                      </span>
+                      <h3 className="font-black uppercase text-lg text-[#0A0A0A] leading-snug">
+                        {job.company}
+                      </h3>
+                      <p className="font-mono text-sm text-[#E3000F] font-bold mt-0.5">
+                        {job.title}
+                      </p>
                     </div>
 
-                    {/* Meta */}
-                    <div
-                      className={`flex flex-wrap gap-3 text-xs text-slate-500 mb-5 ${
-                        i % 2 === 0 ? "md:justify-end" : ""
-                      }`}
-                    >
-                      <span className="flex items-center gap-1">
-                        <Calendar size={11} />
+                    <div className="flex flex-col gap-1.5 md:items-end shrink-0">
+                      <span className="border-2 border-[#0A0A0A] bg-white font-mono text-xs px-2 py-0.5 shadow-[2px_2px_0px_#0A0A0A] text-[#0A0A0A] font-bold whitespace-nowrap">
                         {job.dates}
                       </span>
-                      <span className="flex items-center gap-1">
-                        <MapPin size={11} />
+                      <span className="text-xs text-[#666666] font-mono">
                         {job.location}
                       </span>
                     </div>
-
-                    {/* Achievements */}
-                    <ul
-                      className={`space-y-2.5 ${i % 2 === 0 ? "md:text-right" : ""}`}
-                    >
-                      {job.achievements.map((point, pi) => (
-                        <li
-                          key={pi}
-                          className={`flex gap-3 text-sm text-slate-400 ${
-                            i % 2 === 0 ? "md:flex-row-reverse" : ""
-                          }`}
-                        >
-                          <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-indigo-500 shrink-0" />
-                          <span>{point}</span>
-                        </li>
-                      ))}
-                    </ul>
                   </div>
+
+                  {/* Achievements */}
+                  <ul className="space-y-2.5 text-[#3a3a3a] text-sm font-medium">
+                    {job.achievements.map((point, pi) => (
+                      <li key={pi} className="flex gap-2.5 items-start">
+                        <span className="text-[#E3000F] font-bold shrink-0 mt-0.5">■</span>
+                        <span>{point}</span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-              </motion.div>
+              </div>
             ))}
           </div>
         </div>
-      </div>
+      </ScrollReveal>
     </section>
   );
 }
+

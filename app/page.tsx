@@ -5,6 +5,7 @@ import Skills from "@/components/Skills";
 import Experience from "@/components/Experience";
 import Projects from "@/components/Projects";
 import GitHubStats from "@/components/GitHubStats";
+import Certifications from "@/components/Certifications";
 import Philosophy from "@/components/Philosophy";
 import ResumePreview from "@/components/ResumePreview";
 import Contact from "@/components/Contact";
@@ -22,6 +23,7 @@ export default function Home() {
       <Experience />
       <Projects />
       <GitHubStats />
+      <Certifications />
       <Philosophy />
       <ResumePreview />
       <Contact />
@@ -29,3 +31,4 @@ export default function Home() {
     </main>
   );
 }
+

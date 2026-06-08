@@ -8,6 +8,7 @@ import Image from "next/image";
 import { Github, ExternalLink, BookOpen } from "lucide-react";
 import CaseStudyModal from "./CaseStudyModal";
 import { caseStudies, CaseStudy } from "@/data/caseStudies";
+import ScrollReveal from "./ScrollReveal";
 
 type Project = {
   id: string;
@@ -152,7 +153,6 @@ function trackProjectView(projectId: string) {
 
 export default function Projects() {
   const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-80px" });
   const [activeStudy, setActiveStudy] = useState<CaseStudy | null>(null);
   const [showAll, setShowAll] = useState(false);
 
@@ -160,155 +160,152 @@ export default function Projects() {
 
   return (
     <>
-      <section id="projects" className="section-padding bg-[var(--card)]/30">
-        <div className="max-w-7xl mx-auto">
-          <motion.div
-            ref={ref}
-            initial={{ opacity: 0, y: 20 }}
-            animate={inView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.6 }}
-            className="mb-16"
-          >
-            <p className="text-indigo-400 font-mono text-sm font-medium mb-2">04. Projects</p>
-            <h2 className="text-4xl md:text-5xl font-bold text-slate-100">
-              Things I&apos;ve{" "}
-              <span className="gradient-text">built</span>
-            </h2>
-            <p className="text-slate-400 mt-4 max-w-2xl leading-relaxed">
+      <section id="projects" className="section-padding bg-[#FFF5F5] border-b-2 border-[#0A0A0A]">
+        <ScrollReveal>
+          <div className="max-w-7xl mx-auto">
+            {/* Section header */}
+            <div className="flex items-center gap-3 mb-10">
+              <span className="w-4 h-4 bg-[#E3000F] border-2 border-[#0A0A0A] inline-block" />
+              <h2 className="font-black text-3xl md:text-4xl uppercase tracking-tight text-[#0A0A0A]">PROJECTS</h2>
+            </div>
+            
+            <p className="text-[#3a3a3a] font-medium mt-[-20px] mb-12 max-w-2xl leading-relaxed">
               Featured projects include detailed engineering case studies — click{" "}
-              <span className="text-indigo-400">View Case Study</span> to explore architecture decisions, database design, and technical challenges.
+              <span className="text-[#E3000F] font-bold">View Case Study</span> to explore architecture decisions, database design, and technical challenges.
             </p>
-          </motion.div>
 
-          <div className="grid md:grid-cols-2 gap-6">
-            {visibleProjects.map((project, i) => (
-              <motion.article
-                key={project.id}
-                initial={{ opacity: 0, y: 30 }}
-                animate={inView ? { opacity: 1, y: 0 } : {}}
-                transition={{ duration: 0.5, delay: (i % 6) * 0.08 }}
-                className="card-bg rounded-2xl overflow-hidden group hover:border-indigo-500/30 hover:-translate-y-1 transition-all duration-300"
-              >
-                {/* Project image */}
-                <div className={`relative w-full aspect-video overflow-hidden ${project.imageBg ?? "bg-[var(--card)]"}`}>
-                  <Image
-                    src={project.image}
-                    alt={project.title}
-                    fill
-                    className={`${
-                      project.imageFit === "contain"
-                        ? "object-contain p-6"
-                        : "object-cover object-top group-hover:scale-105"
-                    } opacity-80 group-hover:opacity-100 transition-all duration-500`}
-                    sizes="(max-width: 768px) 100vw, 50vw"
-                    quality={90}
-                  />
-                  {project.featured && (
-                    <div className="absolute top-3 left-3 px-2 py-1 rounded-full bg-indigo-500/80 backdrop-blur-sm text-white text-[10px] font-semibold uppercase tracking-wider border border-indigo-400/30">
-                      Featured
-                    </div>
-                  )}
-                  {project.hasCaseStudy && (
-                    <div className="absolute top-3 right-3 px-2 py-1 rounded-full bg-black/60 backdrop-blur-sm text-indigo-300 text-[10px] font-semibold uppercase tracking-wider border border-indigo-500/30 flex items-center gap-1">
-                      <BookOpen size={9} />
-                      Case Study
-                    </div>
-                  )}
-                </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {visibleProjects.map((project, i) => (
+                <article
+                  key={project.id}
+                  className="bg-white border-2 border-[#0A0A0A] border-t-4 border-t-[#E3000F] 
+                             shadow-[6px_6px_0px_#0A0A0A] hover:-translate-x-1 hover:-translate-y-1 
+                             hover:shadow-[10px_10px_0px_#0A0A0A] transition-all p-5 flex flex-col gap-4 rounded-none"
+                >
+                  {/* Project image */}
+                  <div className={`relative w-full aspect-video overflow-hidden border-2 border-[#0A0A0A] ${project.imageBg ?? "bg-white"}`}>
+                    <Image
+                      src={project.image}
+                      alt={project.title}
+                      fill
+                      className={`${
+                        project.imageFit === "contain"
+                          ? "object-contain p-4"
+                          : "object-cover object-top"
+                      } transition-all duration-300`}
+                      sizes="(max-width: 768px) 100vw, 33vw"
+                      quality={90}
+                    />
+                    {project.featured && (
+                      <div className="absolute top-2 left-2 px-2 py-0.5 border border-[#0A0A0A] bg-[#E3000F] text-white text-[9px] font-bold uppercase tracking-wider shadow-[1.5px_1.5px_0px_#0A0A0A]">
+                        Featured
+                      </div>
+                    )}
+                    {project.hasCaseStudy && (
+                      <div className="absolute top-2 right-2 px-2 py-0.5 border border-[#0A0A0A] bg-white text-[#0A0A0A] text-[9px] font-bold uppercase tracking-wider shadow-[1.5px_1.5px_0px_#0A0A0A] flex items-center gap-1">
+                        <BookOpen size={9} />
+                        Case Study
+                      </div>
+                    )}
+                  </div>
 
-                {/* Content */}
-                <div className="p-6">
-                  <div className="flex items-start justify-between gap-3 mb-3">
-                    <h3 className="text-lg font-bold text-slate-100 group-hover:text-indigo-300 transition-colors">
-                      {project.title}
-                    </h3>
-                    <div className="flex items-center gap-2 shrink-0">
-                      <a
-                        href={project.github}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        aria-label="GitHub"
-                        className="p-1.5 rounded-lg text-slate-500 hover:text-slate-200 hover:bg-white/5 transition-colors"
-                      >
-                        <Github size={16} />
-                      </a>
-                      {project.live !== "#" && (
-                        <a
-                          href={project.live}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          aria-label="Live site"
-                          className="p-1.5 rounded-lg text-slate-500 hover:text-slate-200 hover:bg-white/5 transition-colors"
+                  {/* Content */}
+                  <div className="flex flex-col flex-1 justify-between gap-3">
+                    <div className="space-y-2">
+                      <div className="flex items-start justify-between gap-2">
+                        <h3 className="font-black text-lg uppercase text-[#0A0A0A]">
+                          {project.title}
+                        </h3>
+                        <div className="flex items-center gap-2 shrink-0">
+                          <a
+                            href={project.github}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            aria-label="GitHub"
+                            className="p-1.5 border-2 border-[#0A0A0A] bg-white hover:bg-[#FFF5F5] shadow-[2px_2px_0px_#0A0A0A] hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[3px_3px_0px_#0A0A0A] transition-all rounded-none text-[#0A0A0A]"
+                          >
+                            <Github size={14} />
+                          </a>
+                          {project.live !== "#" && (
+                            <a
+                              href={project.live}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              aria-label="Live site"
+                              className="p-1.5 border-2 border-[#0A0A0A] bg-[#E3000F] text-white hover:bg-[#FF1A1A] shadow-[2px_2px_0px_#0A0A0A] hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[3px_3px_0px_#0A0A0A] transition-all rounded-none"
+                            >
+                              <ExternalLink size={14} />
+                            </a>
+                          )}
+                        </div>
+                      </div>
+
+                      <p className="font-medium text-sm text-[#3a3a3a] leading-relaxed">
+                        {project.description}
+                      </p>
+                    </div>
+
+                    <div className="space-y-4 pt-2">
+                      {/* Tags */}
+                      <div className="flex flex-wrap gap-1.5">
+                        {project.tags.map((tag) => (
+                          <span
+                            key={tag}
+                            className="border-2 border-[#0A0A0A] bg-white text-[#0A0A0A] px-2 py-0.5 
+                                       font-mono text-xs font-bold shadow-[1.5px_1.5px_0px_#0A0A0A] 
+                                       hover:bg-[#E3000F] hover:text-white hover:-translate-x-0.5 
+                                       hover:-translate-y-0.5 hover:shadow-[3.5px_3.5px_0px_#0A0A0A] 
+                                       transition-all cursor-default rounded-none inline-block"
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+
+                      {/* Case Study CTA */}
+                      {project.hasCaseStudy && caseStudies[project.id] && (
+                        <button
+                          id={`case-study-btn-${project.id}`}
+                          onClick={() => {
+                            setActiveStudy(caseStudies[project.id]);
+                            trackProjectView(project.id);
+                          }}
+                          className="flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-[#E3000F] hover:underline group/cs cursor-pointer"
                         >
-                          <ExternalLink size={16} />
-                        </a>
+                          <BookOpen size={13} />
+                          View Engineering Case Study
+                          <span className="group-hover/cs:translate-x-0.5 transition-transform inline-block">→</span>
+                        </button>
                       )}
                     </div>
                   </div>
+                </article>
+              ))}
+            </div>
 
-                  <p className="text-slate-400 text-sm leading-relaxed mb-5">
-                    {project.description}
-                  </p>
-
-                  {/* Tags */}
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {project.tags.map((tag) => (
-                      <span
-                        key={tag}
-                        className="px-2.5 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-medium"
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-
-                  {/* Case Study CTA */}
-                  {project.hasCaseStudy && caseStudies[project.id] && (
-                    <button
-                      id={`case-study-btn-${project.id}`}
-                      onClick={() => {
-                        setActiveStudy(caseStudies[project.id]);
-                        trackProjectView(project.id);
-                      }}
-                      className="flex items-center gap-2 text-xs font-semibold text-indigo-400 hover:text-indigo-300 transition-colors group/cs"
-                    >
-                      <BookOpen size={13} />
-                      View Engineering Case Study
-                      <span className="group-hover/cs:translate-x-0.5 transition-transform inline-block">→</span>
-                    </button>
-                  )}
-                </div>
-              </motion.article>
-            ))}
-          </div>
-
-          {/* Show more/less */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={inView ? { opacity: 1 } : {}}
-            transition={{ delay: 0.6 }}
-            className="text-center mt-10 flex flex-col sm:flex-row gap-3 justify-center"
-          >
-            {!showAll && projects.length > 6 && (
-              <button
-                id="show-more-projects-btn"
-                onClick={() => setShowAll(true)}
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border border-[var(--border)] text-slate-400 text-sm font-medium hover:border-indigo-500/40 hover:text-indigo-400 hover:bg-indigo-500/5 transition-all duration-200"
+            {/* Show more/less */}
+            <div className="text-center mt-12 flex flex-col sm:flex-row gap-4 justify-center">
+              {!showAll && projects.length > 6 && (
+                <button
+                  id="show-more-projects-btn"
+                  onClick={() => setShowAll(true)}
+                  className="bg-white text-[#0A0A0A] border-2 border-[#0A0A0A] px-6 py-3 font-bold uppercase shadow-[4px_4px_0px_#0A0A0A] hover:bg-[#FFF5F5] hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[7px_7px_0px_#0A0A0A] rounded-none transition-all cursor-pointer text-sm"
+                >
+                  Show All Projects ({projects.length - 6} more)
+                </button>
+              )}
+              <a
+                href="https://github.com/sgk18"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-white text-[#0A0A0A] border-2 border-[#0A0A0A] px-6 py-3 font-bold uppercase shadow-[4px_4px_0px_#0A0A0A] hover:bg-[#FFF5F5] hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[7px_7px_0px_#0A0A0A] rounded-none transition-all text-sm flex items-center justify-center gap-2"
               >
-                Show All Projects ({projects.length - 6} more)
-              </button>
-            )}
-            <a
-              href="https://github.com/sgk18"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border border-[var(--border)] text-slate-400 text-sm font-medium hover:border-indigo-500/40 hover:text-indigo-400 hover:bg-indigo-500/5 transition-all duration-200"
-            >
-              <Github size={16} />
-              View more on GitHub
-            </a>
-          </motion.div>
-        </div>
+                <Github size={16} />
+                View more on GitHub
+              </a>
+            </div>
+          </div>
+        </ScrollReveal>
       </section>
 
       <CaseStudyModal study={activeStudy} onClose={() => setActiveStudy(null)} />

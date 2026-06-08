@@ -90,15 +90,15 @@ export default function Hero() {
   return (
     <section
       id="hero"
-      className="relative min-h-screen flex flex-col items-center justify-center px-6 overflow-hidden"
+      className="relative min-h-screen flex flex-col items-center justify-center px-6 overflow-hidden bg-white border-b-2 border-[#0A0A0A] pt-16"
     >
       {/* Hyperspeed WebGL background */}
       <div className="absolute inset-0">
         <Hyperspeed effectOptions={effectOptions} />
       </div>
 
-      {/* Dark overlay */}
-      <div className="absolute inset-0 bg-black/50 pointer-events-none" />
+      {/* Light overlay for readability in Neobrutalism light mode */}
+      <div className="absolute inset-0 bg-white/75 pointer-events-none" />
 
       <div className="relative z-10 max-w-4xl mx-auto text-center">
         {/* Status badge */}
@@ -107,9 +107,9 @@ export default function Hero() {
           initial="hidden"
           animate="show"
           custom={0}
-          className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-black/40 backdrop-blur-sm border border-slate-700/60 text-slate-400 text-xs font-mono mb-10"
+          className="inline-flex items-center gap-2.5 px-3 py-1 border-2 border-[#0A0A0A] bg-[#FFF5F5] font-mono text-xs font-bold text-[#0A0A0A] shadow-[3px_3px_0px_#0A0A0A] mb-10 rounded-none"
         >
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+          <span className="w-2.5 h-2.5 bg-emerald-500 border border-[#0A0A0A] shrink-0" />
           Product Engineering Intern @ SOCIO · Bengaluru, India
         </motion.div>
 
@@ -119,9 +119,9 @@ export default function Hero() {
           initial="hidden"
           animate="show"
           custom={1}
-          className="text-5xl md:text-7xl font-extrabold tracking-tight mb-5 leading-[1.08]"
+          className="text-5xl md:text-7xl font-black uppercase tracking-tighter text-[#0A0A0A] mb-5 leading-[1.08]"
         >
-          <span className="text-slate-100">Suryachalam V M</span>
+          Suryachalam <span className="text-[#E3000F]">V M</span>
         </motion.h1>
 
         {/* Engineering positioning */}
@@ -130,7 +130,7 @@ export default function Hero() {
           initial="hidden"
           animate="show"
           custom={2}
-          className="text-xl md:text-2xl font-semibold tracking-wide gradient-text mb-5"
+          className="text-lg md:text-xl font-bold uppercase tracking-wide text-[#E3000F] mb-5"
         >
           Product Engineer · Full-Stack · Systems Builder
         </motion.p>
@@ -141,12 +141,12 @@ export default function Hero() {
           initial="hidden"
           animate="show"
           custom={3}
-          className="text-base md:text-lg text-slate-400 max-w-2xl mx-auto leading-relaxed mb-10"
+          className="text-base md:text-lg text-[#0A0A0A] font-medium max-w-2xl mx-auto leading-relaxed mb-10"
         >
           I build production systems — not tutorial projects. Offline-first mobile, caching layers,
           push infrastructure, and role-based platforms that hold up under load.
           Currently shipping real features for real users at{" "}
-          <span className="text-slate-200 font-medium">SOCIO</span>.
+          <span className="font-bold underline decoration-[#E3000F] decoration-2">SOCIO</span>.
         </motion.p>
 
         {/* Focus Areas */}
@@ -155,12 +155,12 @@ export default function Hero() {
           initial="hidden"
           animate="show"
           custom={4}
-          className="flex flex-wrap justify-center gap-2 mb-10"
+          className="flex flex-wrap justify-center gap-2.5 mb-10"
         >
           {focusAreas.map((area) => (
             <span
               key={area}
-              className="px-3 py-1.5 text-xs font-mono rounded-full bg-slate-900/70 backdrop-blur-sm border border-slate-700/60 text-slate-400"
+              className="border-2 border-[#0A0A0A] bg-white text-[#0A0A0A] px-3 py-1.5 font-mono text-xs font-bold shadow-[3px_3px_0px_#0A0A0A] rounded-none cursor-default"
             >
               {area}
             </span>
@@ -173,30 +173,32 @@ export default function Hero() {
           initial="hidden"
           animate="show"
           custom={5}
-          className="flex flex-col sm:flex-row gap-3 justify-center items-center mb-10"
+          className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-10"
         >
           <button
             id="hero-view-work-btn"
             onClick={() => smoothScrollTo("#projects")}
-            className="group flex items-center gap-2 px-6 py-3.5 rounded-xl bg-indigo-500 hover:bg-indigo-600 text-white font-semibold text-sm transition-all duration-200 shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 hover:-translate-y-0.5"
+            className="group flex items-center gap-2 bg-[#E3000F] text-white border-2 border-[#0A0A0A] font-bold uppercase px-6 py-3.5 shadow-[4px_4px_0px_#0A0A0A] hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[7px_7px_0px_#0A0A0A] rounded-none transition-all cursor-pointer"
           >
             View Projects & Case Studies
             <ArrowRight size={15} className="group-hover:translate-x-0.5 transition-transform" />
           </button>
+          
           <a
             id="hero-resume-download-btn"
             href="/resume.pdf"
             download="Suryachalam_VM_Resume.pdf"
             onClick={() => fetch('/api/analytics/download', { method: 'POST' }).catch(() => {})}
-            className="group flex items-center gap-2 px-6 py-3.5 rounded-xl border border-slate-700/60 bg-black/30 backdrop-blur-sm text-slate-300 font-semibold text-sm hover:border-indigo-500/50 hover:text-indigo-300 hover:bg-indigo-500/5 transition-all duration-200 hover:-translate-y-0.5"
+            className="group flex items-center gap-2 bg-white text-[#0A0A0A] border-2 border-[#0A0A0A] font-bold uppercase px-6 py-3.5 shadow-[4px_4px_0px_#0A0A0A] hover:bg-[#FFF5F5] hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[7px_7px_0px_#0A0A0A] rounded-none transition-all"
           >
             <Download size={15} />
             Download Resume
           </a>
+
           <button
             id="hero-contact-btn"
             onClick={() => smoothScrollTo("#contact")}
-            className="group flex items-center gap-2 px-6 py-3.5 rounded-xl border border-slate-700/60 bg-black/30 backdrop-blur-sm text-slate-300 font-semibold text-sm hover:border-slate-500/60 hover:text-slate-100 transition-all duration-200 hover:-translate-y-0.5"
+            className="group flex items-center gap-2 bg-white text-[#0A0A0A] border-2 border-[#0A0A0A] font-bold uppercase px-6 py-3.5 shadow-[4px_4px_0px_#0A0A0A] hover:bg-[#FFF5F5] hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[7px_7px_0px_#0A0A0A] rounded-none transition-all cursor-pointer"
           >
             <Mail size={15} />
             Get in Touch
@@ -219,10 +221,10 @@ export default function Hero() {
               target={s.href.startsWith("mailto") ? undefined : "_blank"}
               rel="noopener noreferrer"
               aria-label={s.label}
-              className="flex items-center gap-2 text-slate-500 hover:text-slate-200 text-sm transition-colors duration-200"
+              className="flex items-center gap-2 border-2 border-[#0A0A0A] p-2 bg-white text-[#0A0A0A] shadow-[3px_3px_0px_#0A0A0A] hover:bg-[#E3000F] hover:text-white hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[5px_5px_0px_#0A0A0A] transition-all rounded-none font-bold text-xs"
             >
               {s.icon}
-              <span className="hidden sm:inline">{s.label}</span>
+              <span>{s.label}</span>
             </a>
           ))}
         </motion.div>

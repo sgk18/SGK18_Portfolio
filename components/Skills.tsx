@@ -1,20 +1,17 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { useInView } from "framer-motion";
-import { useRef } from "react";
 import {
   Code2,
   Smartphone,
   Server,
   Wrench,
 } from "lucide-react";
+import ScrollReveal from "./ScrollReveal";
 
 type Skill = { name: string };
 type Category = {
   title: string;
   icon: React.ReactNode;
-  color: string;
   skills: Skill[];
 };
 
@@ -22,7 +19,6 @@ const categories: Category[] = [
   {
     title: "Languages",
     icon: <Code2 size={16} />,
-    color: "from-blue-500/20 to-indigo-500/20 border-indigo-500/20",
     skills: [
       { name: "TypeScript" },
       { name: "JavaScript" },
@@ -37,7 +33,6 @@ const categories: Category[] = [
   {
     title: "Frontend & Mobile",
     icon: <Smartphone size={16} />,
-    color: "from-pink-500/20 to-rose-500/20 border-pink-500/20",
     skills: [
       { name: "React" },
       { name: "Next.js" },
@@ -51,7 +46,6 @@ const categories: Category[] = [
   {
     title: "Backend & Infra",
     icon: <Server size={16} />,
-    color: "from-emerald-500/20 to-teal-500/20 border-emerald-500/20",
     skills: [
       { name: "Node.js" },
       { name: "Express" },
@@ -66,7 +60,6 @@ const categories: Category[] = [
   {
     title: "Integrations & Tools",
     icon: <Wrench size={16} />,
-    color: "from-orange-500/20 to-amber-500/20 border-orange-500/20",
     skills: [
       { name: "OCI" },
       { name: "CI/CD" },
@@ -80,69 +73,47 @@ const categories: Category[] = [
   },
 ];
 
-const pillColors: Record<string, string> = {
-  Languages: "bg-indigo-500/10 text-indigo-300 border-indigo-500/20 hover:bg-indigo-500/20",
-  "Frontend & Mobile": "bg-pink-500/10 text-pink-300 border-pink-500/20 hover:bg-pink-500/20",
-  "Backend & Infra": "bg-emerald-500/10 text-emerald-300 border-emerald-500/20 hover:bg-emerald-500/20",
-  "Integrations & Tools": "bg-orange-500/10 text-orange-300 border-orange-500/20 hover:bg-orange-500/20",
-};
-
 export default function Skills() {
-  const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-80px" });
-
   return (
-    <section id="skills" className="section-padding bg-[var(--card)]/30">
-      <div className="max-w-7xl mx-auto">
-        <motion.div
-          ref={ref}
-          initial={{ opacity: 0, y: 20 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6 }}
-          className="mb-16"
-        >
-          <p className="text-indigo-400 font-mono text-sm font-medium mb-2">02. Skills</p>
-          <h2 className="text-4xl md:text-5xl font-bold text-slate-100">
-            My{" "}
-            <span className="gradient-text">toolkit</span>
-          </h2>
-        </motion.div>
+    <section id="skills" className="section-padding bg-white border-b-2 border-[#0A0A0A]">
+      <ScrollReveal>
+        <div className="max-w-7xl mx-auto">
+          {/* Section header */}
+          <div className="flex items-center gap-3 mb-10">
+            <span className="w-4 h-4 bg-[#E3000F] border-2 border-[#0A0A0A] inline-block" />
+            <h2 className="font-black text-3xl md:text-4xl uppercase tracking-tight text-[#0A0A0A]">TECH STACK</h2>
+          </div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {categories.map((cat, catI) => (
-            <motion.div
-              key={cat.title}
-              initial={{ opacity: 0, y: 30 }}
-              animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.5, delay: catI * 0.1 }}
-              className={`card-bg rounded-2xl p-6 bg-gradient-to-br ${cat.color} border hover:border-opacity-60 transition-all duration-300`}
-            >
-              <div className="flex items-center gap-2 mb-5">
-                <span className="text-slate-300">{cat.icon}</span>
-                <h3 className="font-semibold text-slate-200 text-sm">{cat.title}</h3>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {categories.map((cat) => (
+              <div
+                key={cat.title}
+                className="border-2 border-[#0A0A0A] bg-white p-6 shadow-[4px_4px_0px_#0A0A0A] hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[6px_6px_0px_#0A0A0A] rounded-none transition-all duration-150"
+              >
+                <div className="flex items-center gap-2 mb-4 pb-2 border-b-2 border-[#0A0A0A]">
+                  <span className="text-[#0A0A0A]">{cat.icon}</span>
+                  <h3 className="font-black uppercase text-[#E3000F] text-xs tracking-widest">{cat.title}</h3>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {cat.skills.map((skill) => (
+                    <span
+                      key={skill.name}
+                      className="border-2 border-[#0A0A0A] bg-white text-[#0A0A0A] px-3 py-1 
+                                 font-mono text-sm font-bold shadow-[3px_3px_0px_#0A0A0A] 
+                                 hover:bg-[#E3000F] hover:text-white hover:-translate-x-0.5 
+                                 hover:-translate-y-0.5 hover:shadow-[5px_5px_0px_#0A0A0A] 
+                                 transition-all cursor-default rounded-none inline-block"
+                    >
+                      {skill.name}
+                    </span>
+                  ))}
+                </div>
               </div>
-              <div className="flex flex-wrap gap-2">
-                {cat.skills.map((skill, skillI) => (
-                  <motion.span
-                    key={skill.name}
-                    initial={{ opacity: 0, scale: 0.85 }}
-                    animate={inView ? { opacity: 1, scale: 1 } : {}}
-                    transition={{
-                      duration: 0.3,
-                      delay: catI * 0.1 + skillI * 0.05,
-                    }}
-                    className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors cursor-default ${
-                      pillColors[cat.title]
-                    }`}
-                  >
-                    {skill.name}
-                  </motion.span>
-                ))}
-              </div>
-            </motion.div>
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
+      </ScrollReveal>
     </section>
   );
 }
+

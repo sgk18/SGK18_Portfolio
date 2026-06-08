@@ -1,8 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { useInView } from "framer-motion";
-import { useRef } from "react";
+import ScrollReveal from "./ScrollReveal";
 
 const principles = [
   {
@@ -38,53 +36,41 @@ const principles = [
 ];
 
 export default function Philosophy() {
-  const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-80px" });
-
   return (
-    <section id="philosophy" className="section-padding bg-[var(--card)]/30">
-      <div className="max-w-7xl mx-auto">
-        <motion.div
-          ref={ref}
-          initial={{ opacity: 0, y: 20 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6 }}
-          className="mb-16"
-        >
-          <p className="text-indigo-400 font-mono text-sm font-medium mb-2">
-            06. Engineering Philosophy
-          </p>
-          <h2 className="text-4xl md:text-5xl font-bold text-slate-100">
-            How I{" "}
-            <span className="gradient-text">think</span>
-          </h2>
-          <p className="text-slate-400 mt-4 max-w-2xl leading-relaxed">
+    <section id="philosophy" className="section-padding bg-white border-b-2 border-[#0A0A0A]">
+      <ScrollReveal>
+        <div className="max-w-7xl mx-auto">
+          {/* Section header */}
+          <div className="flex items-center gap-3 mb-10">
+            <span className="w-4 h-4 bg-[#E3000F] border-2 border-[#0A0A0A] inline-block" />
+            <h2 className="font-black text-3xl md:text-4xl uppercase tracking-tight text-[#0A0A0A]">PHILOSOPHY</h2>
+          </div>
+          
+          <p className="text-[#3a3a3a] font-medium mt-[-20px] mb-12 max-w-2xl leading-relaxed">
             These are the principles that guide every technical decision I make — from database schema design to how I name a function.
           </p>
-        </motion.div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {principles.map((p, i) => (
-            <motion.div
-              key={p.number}
-              initial={{ opacity: 0, y: 30 }}
-              animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.5, delay: i * 0.08 }}
-              className="group card-bg rounded-2xl p-6 hover:border-indigo-500/30 transition-all duration-300 flex flex-col gap-4"
-            >
-              <div className="flex items-start gap-4">
-                <span className="font-mono text-3xl font-bold text-slate-800 group-hover:text-indigo-500/40 transition-colors select-none shrink-0">
-                  {p.number}
-                </span>
-                <h3 className="text-slate-200 font-semibold leading-snug pt-1.5">
-                  {p.title}
-                </h3>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {principles.map((p) => (
+              <div
+                key={p.number}
+                className="group border-2 border-[#0A0A0A] bg-white p-6 shadow-[5px_5px_0px_#0A0A0A] hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[7px_7px_0px_#0A0A0A] rounded-none transition-all duration-150 flex flex-col gap-4"
+              >
+                <div className="flex items-start gap-4">
+                  <span className="font-mono text-3xl font-black text-[#E3000F] select-none shrink-0">
+                    {p.number}
+                  </span>
+                  <h3 className="text-[#0A0A0A] font-black uppercase text-base leading-snug pt-1.5">
+                    {p.title}
+                  </h3>
+                </div>
+                <p className="text-[#3a3a3a] font-medium text-sm leading-relaxed">{p.body}</p>
               </div>
-              <p className="text-slate-400 text-sm leading-relaxed">{p.body}</p>
-            </motion.div>
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
+      </ScrollReveal>
     </section>
   );
 }
+
