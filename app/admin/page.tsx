@@ -1,19 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import {
-  Users,
-  Download,
-  Mail,
-  Eye,
-  BarChart2,
-  RefreshCw,
-  Lock,
-  CheckCircle,
-  Clock,
-  XCircle,
-  LogOut,
-} from "lucide-react";
+import { useState, useCallback } from "react";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 interface AnalyticsSummary {
@@ -43,31 +30,25 @@ interface Contact {
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
-function StatCard({
-  label,
-  value,
-  icon,
-  color,
-}: {
-  label: string;
-  value: number | string;
-  icon: React.ReactNode;
-  color: string;
-}) {
+const formatDate = (dateString: string) => {
+  return new Date(dateString).toLocaleDateString() + " " + new Date(dateString).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+};
+
+const statusColor = {
+  pending: "border-[#FFD700] text-[#FFD700] bg-[#1a1400]",
+  reviewed: "border-[#00FF41] text-[#00FF41] bg-[#001a00]",
+  ignored: "border-[#E3000F] text-[#E3000F] bg-[#1a0000]",
+};
+
+function StatusBadge({ status }: { status: Contact["status"] }) {
   return (
-    <div className="bg-[#0d0d18] rounded-2xl p-6 border border-slate-800">
-      <div className={`inline-flex p-2.5 rounded-xl mb-4 ${color}`}>{icon}</div>
-      <p className="text-3xl font-bold text-slate-100 mb-1">{value}</p>
-      <p className="text-sm text-slate-500">{label}</p>
-    </div>
+    <span
+      className={`font-mono text-xs border px-2 py-0.5 uppercase ${statusColor[status]}`}
+    >
+      {status}
+    </span>
   );
 }
-
-const statusIcons: Record<string, React.ReactNode> = {
-  pending: <Clock size={14} className="text-amber-400" />,
-  reviewed: <CheckCircle size={14} className="text-emerald-400" />,
-  ignored: <XCircle size={14} className="text-slate-500" />,
-};
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function AdminPage() {
@@ -78,7 +59,6 @@ export default function AdminPage() {
   const [analytics, setAnalytics] = useState<AnalyticsSummary | null>(null);
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<"overview" | "contacts">("overview");
 
   const fetchData = useCallback(async (pw: string) => {
     setLoading(true);
@@ -96,7 +76,9 @@ export default function AdminPage() {
 
       if (!analyticsRes.ok || !contactsRes.ok) {
         setAuthed(false);
-        setAuthError(`Server/Database error (Analytics: ${analyticsRes.status}, Contacts: ${contactsRes.status}).`);
+        setAuthError(
+          `Server/Database error (Analytics: ${analyticsRes.status}, Contacts: ${contactsRes.status}).`
+        );
         return;
       }
 
@@ -125,7 +107,9 @@ export default function AdminPage() {
     }
 
     if (!res.ok) {
-      setAuthError(`Server/Database error: ${res.status}. Please check server console logs.`);
+      setAuthError(
+        `Server/Database error: ${res.status}. Please check server console logs.`
+      );
       setLoading(false);
       return;
     }
@@ -143,321 +127,287 @@ export default function AdminPage() {
       },
       body: JSON.stringify({ id, status }),
     });
-    setContacts((prev) => prev.map((c) => (c.id === id ? { ...c, status } : c)));
+    setContacts((prev) =>
+      prev.map((c) => (c.id === id ? { ...c, status } : c))
+    );
   };
 
   // ─── Login Screen ───────────────────────────────────────────────────────────
   if (!authed) {
     return (
-      <div className="min-h-screen bg-[#09090e] flex items-center justify-center px-6">
-        <div className="w-full max-w-sm">
-          <div className="text-center mb-8">
-            <div className="w-12 h-12 mx-auto rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center mb-4">
-              <Lock size={20} className="text-indigo-400" />
+      <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center px-6">
+        <div className="border-2 border-[#E3000F] bg-[#141414] shadow-[6px_6px_0px_#E3000F] p-8 w-full max-w-sm flex flex-col gap-6">
+          <div>
+            <div className="flex items-center gap-3 mb-2">
+              <span className="w-3 h-3 bg-[#E3000F] border border-[#E3000F] inline-block" />
+              <h1 className="font-black text-2xl uppercase text-white tracking-tight">
+                ADMIN ACCESS
+              </h1>
             </div>
-            <h1 className="text-2xl font-bold text-slate-100">Admin Dashboard</h1>
-            <p className="text-slate-500 text-sm mt-1">Recruiter analytics & contact management</p>
+            <p className="font-mono text-xs text-[#888]">
+              Restricted. Authorised personnel only.
+            </p>
           </div>
 
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
-              <label htmlFor="admin-password" className="block text-sm font-medium text-slate-400 mb-1.5">
-                Password
-              </label>
               <input
-                id="admin-password"
                 type="password"
+                className="border-2 border-[#E3000F] bg-[#0A0A0A] text-white font-mono text-sm px-4 py-3 w-full rounded-none focus:outline-none focus:shadow-[4px_4px_0px_#E3000F] placeholder:text-[#444] transition-all"
+                placeholder="ENTER PASSWORD"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter admin password"
-                className="w-full px-4 py-3 rounded-xl bg-[#0d0d18] border border-slate-800 text-slate-200 placeholder-slate-600 text-sm focus:outline-none focus:border-indigo-500/50 focus:ring-2 focus:ring-indigo-500/10 transition-all"
                 required
               />
-              {authError && <p className="text-rose-400 text-xs mt-1.5">{authError}</p>}
             </div>
             <button
               type="submit"
               disabled={loading}
-              className="w-full flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-indigo-500 hover:bg-indigo-600 disabled:bg-indigo-500/50 text-white font-semibold text-sm transition-all"
+              className="bg-[#E3000F] text-white border-2 border-[#E3000F] font-black uppercase px-6 py-3 w-full rounded-none shadow-[3px_3px_0px_#fff] hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[5px_5px_0px_#fff] transition-all tracking-widest disabled:opacity-50"
             >
-              {loading ? (
-                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              ) : (
-                "Sign In"
-              )}
+              {loading ? "AUTHENTICATING..." : "AUTHENTICATE →"}
             </button>
           </form>
 
-          <p className="text-center text-xs text-slate-600 mt-6">
-            Password is set via <code className="text-slate-500">ADMIN_PASSWORD</code> environment variable.
-          </p>
+          {authError && (
+            <p className="font-mono text-xs text-[#E3000F] border border-[#E3000F] bg-[#1a0000] px-3 py-2">
+              ACCESS DENIED - {authError}
+            </p>
+          )}
         </div>
       </div>
     );
   }
 
   // ─── Dashboard ──────────────────────────────────────────────────────────────
-  const pendingContacts = contacts.filter((c) => c.status === "pending").length;
-
   return (
-    <div className="min-h-screen bg-[#09090e] text-slate-200">
-      {/* Header */}
-      <header className="sticky top-0 z-10 bg-[#09090e]/90 backdrop-blur border-b border-slate-800 px-4 sm:px-6 py-4 flex items-center justify-between">
+    <div className="min-h-screen bg-[#0A0A0A] pb-10 font-medium">
+      <header className="border-b-2 border-[#E3000F] bg-[#0A0A0A] px-6 py-4 flex items-center justify-between sticky top-0 z-50">
         <div className="flex items-center gap-3">
-          <BarChart2 size={20} className="text-indigo-400" />
-          <span className="hidden sm:inline font-bold text-slate-100">Portfolio Analytics</span>
-          <span className="sm:hidden font-bold text-slate-100 text-sm">Analytics</span>
-          <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-mono">
-            live
+          <span className="w-3 h-3 bg-[#E3000F] inline-block" />
+          <span className="font-black text-white uppercase tracking-tight text-lg">
+            SGK / ADMIN
           </span>
         </div>
-        <div className="flex items-center gap-2 sm:gap-3">
+        <div className="flex items-center gap-4">
+          <span className="font-mono text-xs text-[#888] hidden sm:inline">
+            AUTHENTICATED
+          </span>
+          <span className="w-2 h-2 bg-[#00FF41] inline-block animate-pulse" />
           <button
-            onClick={() => fetchData(password)}
-            disabled={loading}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-white/5 text-xs transition-colors"
+            onClick={() => {
+              setAuthed(false);
+              setPassword("");
+            }}
+            className="font-mono text-xs text-[#E3000F] border border-[#E3000F] px-3 py-1 hover:bg-[#E3000F] hover:text-white transition-all rounded-none"
           >
-            <RefreshCw size={13} className={loading ? "animate-spin" : ""} />
-            <span className="hidden sm:inline">Refresh</span>
-          </button>
-          <button
-            onClick={() => { setAuthed(false); setPassword(""); }}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-slate-500 hover:text-rose-400 hover:bg-rose-500/5 text-xs transition-colors"
-          >
-            <LogOut size={13} />
-            <span className="hidden sm:inline">Sign out</span>
+            LOGOUT
           </button>
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-10 space-y-10">
-        {/* Stat Cards */}
-        {analytics && (
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <StatCard
-              label="Unique Visitors"
-              value={analytics.totalVisitors}
-              icon={<Users size={18} className="text-indigo-400" />}
-              color="bg-indigo-500/10"
-            />
-            <StatCard
-              label="Resume Downloads"
-              value={analytics.totalDownloads}
-              icon={<Download size={18} className="text-emerald-400" />}
-              color="bg-emerald-500/10"
-            />
-            <StatCard
-              label="Contact Requests"
-              value={analytics.totalContacts}
-              icon={<Mail size={18} className="text-amber-400" />}
-              color="bg-amber-500/10"
-            />
-            <StatCard
-              label="Total Page Views"
-              value={analytics.totalPageViews}
-              icon={<Eye size={18} className="text-purple-400" />}
-              color="bg-purple-500/10"
-            />
+      <main className="max-w-6xl mx-auto mt-8 space-y-8">
+        {!analytics && loading && (
+          <div className="mx-6 border-2 border-[#E3000F] bg-[#141414] p-5 animate-pulse">
+            <div className="h-3 bg-[#1E1E1E] w-24 mb-3" />
+            <div className="h-8 bg-[#1E1E1E] w-16" />
           </div>
         )}
 
-        {/* Tabs */}
-        <div className="flex gap-1 p-1 rounded-xl bg-slate-900/60 border border-slate-800 w-fit">
-          {(["overview", "contacts"] as const).map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`px-4 py-2 rounded-lg text-sm font-semibold capitalize transition-all ${
-                activeTab === tab
-                  ? "bg-indigo-500 text-white shadow-md shadow-indigo-500/20"
-                  : "text-slate-400 hover:text-slate-200"
-              }`}
-            >
-              {tab}
-              {tab === "contacts" && pendingContacts > 0 && (
-                <span className="ml-2 px-1.5 py-0.5 rounded-full bg-amber-500 text-black text-[10px] font-bold">
-                  {pendingContacts}
-                </span>
-              )}
-            </button>
-          ))}
-        </div>
+        {authError && (
+          <div className="font-mono text-xs text-[#E3000F] border border-[#E3000F] bg-[#1a0000] px-4 py-3 mx-6">
+            ⚠ FAILED TO FETCH — {authError}
+          </div>
+        )}
 
-        {/* Tab Content */}
-        {activeTab === "overview" && analytics && (
-          <div className="grid md:grid-cols-3 gap-6">
-            {/* Page Views */}
-            <div className="md:col-span-1 bg-[#0d0d18] rounded-2xl p-6 border border-slate-800">
-              <h3 className="text-sm font-semibold text-slate-400 mb-4 uppercase tracking-wider">
-                Page Views
-              </h3>
-              <div className="space-y-3">
-                {Object.entries(analytics.pageViews)
-                  .sort(([, a], [, b]) => b - a)
-                  .slice(0, 8)
-                  .map(([page, count]) => {
-                    const max = Math.max(...Object.values(analytics.pageViews));
-                    return (
-                      <div key={page} className="space-y-1">
-                        <div className="flex items-center justify-between text-xs">
-                          <span className="text-slate-400 font-mono truncate max-w-[60%]">{page}</span>
-                          <span className="text-slate-300 font-semibold">{count}</span>
-                        </div>
-                        <div className="h-1.5 rounded-full bg-slate-800">
-                          <div
-                            className="h-full rounded-full bg-indigo-500"
-                            style={{ width: `${(count / max) * 100}%` }}
-                          />
-                        </div>
-                      </div>
-                    );
-                  })}
-                {Object.keys(analytics.pageViews).length === 0 && (
-                  <p className="text-slate-600 text-sm text-center py-4">No page view data yet.</p>
+        {analytics && (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 px-6">
+            <div className="border-2 border-[#E3000F] bg-[#141414] shadow-[4px_4px_0px_#E3000F] p-5">
+              <p className="font-mono text-xs text-[#888] uppercase tracking-widest mb-2">
+                TOTAL VISITS
+              </p>
+              <p className="font-black text-4xl text-white">
+                {analytics.totalVisitors}
+              </p>
+              <p className="font-mono text-xs text-[#E3000F] mt-1">↑ all time</p>
+            </div>
+            <div className="border-2 border-[#E3000F] bg-[#141414] shadow-[4px_4px_0px_#E3000F] p-5">
+              <p className="font-mono text-xs text-[#888] uppercase tracking-widest mb-2">
+                PAGE VIEWS
+              </p>
+              <p className="font-black text-4xl text-white">
+                {analytics.totalPageViews}
+              </p>
+              <p className="font-mono text-xs text-[#E3000F] mt-1">↑ all time</p>
+            </div>
+            <div className="border-2 border-[#E3000F] bg-[#141414] shadow-[4px_4px_0px_#E3000F] p-5">
+              <p className="font-mono text-xs text-[#888] uppercase tracking-widest mb-2">
+                DOWNLOADS
+              </p>
+              <p className="font-black text-4xl text-white">
+                {analytics.totalDownloads}
+              </p>
+              <p className="font-mono text-xs text-[#E3000F] mt-1">↑ resumes</p>
+            </div>
+            <div className="border-2 border-[#E3000F] bg-[#141414] shadow-[4px_4px_0px_#E3000F] p-5">
+              <p className="font-mono text-xs text-[#888] uppercase tracking-widest mb-2">
+                MESSAGES
+              </p>
+              <p className="font-black text-4xl text-white">
+                {analytics.totalContacts}
+              </p>
+              <p className="font-mono text-xs text-[#E3000F] mt-1">↑ received</p>
+            </div>
+          </div>
+        )}
+
+        {analytics && (
+          <div className="grid md:grid-cols-2 gap-6 px-6">
+            <div className="border-2 border-[#E3000F] bg-[#141414] shadow-[4px_4px_0px_#E3000F]">
+              <div className="border-b-2 border-[#E3000F] px-5 py-3 flex items-center gap-2">
+                <span className="w-2 h-2 bg-[#E3000F] inline-block" />
+                <h2 className="font-black text-sm uppercase text-white tracking-widest">
+                  RECENT VISITS
+                </h2>
+              </div>
+              <div className="divide-y divide-[#1E1E1E]">
+                {analytics.recentVisits.map((visit) => (
+                  <div
+                    key={visit.id}
+                    className="px-5 py-3 flex justify-between items-center hover:bg-[#1E1E1E] transition-colors"
+                  >
+                    <span className="font-mono text-sm text-white max-w-[40%] truncate">
+                      {visit.page}
+                    </span>
+                    <span className="font-mono text-xs text-[#888] max-w-[30%] truncate">
+                      {visit.referrer || "direct"}
+                    </span>
+                    <span className="font-mono text-xs text-[#E3000F]">
+                      {formatDate(visit.timestamp)}
+                    </span>
+                  </div>
+                ))}
+                {analytics.recentVisits.length === 0 && (
+                  <div className="px-5 py-10 text-center">
+                    <p className="font-mono text-sm text-[#444] uppercase tracking-widest">
+                      [ NO VISITS ]
+                    </p>
+                  </div>
                 )}
               </div>
             </div>
 
-            {/* Top Referrers */}
-            <div className="bg-[#0d0d18] rounded-2xl p-6 border border-slate-800">
-              <h3 className="text-sm font-semibold text-slate-400 mb-4 uppercase tracking-wider">
-                Top Referrers
-              </h3>
-              <div className="space-y-3">
+            <div className="border-2 border-[#E3000F] bg-[#141414] shadow-[4px_4px_0px_#E3000F]">
+              <div className="border-b-2 border-[#E3000F] px-5 py-3 flex items-center gap-2">
+                <span className="w-2 h-2 bg-[#E3000F] inline-block" />
+                <h2 className="font-black text-sm uppercase text-white tracking-widest">
+                  TOP REFERRERS
+                </h2>
+              </div>
+              <div className="divide-y divide-[#1E1E1E]">
                 {Object.entries(analytics.referrers)
                   .sort(([, a], [, b]) => b - a)
-                  .slice(0, 8)
+                  .slice(0, 5)
                   .map(([referrer, count]) => (
-                    <div key={referrer} className="flex items-center justify-between text-sm">
-                      <span className="text-slate-400 font-mono truncate max-w-[70%]">{referrer}</span>
-                      <span className="text-slate-200 font-semibold">{count}</span>
+                    <div
+                      key={referrer}
+                      className="px-5 py-3 flex justify-between items-center hover:bg-[#1E1E1E] transition-colors"
+                    >
+                      <span className="font-mono text-sm text-white max-w-[70%] truncate">
+                        {referrer}
+                      </span>
+                      <span className="font-mono text-xs text-[#E3000F]">
+                        {count} VISITS
+                      </span>
                     </div>
                   ))}
                 {Object.keys(analytics.referrers).length === 0 && (
-                  <p className="text-slate-600 text-sm text-center py-4">No referrer data yet.</p>
+                  <div className="px-5 py-10 text-center">
+                    <p className="font-mono text-sm text-[#444] uppercase tracking-widest">
+                      [ NO REFERRERS ]
+                    </p>
+                  </div>
                 )}
-              </div>
-            </div>
-
-            {/* Most Viewed Projects */}
-            <div className="bg-[#0d0d18] rounded-2xl p-6 border border-slate-800">
-              <h3 className="text-sm font-semibold text-slate-400 mb-4 uppercase tracking-wider">
-                Project Views
-              </h3>
-              <div className="space-y-3">
-                {Object.entries(analytics.viewsByProject)
-                  .sort(([, a], [, b]) => b - a)
-                  .map(([project, count]) => (
-                    <div key={project} className="flex items-center justify-between text-sm">
-                      <span className="text-slate-400 font-mono truncate max-w-[70%]">{project}</span>
-                      <span className="text-slate-200 font-semibold">{count}</span>
-                    </div>
-                  ))}
-                {Object.keys(analytics.viewsByProject).length === 0 && (
-                  <p className="text-slate-600 text-sm text-center py-4">No project views yet.</p>
-                )}
-              </div>
-            </div>
-
-            {/* Recent Visits */}
-            <div className="md:col-span-3 bg-[#0d0d18] rounded-2xl p-6 border border-slate-800">
-              <h3 className="text-sm font-semibold text-slate-400 mb-4 uppercase tracking-wider">
-                Recent Visits
-              </h3>
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="text-left text-xs text-slate-600 border-b border-slate-800">
-                      <th className="pb-3 font-mono">Time</th>
-                      <th className="pb-3 font-mono">Page</th>
-                      <th className="pb-3 font-mono">Referrer</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-800/50">
-                    {analytics.recentVisits.map((v) => (
-                      <tr key={v.id}>
-                        <td className="py-3 text-slate-500 font-mono text-xs whitespace-nowrap">
-                          {new Date(v.timestamp).toLocaleString()}
-                        </td>
-                        <td className="py-3 text-slate-300 font-mono text-xs">{v.page}</td>
-                        <td className="py-3 text-slate-500 font-mono text-xs truncate max-w-[200px]">
-                          {v.referrer}
-                        </td>
-                      </tr>
-                    ))}
-                    {analytics.recentVisits.length === 0 && (
-                      <tr>
-                        <td colSpan={3} className="py-6 text-center text-slate-600 text-sm">
-                          No visits tracked yet. The tracker fires on your first page load.
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
               </div>
             </div>
           </div>
         )}
 
-        {activeTab === "contacts" && (
-          <div className="space-y-4">
+        <div className="border-2 border-[#E3000F] bg-[#141414] shadow-[4px_4px_0px_#E3000F] mx-6 mb-6">
+          <div className="border-b-2 border-[#E3000F] px-5 py-3 flex items-center gap-2">
+            <span className="w-2 h-2 bg-[#E3000F] inline-block" />
+            <h2 className="font-black text-sm uppercase text-white tracking-widest">
+              MESSAGES
+            </h2>
+            <span className="ml-auto font-mono text-xs text-[#E3000F] border border-[#E3000F] px-2 py-0.5">
+              {contacts.length} TOTAL
+            </span>
+          </div>
+
+          <div className="divide-y divide-[#1E1E1E]">
             {contacts.length === 0 && (
-              <div className="bg-[#0d0d18] rounded-2xl p-10 border border-slate-800 text-center text-slate-600">
-                No contact submissions yet.
+              <div className="px-5 py-10 text-center">
+                <p className="font-mono text-sm text-[#444] uppercase tracking-widest">
+                  [ NO MESSAGES ]
+                </p>
               </div>
             )}
-            {contacts.map((c) => (
+            {contacts.map((contact) => (
               <div
-                key={c.id}
-                className={`bg-[#0d0d18] rounded-2xl p-6 border transition-colors ${
-                  c.status === "pending" ? "border-amber-500/20" : "border-slate-800"
-                }`}
+                key={contact.id}
+                className="px-5 py-4 hover:bg-[#1E1E1E] transition-colors grid grid-cols-1 md:grid-cols-12 gap-4 items-start"
               >
-                <div className="flex items-start justify-between gap-4 mb-3">
-                  <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      {statusIcons[c.status]}
-                      <span className="font-semibold text-slate-200">{c.name}</span>
-                      <span className="text-slate-500 text-sm">·</span>
-                      <a
-                        href={`mailto:${c.email}`}
-                        className="text-indigo-400 text-sm hover:text-indigo-300"
-                      >
-                        {c.email}
-                      </a>
-                    </div>
-                    <p className="text-sm font-medium text-slate-300">{c.subject}</p>
-                    <p className="text-xs text-slate-600 mt-0.5">
-                      {new Date(c.createdAt).toLocaleString()}
-                    </p>
-                  </div>
-                  <div className="flex gap-2 shrink-0">
-                    {(["pending", "reviewed", "ignored"] as const).map((s) => (
-                      <button
-                        key={s}
-                        onClick={() => updateStatus(c.id, s)}
-                        className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all capitalize ${
-                          c.status === s
-                            ? s === "pending"
-                              ? "bg-amber-500/20 text-amber-300 border border-amber-500/30"
-                              : s === "reviewed"
-                              ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
-                              : "bg-slate-800 text-slate-400 border border-slate-700"
-                            : "bg-transparent text-slate-600 border border-slate-800 hover:border-slate-700 hover:text-slate-400"
-                        }`}
-                      >
-                        {s}
-                      </button>
-                    ))}
-                  </div>
+                {/* Name + Email */}
+                <div className="md:col-span-3">
+                  <p className="font-bold text-white text-sm">
+                    {contact.name}
+                  </p>
+                  <p className="font-mono text-xs text-[#888]">
+                    {contact.email}
+                  </p>
                 </div>
-                <p className="text-slate-400 text-sm leading-relaxed border-t border-slate-800 pt-3 mt-3">
-                  {c.message}
-                </p>
+                {/* Subject */}
+                <div className="md:col-span-3">
+                  <p className="font-medium text-white text-sm">
+                    {contact.subject}
+                  </p>
+                </div>
+                {/* Message preview */}
+                <div className="md:col-span-3">
+                  <p className="font-mono text-xs text-[#888] line-clamp-2">
+                    {contact.message}
+                  </p>
+                </div>
+                {/* Date */}
+                <div className="md:col-span-1">
+                  <p className="font-mono text-xs text-[#E3000F]">
+                    {formatDate(contact.createdAt)}
+                  </p>
+                </div>
+                {/* Status badge + action */}
+                <div className="md:col-span-2 flex flex-col gap-2 items-start md:items-end">
+                  <StatusBadge status={contact.status} />
+                  {contact.status !== "reviewed" && (
+                    <button
+                      onClick={() => updateStatus(contact.id, "reviewed")}
+                      className="font-mono text-xs border border-[#888] text-[#888] px-2 py-0.5 hover:border-[#00FF41] hover:text-[#00FF41] hover:bg-[#001a00] transition-all rounded-none uppercase"
+                    >
+                      MARK REVIEWED
+                    </button>
+                  )}
+                  {contact.status !== "ignored" && contact.status !== "reviewed" && (
+                    <button
+                      onClick={() => updateStatus(contact.id, "ignored")}
+                      className="font-mono text-xs border border-[#888] text-[#888] px-2 py-0.5 hover:border-[#E3000F] hover:text-[#E3000F] hover:bg-[#1a0000] transition-all rounded-none uppercase mt-1"
+                    >
+                      IGNORE
+                    </button>
+                  )}
+                </div>
               </div>
             ))}
           </div>
-        )}
+        </div>
       </main>
     </div>
   );

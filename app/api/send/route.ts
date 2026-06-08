@@ -30,7 +30,8 @@ export async function POST(req: Request) {
     });
 
     return Response.json(data);
-  } catch {
+  } catch (err) {
+    console.error('Send API error:', err);
     return Response.json(
       { error: 'Failed to send email.' },
       { status: 500 }

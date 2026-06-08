@@ -59,19 +59,39 @@ export async function POST(req: NextRequest) {
       return Response.json({ error: 'Input exceeds maximum allowed length.' }, { status: 400 });
     }
 
-    // Save to relational database
-    const { contact, conversation, message: dbMessage } = await db.saveContactSubmission(
-      name,
-      email,
-      subject,
-      message,
-      company,
-      role,
-      linkedin
-    );
+    // Save to relational database (fail gracefully if DB is not configured)
+    let contact: any = null;
+    let conversation: any = null;
+    let dbMessage: any = null;
 
-    // Track analytics
-    await db.trackVisit('/contact-submit', '', '', ipHash);
+    try {
+      const saved = await db.saveContactSubmission(
+        name,
+        email,
+        subject,
+        message,
+        company,
+        role,
+        linkedin
+      );
+      contact = saved.contact;
+      conversation = saved.conversation;
+      dbMessage = saved.message;
+
+      // Track analytics (best-effort)
+      try {
+        await db.trackVisit('/contact-submit', '', '', ipHash);
+      } catch (visErr) {
+        console.error('Track visit failed:', visErr);
+      }
+    } catch (dbErr) {
+      console.error('DB save failed, continuing without DB:', dbErr);
+      // Provide fallback placeholders so later code can still run
+      const tsId = `tmp-${Date.now()}`;
+      contact = { id: tsId, name, email };
+      conversation = { id: `${tsId}-conv`, subject };
+      dbMessage = { id: `${tsId}-msg` };
+    }
 
     // Send emails if Resend is configured
     const apiKey = process.env.RESEND_API_KEY;
@@ -107,13 +127,19 @@ export async function POST(req: NextRequest) {
         `,
       });
 
-      // Save the email message ID of this confirmation email
+      // Save the email message ID of this confirmation email (best-effort)
       // We will match inbound replies' In-Reply-To header with this ID!
       if (confirmEmail.data?.id) {
-        await prisma.message.update({
-          where: { id: dbMessage.id },
-          data: { emailMessageId: confirmEmail.data.id },
-        });
+        try {
+          if (dbMessage?.id && typeof prisma?.message?.update === 'function') {
+            await prisma.message.update({
+              where: { id: dbMessage.id },
+              data: { emailMessageId: confirmEmail.data.id },
+            });
+          }
+        } catch (prErr) {
+          console.error('Failed to save emailMessageId to DB:', prErr);
+        }
       }
 
       // 2. Notify Surya
