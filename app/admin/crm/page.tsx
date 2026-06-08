@@ -122,6 +122,7 @@ export default function CRMDashboard() {
   const [activities, setActivities] = useState<ActivityLog[]>([]);
 
   const [activeView, setActiveView] = useState<"conversations" | "analytics">("conversations");
+  const [mobileInfoOpen, setMobileInfoOpen] = useState(false);
   const [loadingList, setLoadingList] = useState(false);
   const [loadingDetails, setLoadingDetails] = useState(false);
   const [sendingReply, setSendingReply] = useState(false);
@@ -166,6 +167,7 @@ export default function CRMDashboard() {
 
   const fetchContactDetails = useCallback(async (contactId: string) => {
     setLoadingDetails(true);
+    setMobileInfoOpen(false); // Close mobile profile overlay on new selection
     try {
       const res = await fetch(`/api/admin/crm?contactId=${contactId}`, {
         headers: { "x-admin-password": password },
@@ -466,7 +468,7 @@ export default function CRMDashboard() {
             <div className="p-1.5 rounded-lg bg-indigo-500/10 border border-indigo-500/20">
               <Sparkles size={14} className="text-indigo-400" />
             </div>
-            <span className="font-extrabold text-sm tracking-wide bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+            <span className="hidden sm:inline font-extrabold text-sm tracking-wide bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
               Recruiter CRM
             </span>
           </div>
@@ -474,7 +476,10 @@ export default function CRMDashboard() {
           {/* Tab switches */}
           <div className="flex items-center gap-1 bg-[#10101a] border border-[#1e1e2f] p-0.5 rounded-lg">
             <button
-              onClick={() => setActiveView("conversations")}
+              onClick={() => {
+                setActiveView("conversations");
+                setMobileInfoOpen(false);
+              }}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold tracking-wide transition-all ${
                 activeView === "conversations"
                   ? "bg-indigo-500 text-white shadow-md shadow-indigo-500/10"
@@ -487,6 +492,7 @@ export default function CRMDashboard() {
             <button
               onClick={() => {
                 setActiveView("analytics");
+                setMobileInfoOpen(false);
                 fetchAnalytics();
               }}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold tracking-wide transition-all ${
@@ -509,14 +515,14 @@ export default function CRMDashboard() {
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-[#12121e]/50 text-xs border border-[#161623] transition-colors"
           >
             <RefreshCw size={12} className={loadingList || loadingDetails ? "animate-spin" : ""} />
-            Sync
+            <span className="hidden sm:inline">Sync</span>
           </button>
           <button
             onClick={handleSignOut}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-slate-500 hover:text-rose-400 hover:bg-rose-500/5 text-xs transition-colors"
           >
             <LogOut size={12} />
-            Exit CRM
+            <span className="hidden sm:inline">Exit CRM</span>
           </button>
         </div>
       </header>
@@ -526,7 +532,7 @@ export default function CRMDashboard() {
         {activeView === "conversations" ? (
           <>
             {/* ─── LEFT SIDEBAR: Inbox List ───────────────────────────────────── */}
-            <aside className="w-80 border-r border-[#161623] bg-[#09090d]/30 flex flex-col overflow-hidden">
+            <aside className={`w-80 border-r border-[#161623] bg-[#09090d]/30 flex-col overflow-hidden shrink-0 transition-all ${activeContact ? "hidden lg:flex" : "w-full lg:w-80 flex"}`}>
               {/* Search & Sort Panel */}
               <div className="p-4 border-b border-[#161623] space-y-3">
                 <div className="relative">
@@ -640,7 +646,7 @@ export default function CRMDashboard() {
             </aside>
 
             {/* ─── CENTER PANEL: Conversation Timeline ───────────────────────── */}
-            <main className="flex-1 flex flex-col bg-[#08080c] relative overflow-hidden">
+            <main className={`flex-1 flex-col bg-[#08080c] relative overflow-hidden transition-all ${activeContact ? "flex" : "hidden lg:flex"}`}>
               {loadingDetails ? (
                 <div className="flex-1 flex flex-col items-center justify-center gap-3">
                   <div className="w-6 h-6 border-2 border-slate-700 border-t-indigo-400 rounded-full animate-spin" />
@@ -661,11 +667,18 @@ export default function CRMDashboard() {
               ) : (
                 <>
                   {/* Thread Header */}
-                  <header className="h-14 shrink-0 px-6 border-b border-[#161623] bg-[#08080c]/50 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div>
-                        <h2 className="font-bold text-sm text-slate-200">{activeContact.name}</h2>
-                        <p className="text-[10px] text-slate-500">
+                  <header className="h-14 shrink-0 px-4 sm:px-6 border-b border-[#161623] bg-[#08080c]/50 flex items-center justify-between">
+                    <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                      <button
+                        onClick={() => setActiveContact(null)}
+                        className="lg:hidden p-1.5 rounded-lg border border-[#161623] bg-[#0c0c14] text-slate-400 hover:text-slate-200 mr-1 flex items-center justify-center shrink-0"
+                        aria-label="Back to candidate list"
+                      >
+                        <ArrowRight size={14} className="rotate-180" />
+                      </button>
+                      <div className="min-w-0">
+                        <h2 className="font-bold text-sm text-slate-200 truncate">{activeContact.name}</h2>
+                        <p className="text-[10px] text-slate-500 truncate">
                           {activeContact.email}
                           {activeContact.company ? ` · Recruiter at ${activeContact.company}` : ""}
                         </p>
@@ -673,8 +686,8 @@ export default function CRMDashboard() {
                     </div>
 
                     {/* Status Dropdown selector */}
-                    <div className="flex items-center gap-2">
-                      <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Status:</span>
+                    <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+                      <span className="hidden md:inline text-[10px] font-semibold uppercase tracking-wider text-slate-500">Status:</span>
                       <select
                         value={activeContact.status}
                         onChange={(e) => handleStatusChange(e.target.value)}
@@ -686,6 +699,15 @@ export default function CRMDashboard() {
                           </option>
                         ))}
                       </select>
+
+                      {/* Profile info toggle on mobile */}
+                      <button
+                        onClick={() => setMobileInfoOpen(!mobileInfoOpen)}
+                        className="lg:hidden p-2 rounded-lg border border-[#161623] bg-[#0c0c14] text-slate-400 hover:text-slate-200 flex items-center justify-center ml-1"
+                        aria-label="Toggle profile information"
+                      >
+                        <User size={14} />
+                      </button>
                     </div>
                   </header>
 
@@ -794,8 +816,20 @@ export default function CRMDashboard() {
               )}
             </main>
 
+            {/* Backdrop for mobile slide-out profile sidebar */}
+            {mobileInfoOpen && (
+              <div 
+                className="lg:hidden fixed inset-0 top-14 bg-black/60 z-20 animate-fade-in" 
+                onClick={() => setMobileInfoOpen(false)}
+              />
+            )}
+
             {/* ─── RIGHT PANEL: Recruiter Profile & Timeline Notes ────────────── */}
-            <aside className="w-72 border-l border-[#161623] bg-[#09090d]/30 flex flex-col overflow-y-auto p-5 space-y-6">
+            <aside className={`w-72 border-l border-[#161623] bg-[#09090d]/30 flex-col overflow-y-auto p-5 space-y-6 shrink-0 transition-all ${
+              mobileInfoOpen 
+                ? "fixed inset-y-14 right-0 z-30 w-80 bg-[#08080c] border-l-2 border-l-[#161623] flex shadow-2xl" 
+                : "hidden lg:flex"
+            }`}>
               {activeContact ? (
                 <>
                   {/* Contact Summary card */}
@@ -929,7 +963,7 @@ export default function CRMDashboard() {
             {analytics ? (
               <>
                 {/* Stats row */}
-                <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                   <div className="card-bg rounded-xl border border-[#161623] p-5">
                     <p className="text-slate-500 text-[10px] font-mono uppercase tracking-widest mb-1.5">Total Contacts</p>
                     <p className="text-3xl font-extrabold text-slate-100 mb-0.5">{analytics.totalContacts}</p>

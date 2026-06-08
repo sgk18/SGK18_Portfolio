@@ -202,37 +202,38 @@ export default function AdminPage() {
   return (
     <div className="min-h-screen bg-[#09090e] text-slate-200">
       {/* Header */}
-      <header className="sticky top-0 z-10 bg-[#09090e]/90 backdrop-blur border-b border-slate-800 px-6 py-4 flex items-center justify-between">
+      <header className="sticky top-0 z-10 bg-[#09090e]/90 backdrop-blur border-b border-slate-800 px-4 sm:px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <BarChart2 size={20} className="text-indigo-400" />
-          <span className="font-bold text-slate-100">Portfolio Analytics</span>
+          <span className="hidden sm:inline font-bold text-slate-100">Portfolio Analytics</span>
+          <span className="sm:hidden font-bold text-slate-100 text-sm">Analytics</span>
           <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-mono">
             live
           </span>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           <button
             onClick={() => fetchData(password)}
             disabled={loading}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-white/5 text-xs transition-colors"
           >
             <RefreshCw size={13} className={loading ? "animate-spin" : ""} />
-            Refresh
+            <span className="hidden sm:inline">Refresh</span>
           </button>
           <button
             onClick={() => { setAuthed(false); setPassword(""); }}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-slate-500 hover:text-rose-400 hover:bg-rose-500/5 text-xs transition-colors"
           >
             <LogOut size={13} />
-            Sign out
+            <span className="hidden sm:inline">Sign out</span>
           </button>
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-6 py-10 space-y-10">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-10 space-y-10">
         {/* Stat Cards */}
         {analytics && (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             <StatCard
               label="Unique Visitors"
               value={analytics.totalVisitors}
