@@ -3,7 +3,7 @@
 import { useState, useRef, FormEvent } from "react";
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
-import { Send, Mail, Github, Linkedin, CheckCircle, AlertCircle } from "lucide-react";
+import { Send, Mail, Phone, Github, Linkedin, CheckCircle, AlertCircle } from "lucide-react";
 import ScrollReveal from "./ScrollReveal";
 
 type FormState = {
@@ -113,7 +113,7 @@ export default function Contact() {
                 in full-stack product engineering, hybrid mobile, offline-first systems, EdTech, and AI-integrated applications.
               </p>
 
-              <div className="space-y-4">
+              <div className="space-y-4 flex flex-col">
                 <a
                   href="mailto:suryachalam18@gmail.com"
                   id="contact-email-link"
@@ -123,6 +123,17 @@ export default function Contact() {
                     <Mail size={16} />
                   </div>
                   <span className="text-sm font-bold uppercase tracking-wider">suryachalam18@gmail.com</span>
+                </a>
+
+                <a
+                  href="tel:+919844588551"
+                  id="contact-phone-link"
+                  className="flex items-center gap-3 p-4 border-2 border-[#0A0A0A] bg-white shadow-[3px_3px_0px_#0A0A0A] hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[5px_5px_0px_#0A0A0A] transition-all rounded-none group w-fit"
+                >
+                  <div className="p-2 border-2 border-[#0A0A0A] bg-[#FFF5F5] text-[#E3000F] rounded-none group-hover:bg-[#E3000F] group-hover:text-white transition-colors shadow-[1.5px_1.5px_0px_#0A0A0A]">
+                    <Phone size={16} />
+                  </div>
+                  <span className="text-sm font-bold uppercase tracking-wider">+91 98445 88551</span>
                 </a>
               </div>
 
@@ -328,7 +339,6 @@ export default function Contact() {
                     id="contact-submit-btn"
                     type="submit"
                     disabled={status === "loading"}
-                  >
                     className="w-full flex items-center justify-center gap-2 px-6 py-3.5 contact-submit hover:bg-[#FF1A1A] disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed font-bold uppercase shadow-[4px_4px_0px_#0A0A0A] hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[7px_7px_0px_#0A0A0A] transition-all rounded-none cursor-pointer text-sm tracking-wider"
                     aria-live="polite"
                   >

@@ -30,9 +30,9 @@ export default function About() {
             <h2 className="font-black text-3xl md:text-4xl uppercase tracking-tight text-[#0A0A0A]">ABOUT ME</h2>
           </div>
 
-          <div className="grid lg:grid-cols-12 gap-12 items-start">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-12 items-start">
             {/* Profile Photo */}
-            <div className="col-span-12 md:col-span-4 lg:col-span-3 flex justify-center">
+            <div className="col-span-1 md:col-span-4 lg:col-span-3 flex justify-center">
               <div className="relative w-full max-w-[280px] aspect-square rounded-none overflow-hidden border-4 border-[#0A0A0A] shadow-[8px_8px_0px_#0A0A0A] bg-white group">
                 <Image
                   src="/surya.png"
@@ -46,7 +46,7 @@ export default function About() {
             </div>
 
             {/* Bio */}
-            <div className="col-span-12 md:col-span-8 lg:col-span-5 space-y-6">
+            <div className="col-span-1 md:col-span-8 lg:col-span-5 space-y-6">
               <div className="flex items-center gap-2 text-[#0A0A0A] font-mono text-sm font-bold">
                 <User size={16} className="text-[#E3000F] shrink-0" />
                 <span>Full-Stack & Product Engineer · Undergrad · Builder</span>
@@ -79,7 +79,7 @@ export default function About() {
             </div>
 
             {/* Stats & Achievements */}
-            <div className="col-span-12 lg:col-span-4 space-y-8">
+            <div className="col-span-1 md:col-span-12 lg:col-span-4 space-y-8">
               {/* Stats grid */}
               <div className="grid grid-cols-2 gap-4">
                 {stats.map((stat) => (

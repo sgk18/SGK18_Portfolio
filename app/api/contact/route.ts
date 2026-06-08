@@ -159,7 +159,7 @@ export async function POST(req: NextRequest) {
             <p><strong>Subject:</strong> ${subject}</p>
             <div style="background: #f1f5f9; padding: 15px; border-radius: 8px; margin-top: 20px; white-space: pre-wrap;">${message}</div>
             <p style="margin-top: 25px;">
-              <a href="${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3001'}/admin/crm?id=${contact.id}" 
+              <a href="${process.env.NEXT_PUBLIC_APP_URL || req.nextUrl.origin}/admin/crm?id=${contact.id}" 
                  style="background: #6366f1; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">
                 Open in CRM Dashboard
               </a>

@@ -33,11 +33,12 @@ export async function POST(req: NextRequest) {
 
     // Support both Resend wrapped payloads ({ type, data }) and raw payloads
     const emailData = rawBody.data && rawBody.type === 'email.received' ? rawBody.data : rawBody;
+    const emailId = emailData.email_id || emailData.id;
 
     const fromHeader = emailData.from || '';
     const subject = emailData.subject || 'No Subject';
-    const textContent = emailData.text || emailData.html || 'No content';
-    const headers = emailData.headers || {};
+    let textContent = emailData.text || emailData.html || 'No content';
+    let headers = emailData.headers || {};
 
     const recruiterEmail = extractEmail(fromHeader);
     if (!recruiterEmail) {
@@ -47,8 +48,28 @@ export async function POST(req: NextRequest) {
 
     // Resolve Message IDs for threading
     // Resend webhooks put headers in standard fields, or headers object
-    const messageId = cleanMessageId(emailData.messageId || headers['Message-ID'] || headers['message-id']);
-    const inReplyTo = cleanMessageId(emailData.inReplyTo || headers['In-Reply-To'] || headers['in-reply-to']);
+    let messageId = cleanMessageId(emailData.messageId || headers['Message-ID'] || headers['message-id']);
+    let inReplyTo = cleanMessageId(emailData.inReplyTo || headers['In-Reply-To'] || headers['in-reply-to']);
+
+    // Fetch full email content from Resend API if API key is set and we have an email ID
+    const apiKey = process.env.RESEND_API_KEY;
+    if (apiKey && emailId) {
+      try {
+        const resend = new Resend(apiKey);
+        const { data: fullEmail, error } = await resend.emails.receiving.get(emailId);
+        if (error) {
+          console.error('Failed to retrieve receiving email content from Resend API:', error);
+        } else if (fullEmail) {
+          console.log('Successfully retrieved full email details for ID:', emailId);
+          textContent = fullEmail.text || fullEmail.html || textContent;
+          const fullHeaders = (fullEmail.headers || {}) as Record<string, any>;
+          messageId = cleanMessageId(fullEmail.message_id) || cleanMessageId(fullHeaders['Message-ID'] || fullHeaders['message-id']) || messageId;
+          inReplyTo = cleanMessageId(fullHeaders['In-Reply-To'] || fullHeaders['in-reply-to']) || inReplyTo;
+        }
+      } catch (fetchErr) {
+        console.error('Error fetching receiving email details from Resend API:', fetchErr);
+      }
+    }
 
     let resolvedConversationId: string | null = null;
     let resolvedContactId: string | null = null;
@@ -138,7 +159,6 @@ export async function POST(req: NextRequest) {
     });
 
     // Send internal alert email to Surya notifying them of the incoming reply
-    const apiKey = process.env.RESEND_API_KEY;
     const fromDomain = process.env.RESEND_FROM_EMAIL || 'Portfolio Webhook <onboarding@resend.dev>';
     if (apiKey) {
       const resend = new Resend(apiKey);
@@ -156,7 +176,7 @@ export async function POST(req: NextRequest) {
             <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 15px 0;" />
             <div style="background: #f1f5f9; padding: 15px; border-radius: 8px; white-space: pre-wrap;">${textContent}</div>
             <p style="margin-top: 25px;">
-              <a href="${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3001'}/admin/crm?id=${resolvedContactId}" 
+              <a href="${process.env.NEXT_PUBLIC_APP_URL || req.nextUrl.origin}/admin/crm?id=${resolvedContactId}" 
                  style="background: #6366f1; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">
                 Reply in CRM Dashboard
               </a>
