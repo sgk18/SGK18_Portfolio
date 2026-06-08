@@ -125,62 +125,64 @@ export default function GitHubStats() {
           )}
 
           {/* Profile Card + Metrics */}
-          <div className="grid lg:grid-cols-12 gap-6 mb-10">
-            {/* Profile */}
-            <div className="lg:col-span-4 border-2 border-[#0A0A0A] bg-white p-6 shadow-[5px_5px_0px_#0A0A0A] hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[7px_7px_0px_#0A0A0A] transition-all rounded-none flex flex-col gap-5">
-              {loading ? (
-                <div className="animate-pulse space-y-4">
-                  <div className="w-20 h-20 rounded-none bg-gray-200 border-2 border-[#0A0A0A]" />
-                  <div className="w-32 h-5 bg-gray-200" />
-                  <div className="w-48 h-3 bg-gray-200" />
-                  <div className="w-40 h-3 bg-gray-200" />
-                </div>
-              ) : data ? (
-                <>
-                  <div className="relative w-20 h-20 rounded-none overflow-hidden border-2 border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A]">
-                    <Image
-                      src={data.avatarUrl}
-                      alt={data.username}
-                      fill
-                      className="object-cover"
-                      sizes="80px"
-                    />
+          {(loading || data) && (
+            <div className="grid lg:grid-cols-12 gap-6 mb-10">
+              {/* Profile */}
+              <div className="lg:col-span-4 border-2 border-[#0A0A0A] bg-white p-6 shadow-[5px_5px_0px_#0A0A0A] hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[7px_7px_0px_#0A0A0A] transition-all rounded-none flex flex-col gap-5">
+                {loading ? (
+                  <div className="animate-pulse space-y-4">
+                    <div className="w-20 h-20 rounded-none bg-gray-200 border-2 border-[#0A0A0A]" />
+                    <div className="w-32 h-5 bg-gray-200" />
+                    <div className="w-48 h-3 bg-gray-200" />
+                    <div className="w-40 h-3 bg-gray-200" />
                   </div>
-                  <div>
-                    <p className="text-lg font-black uppercase text-[#0A0A0A]">{data.name ?? data.username}</p>
-                    <p className="text-sm font-mono text-[#E3000F] font-bold">@{data.username}</p>
-                    {data.bio && (
-                      <p className="text-sm text-[#3a3a3a] font-medium leading-relaxed mt-2">{data.bio}</p>
-                    )}
-                  </div>
-                  <a
-                    href={data.profileUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-[#0A0A0A] hover:underline"
-                  >
-                    <Github size={14} />
-                    View GitHub Profile
-                    <ExternalLink size={12} />
-                  </a>
-                </>
-              ) : null}
-            </div>
+                ) : data ? (
+                  <>
+                    <div className="relative w-20 h-20 rounded-none overflow-hidden border-2 border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A]">
+                      <Image
+                        src={data.avatarUrl}
+                        alt={data.username}
+                        fill
+                        className="object-cover"
+                        sizes="80px"
+                      />
+                    </div>
+                    <div>
+                      <p className="text-lg font-black uppercase text-[#0A0A0A]">{data.name ?? data.username}</p>
+                      <p className="text-sm font-mono text-[#E3000F] font-bold">@{data.username}</p>
+                      {data.bio && (
+                        <p className="text-sm text-[#3a3a3a] font-medium leading-relaxed mt-2">{data.bio}</p>
+                      )}
+                    </div>
+                    <a
+                      href={data.profileUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-[#0A0A0A] hover:underline"
+                    >
+                      <Github size={14} />
+                      View GitHub Profile
+                      <ExternalLink size={12} />
+                    </a>
+                  </>
+                ) : null}
+              </div>
 
-            {/* Metric cards */}
-            <div className="lg:col-span-8 grid sm:grid-cols-2 md:grid-cols-4 gap-4 content-start">
-              {loading ? (
-                Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)
-              ) : data ? (
-                <>
-                  <MetricCard label="Repositories" value={data.publicRepos} icon={<BookOpen size={18} />} />
-                  <MetricCard label="Stars earned" value={data.totalStars} icon={<Star size={18} />} />
-                  <MetricCard label="Forks" value={data.totalForks} icon={<GitFork size={18} />} />
-                  <MetricCard label="Followers" value={data.followers} icon={<Users size={18} />} />
-                </>
-              ) : null}
+              {/* Metric cards */}
+              <div className="lg:col-span-8 grid sm:grid-cols-2 md:grid-cols-4 gap-4 content-start">
+                {loading ? (
+                  Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)
+                ) : data ? (
+                  <>
+                    <MetricCard label="Repositories" value={data.publicRepos} icon={<BookOpen size={18} />} />
+                    <MetricCard label="Stars earned" value={data.totalStars} icon={<Star size={18} />} />
+                    <MetricCard label="Forks" value={data.totalForks} icon={<GitFork size={18} />} />
+                    <MetricCard label="Followers" value={data.followers} icon={<Users size={18} />} />
+                  </>
+                ) : null}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Language Breakdown */}
           {(loading || data) && (
@@ -231,125 +233,128 @@ export default function GitHubStats() {
             </div>
           )}
 
-          <div className="grid lg:grid-cols-2 gap-6">
-            {/* Top Repositories */}
-            <div className="border-2 border-[#0A0A0A] bg-white p-6 shadow-[5px_5px_0px_#0A0A0A] rounded-none">
-              <h3 className="text-xs font-black uppercase text-[#E3000F] tracking-widest mb-5">
-                Featured Repositories
-              </h3>
-              {loading ? (
-                <div className="space-y-4 animate-pulse">
-                  {Array.from({ length: 4 }).map((_, i) => (
-                    <div key={i} className="space-y-2 pb-4 border-b-2 border-gray-100">
-                      <div className="w-32 h-4 bg-gray-200" />
-                      <div className="w-48 h-3 bg-gray-200" />
-                    </div>
-                  ))}
-                </div>
-              ) : data ? (
-                <div className="space-y-4">
-                  {data.topRepos.map((repo, i) => (
-                    <a
-                      key={repo.name}
-                      href={repo.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={`group flex flex-col gap-1.5 pb-4 transition-all hover:-translate-x-0.5 hover:opacity-100 ${i < data.topRepos.length - 1 ? "border-b-2 border-dashed border-gray-100" : ""} opacity-90`}
-                    >
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="text-sm font-black uppercase text-[#0A0A0A] group-hover:text-[#E3000F] transition-colors font-mono">
-                          {repo.name}
-                        </span>
-                        <div className="flex items-center gap-3 text-xs font-mono text-[#666666] shrink-0 font-bold">
-                          {repo.stars > 0 && (
-                            <span className="flex items-center gap-1 border border-[#0A0A0A] px-1 bg-[#FFF5F5]">
-                              <Star size={11} className="text-[#E3000F]" />
-                              {repo.stars}
-                            </span>
-                          )}
-                          {repo.forks > 0 && (
-                            <span className="flex items-center gap-1 border border-[#0A0A0A] px-1 bg-[#FFF5F5]">
-                              <GitFork size={11} className="text-[#0A0A0A]" />
-                              {repo.forks}
-                            </span>
-                          )}
-                        </div>
+          {/* Top Repositories & Recent Activity */}
+          {(loading || data) && (
+            <div className="grid lg:grid-cols-2 gap-6">
+              {/* Top Repositories */}
+              <div className="border-2 border-[#0A0A0A] bg-white p-6 shadow-[5px_5px_0px_#0A0A0A] rounded-none">
+                <h3 className="text-xs font-black uppercase text-[#E3000F] tracking-widest mb-5">
+                  Featured Repositories
+                </h3>
+                {loading ? (
+                  <div className="space-y-4 animate-pulse">
+                    {Array.from({ length: 4 }).map((_, i) => (
+                      <div key={i} className="space-y-2 pb-4 border-b-2 border-gray-100">
+                        <div className="w-32 h-4 bg-gray-200" />
+                        <div className="w-48 h-3 bg-gray-200" />
                       </div>
-                      {repo.description && (
-                        <p className="text-xs text-[#3a3a3a] font-medium leading-relaxed line-clamp-2">
-                          {repo.description}
-                        </p>
-                      )}
-                      {repo.language && (
-                        <div className="flex items-center gap-1.5 mt-0.5">
-                          <span
-                            className="w-2 h-2 border border-[#0A0A0A]"
-                            style={{ backgroundColor: langColor(repo.language) }}
-                          />
-                          <span className="text-[10px] font-mono font-bold text-[#666666] uppercase">{repo.language}</span>
+                    ))}
+                  </div>
+                ) : data ? (
+                  <div className="space-y-4">
+                    {data.topRepos.map((repo, i) => (
+                      <a
+                        key={repo.name}
+                        href={repo.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={`group flex flex-col gap-1.5 pb-4 transition-all hover:-translate-x-0.5 hover:opacity-100 ${i < data.topRepos.length - 1 ? "border-b-2 border-dashed border-gray-100" : ""} opacity-90`}
+                      >
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-sm font-black uppercase text-[#0A0A0A] group-hover:text-[#E3000F] transition-colors font-mono">
+                            {repo.name}
+                          </span>
+                          <div className="flex items-center gap-3 text-xs font-mono text-[#666666] shrink-0 font-bold">
+                            {repo.stars > 0 && (
+                              <span className="flex items-center gap-1 border border-[#0A0A0A] px-1 bg-[#FFF5F5]">
+                                <Star size={11} className="text-[#E3000F]" />
+                                {repo.stars}
+                              </span>
+                            )}
+                            {repo.forks > 0 && (
+                              <span className="flex items-center gap-1 border border-[#0A0A0A] px-1 bg-[#FFF5F5]">
+                                <GitFork size={11} className="text-[#0A0A0A]" />
+                                {repo.forks}
+                              </span>
+                            )}
+                          </div>
                         </div>
-                      )}
-                    </a>
-                  ))}
-                </div>
-              ) : null}
-            </div>
-
-            {/* Recent Activity */}
-            <div className="border-2 border-[#0A0A0A] bg-white p-6 shadow-[5px_5px_0px_#0A0A0A] rounded-none">
-              <h3 className="text-xs font-black uppercase text-[#E3000F] tracking-widest mb-5">
-                Recent Activity
-              </h3>
-              {loading ? (
-                <div className="space-y-4 animate-pulse">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <div key={i} className="flex items-center justify-between">
-                      <div className="w-32 h-4 bg-gray-200" />
-                      <div className="w-16 h-3 bg-gray-200" />
-                    </div>
-                  ))}
-                </div>
-              ) : data ? (
-                <div className="space-y-3">
-                  {data.recentRepos.map((repo) => (
-                    <a
-                      key={repo.name}
-                      href={repo.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="group flex items-center justify-between py-2.5 border-b border-dashed border-gray-100 last:border-0 hover:translate-x-0.5 transition-all"
-                    >
-                      <div className="flex items-center gap-3">
-                        {repo.language && (
-                          <span
-                            className="w-2.5 h-2.5 border border-[#0A0A0A] shrink-0"
-                            style={{ backgroundColor: langColor(repo.language) }}
-                          />
+                        {repo.description && (
+                          <p className="text-xs text-[#3a3a3a] font-medium leading-relaxed line-clamp-2">
+                            {repo.description}
+                          </p>
                         )}
-                        <span className="text-sm font-mono font-bold text-[#0A0A0A] group-hover:text-[#E3000F] transition-colors">
-                          {repo.name}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-1.5 text-xs text-[#666666] font-mono font-bold shrink-0">
-                        <Clock size={11} />
-                        {timeAgo(repo.updatedAt)}
-                      </div>
-                    </a>
-                  ))}
+                        {repo.language && (
+                          <div className="flex items-center gap-1.5 mt-0.5">
+                            <span
+                              className="w-2.5 h-2.5 border border-[#0A0A0A]"
+                              style={{ backgroundColor: langColor(repo.language) }}
+                            />
+                            <span className="text-[10px] font-mono font-bold text-[#666666] uppercase">{repo.language}</span>
+                          </div>
+                        )}
+                      </a>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
 
-                  <a
-                    href={`https://github.com/${data.username}?tab=repositories`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-[#E3000F] hover:underline pt-2 cursor-pointer"
-                  >
-                    <Github size={12} />
-                    View all {data.publicRepos} repositories →
-                  </a>
-                </div>
-              ) : null}
+              {/* Recent Activity */}
+              <div className="border-2 border-[#0A0A0A] bg-white p-6 shadow-[5px_5px_0px_#0A0A0A] rounded-none">
+                <h3 className="text-xs font-black uppercase text-[#E3000F] tracking-widest mb-5">
+                  Recent Activity
+                </h3>
+                {loading ? (
+                  <div className="space-y-4 animate-pulse">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <div key={i} className="flex items-center justify-between">
+                        <div className="w-32 h-4 bg-gray-200" />
+                        <div className="w-16 h-3 bg-gray-200" />
+                      </div>
+                    ))}
+                  </div>
+                ) : data ? (
+                  <div className="space-y-3">
+                    {data.recentRepos.map((repo) => (
+                      <a
+                        key={repo.name}
+                        href={repo.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="group flex items-center justify-between py-2.5 border-b border-dashed border-gray-100 last:border-0 hover:translate-x-0.5 transition-all"
+                      >
+                        <div className="flex items-center gap-3">
+                          {repo.language && (
+                            <span
+                              className="w-2.5 h-2.5 border border-[#0A0A0A] shrink-0"
+                              style={{ backgroundColor: langColor(repo.language) }}
+                            />
+                          )}
+                          <span className="text-sm font-mono font-bold text-[#0A0A0A] group-hover:text-[#E3000F] transition-colors">
+                            {repo.name}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1.5 text-xs text-[#666666] font-mono font-bold shrink-0">
+                          <Clock size={11} />
+                          {timeAgo(repo.updatedAt)}
+                        </div>
+                      </a>
+                    ))}
+
+                    <a
+                      href={`https://github.com/${data.username}?tab=repositories`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-[#E3000F] hover:underline pt-2 cursor-pointer"
+                    >
+                      <Github size={12} />
+                      View all {data.publicRepos} repositories →
+                    </a>
+                  </div>
+                ) : null}
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </ScrollReveal>
     </section>
