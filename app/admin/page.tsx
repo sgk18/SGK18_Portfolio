@@ -88,9 +88,15 @@ export default function AdminPage() {
         fetch("/api/admin/contacts", { headers: { "x-admin-password": pw } }),
       ]);
 
+      if (analyticsRes.status === 401 || contactsRes.status === 401) {
+        setAuthed(false);
+        setAuthError("Incorrect password.");
+        return;
+      }
+
       if (!analyticsRes.ok || !contactsRes.ok) {
         setAuthed(false);
-        setAuthError("Invalid password.");
+        setAuthError(`Server/Database error (Analytics: ${analyticsRes.status}, Contacts: ${contactsRes.status}).`);
         return;
       }
 
@@ -114,6 +120,12 @@ export default function AdminPage() {
 
     if (res.status === 401) {
       setAuthError("Incorrect password.");
+      setLoading(false);
+      return;
+    }
+
+    if (!res.ok) {
+      setAuthError(`Server/Database error: ${res.status}. Please check server console logs.`);
       setLoading(false);
       return;
     }

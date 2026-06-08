@@ -5,6 +5,10 @@ import { PrismaLibSql } from '@prisma/adapter-libsql';
 // Prevent multiple Prisma Client instances during Next.js hot reload in development
 const globalForPrisma = globalThis as unknown as { prisma: PrismaClient };
 
+if (process.env.NODE_ENV === 'development') {
+  process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+}
+
 function createPrismaClient(): PrismaClient {
   const tursoUrl = process.env.TURSO_DATABASE_URL;
   const authToken = process.env.TURSO_AUTH_TOKEN;
