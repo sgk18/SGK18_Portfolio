@@ -3,7 +3,11 @@
 import { useMemo } from "react";
 import { motion } from "framer-motion";
 import { Github, Linkedin, Mail, Download, ArrowRight } from "lucide-react";
-import Hyperspeed from "./Hyperspeed";
+import dynamic from "next/dynamic";
+
+const Hyperspeed = dynamic(() => import("./Hyperspeed"), {
+  ssr: false,
+});
 import { smoothScrollTo } from "@/lib/smoothScroll";
 
 const fadeUp = {
@@ -18,6 +22,7 @@ const fadeUp = {
     },
   }),
 };
+
 
 const hyperspeedOptions = {
   distortion: 'turbulentDistortion',
@@ -119,9 +124,9 @@ export default function Hero() {
           initial="hidden"
           animate="show"
           custom={1}
-          className="text-5xl md:text-7xl font-black uppercase tracking-tighter text-[#0A0A0A] mb-5 leading-[1.08]"
+          className="text-4xl sm:text-5xl md:text-7xl font-black uppercase tracking-tighter text-[#0A0A0A] mb-5 leading-[1.08]"
         >
-          Suryachalam <span className="text-[#E3000F]">V M</span>
+          Suryachalam <span className="text-[#E3000F] whitespace-nowrap">V M</span>
         </motion.h1>
 
         {/* Engineering positioning */}
@@ -148,6 +153,7 @@ export default function Hero() {
           Currently shipping real features for real users at{" "}
           <span className="font-bold underline decoration-[#E3000F] decoration-2">SOCIO</span>.
         </motion.p>
+
 
         {/* Focus Areas */}
         <motion.div

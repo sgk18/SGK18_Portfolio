@@ -23,10 +23,6 @@
     "@gsap/react": "^2.1.2",
     "@libsql/client": "^0.17.3",
     "@prisma/adapter-libsql": "^7.8.0",
-    "@supabase/supabase-js": "^2.107.0",
-    "@tsparticles/engine": "^3.9.1",
-    "@tsparticles/react": "^3.0.0",
-    "@tsparticles/slim": "^3.9.1",
     "@types/three": "^0.183.1",
     "framer-motion": "^12.34.4",
     "gsap": "^3.14.2",
@@ -38,8 +34,7 @@
     "react-dom": "^19.2.4",
     "react-icons": "^5.5.0",
     "resend": "^6.9.3",
-    "three": "^0.183.2",
-    "tsparticles": "^3.9.1"
+    "three": "^0.183.2"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.3",

@@ -745,7 +745,7 @@ class App {
   scene: THREE.Scene;
   renderPass!: RenderPass;
   bloomPass!: EffectPass;
-  clock: THREE.Clock;
+  clock: THREE.Timer;
   assets: Record<string, any>;
   disposed: boolean;
   road: Road;
@@ -766,6 +766,11 @@ class App {
     this.container = container;
 
     this.renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true });
+    this.renderer.domElement.style.width = '100%';
+    this.renderer.domElement.style.height = '100%';
+    this.renderer.domElement.style.position = 'absolute';
+    this.renderer.domElement.style.top = '0';
+    this.renderer.domElement.style.left = '0';
     this.renderer.setSize(container.offsetWidth, container.offsetHeight, false);
     this.renderer.setPixelRatio(window.devicePixelRatio);
     this.composer = new EffectComposer(this.renderer);
@@ -783,7 +788,10 @@ class App {
     this.scene.fog = fog;
     this.fogUniforms = { fogColor: { value: fog.color }, fogNear: { value: fog.near }, fogFar: { value: fog.far } };
 
-    this.clock = new THREE.Clock();
+    this.clock = new THREE.Timer();
+    if (typeof document !== 'undefined') {
+      this.clock.connect(document);
+    }
     this.assets = {};
     this.disposed = false;
 
@@ -893,7 +901,7 @@ class App {
     const lerpPercentage = Math.exp(-(-60 * Math.log2(1 - 0.1)) * delta);
     this.speedUp += lerp(this.speedUp, this.speedUpTarget, lerpPercentage, 0.00001);
     this.timeOffset += this.speedUp * delta;
-    const time = this.clock.elapsedTime + this.timeOffset;
+    const time = this.clock.getElapsed() + this.timeOffset;
 
     this.rightCarLights.update(time);
     this.leftCarLights.update(time);
@@ -916,6 +924,10 @@ class App {
 
   dispose() {
     this.disposed = true;
+    if (this.clock) {
+      this.clock.dispose();
+      this.clock.disconnect();
+    }
     if (this.renderer) this.renderer.dispose();
     if (this.composer) this.composer.dispose();
     if (this.scene) this.scene.clear();
@@ -932,6 +944,7 @@ class App {
   }
 
   setSize(width: number, height: number, updateStyles: boolean) {
+    this.renderer.setSize(width, height, updateStyles);
     this.composer.setSize(width, height, updateStyles);
   }
 
@@ -942,6 +955,7 @@ class App {
       this.camera.aspect = canvas.clientWidth / canvas.clientHeight;
       this.camera.updateProjectionMatrix();
     }
+    this.clock.update();
     const delta = this.clock.getDelta();
     this.render(delta);
     this.update(delta);
