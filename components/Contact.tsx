@@ -162,7 +162,7 @@ export default function Contact() {
             </div>
 
             {/* Right: form */}
-            <div>
+            <div className="contact-form">
               {status === "success" ? (
                 <div className="border-2 border-[#0A0A0A] bg-white p-10 flex flex-col items-center text-center gap-4 shadow-[5px_5px_0px_#0A0A0A] rounded-none">
                   <div className="w-16 h-16 border-2 border-[#0A0A0A] bg-[#FFF5F5] text-emerald-600 flex items-center justify-center shadow-[3px_3px_0px_#0A0A0A] rounded-none">
@@ -328,7 +328,9 @@ export default function Contact() {
                     id="contact-submit-btn"
                     type="submit"
                     disabled={status === "loading"}
-                    className="w-full flex items-center justify-center gap-2 px-6 py-3.5 border-2 border-[#0A0A0A] bg-[#E3000F] hover:bg-[#FF1A1A] disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed text-white font-bold uppercase shadow-[4px_4px_0px_#0A0A0A] hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[7px_7px_0px_#0A0A0A] transition-all rounded-none cursor-pointer text-sm tracking-wider"
+                  >
+                    className="w-full flex items-center justify-center gap-2 px-6 py-3.5 contact-submit hover:bg-[#FF1A1A] disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed font-bold uppercase shadow-[4px_4px_0px_#0A0A0A] hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[7px_7px_0px_#0A0A0A] transition-all rounded-none cursor-pointer text-sm tracking-wider"
+                    aria-live="polite"
                   >
                     {status === "loading" ? (
                       <>

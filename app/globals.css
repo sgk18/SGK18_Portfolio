@@ -101,5 +101,35 @@ body {
     background-color: #FFFFFF;
     border: 2px solid #0A0A0A;
   }
+
+  /* Contact form specific adjustments to normalize inputs and autofill */
+  .contact-form input,
+  .contact-form textarea {
+    background-color: var(--color-nb-surface);
+    border: 2px solid var(--color-nb-border);
+    color: var(--color-foreground);
+    -webkit-text-fill-color: var(--color-foreground);
+  }
+
+  /* Remove browser autofill background color (Chrome/Edge/Safari) */
+  input:-webkit-autofill,
+  textarea:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0px 1000px var(--color-nb-surface) inset !important;
+    box-shadow: 0 0 0px 1000px var(--color-nb-surface) inset !important;
+    -webkit-text-fill-color: var(--color-foreground) !important;
+  }
+
+  .contact-form input:focus,
+  .contact-form textarea:focus {
+    outline: none;
+    border-color: var(--color-nb-red);
+    box-shadow: 6px 6px 0 0 var(--color-nb-black);
+  }
+
+  .contact-form .contact-submit {
+    border: 2px solid var(--color-nb-border);
+    background-color: var(--color-nb-red);
+    color: white;
+  }
 }
 
