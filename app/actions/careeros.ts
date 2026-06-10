@@ -202,7 +202,8 @@ export async function getDashboardData(pw: string) {
     contacts,
     notes,
     reminders,
-    activityLogs
+    activityLogs,
+    dashboardAlerts
   ] = await Promise.all([
     prisma.opportunity.findMany({ orderBy: { createdAt: "desc" } }),
     prisma.hackathon.findMany({ orderBy: { createdAt: "desc" } }),
@@ -222,6 +223,7 @@ export async function getDashboardData(pw: string) {
     prisma.note.findMany({ orderBy: { updatedAt: "desc" } }),
     prisma.reminder.findMany({ orderBy: { reminderDate: "asc" } }),
     prisma.activityLog.findMany({ orderBy: { createdAt: "desc" }, take: 50 }),
+    prisma.dashboardAlert.findMany({ where: { dismissed: false }, orderBy: { createdAt: "desc" } }),
   ]);
 
   return {
@@ -262,6 +264,10 @@ export async function getDashboardData(pw: string) {
     activityLogs: activityLogs.map(a => ({
       ...a,
       createdAt: a.createdAt.toISOString(),
+    })),
+    dashboardAlerts: dashboardAlerts.map(da => ({
+      ...da,
+      createdAt: da.createdAt.toISOString(),
     })),
   };
 }
@@ -963,4 +969,49 @@ export async function globalSearchAction(pw: string, query: string) {
     events: events.map(e => ({ ...e, type: "event" })),
     applications: applications.map(a => ({ ...a, type: "application" })),
   };
+}
+
+export async function getDashboardAlertsAction(pw: string) {
+  checkAuth(pw);
+  const alerts = await prisma.dashboardAlert.findMany({
+    where: { dismissed: false },
+    orderBy: { createdAt: "desc" },
+  });
+  return alerts.map(da => ({
+    ...da,
+    createdAt: da.createdAt.toISOString(),
+  }));
+}
+
+export async function markAlertReadAction(pw: string, id: string) {
+  checkAuth(pw);
+  const alert = await prisma.dashboardAlert.update({
+    where: { id },
+    data: { read: true },
+  });
+  return {
+    ...alert,
+    createdAt: alert.createdAt.toISOString(),
+  };
+}
+
+export async function dismissAlertAction(pw: string, id: string) {
+  checkAuth(pw);
+  const alert = await prisma.dashboardAlert.update({
+    where: { id },
+    data: { dismissed: true },
+  });
+  return {
+    ...alert,
+    createdAt: alert.createdAt.toISOString(),
+  };
+}
+
+// Action to manually trigger a proactive audit run
+export async function runAuditAction(pw: string) {
+  checkAuth(pw);
+  const { DeadlineEngine } = await import("@/lib/deadlineEngine");
+  await DeadlineEngine.runAudit(pw);
+  await DeadlineEngine.processExpiredItems();
+  return { success: true };
 }

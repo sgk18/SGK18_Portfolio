@@ -200,3 +200,30 @@ model Reminder {
 
   @@map("reminders")
 }
+
+model NotificationLog {
+  id               String   @id @default(cuid())
+  entityType       String   // "OPPORTUNITY", "HACKATHON", "APPLICATION", "EVENT", "GOAL", "CONTACT"
+  entityId         String
+  notificationType String   // e.g. "DEADLINE_1_DAY", "DAILY_DIGEST_2026-06-15"
+  sentAt           DateTime @default(now())
+  recipient        String
+  status           String   // "SENT" | "FAILED"
+
+  @@unique([entityType, entityId, notificationType])
+  @@map("notification_logs")
+}
+
+model DashboardAlert {
+  id          String   @id @default(cuid())
+  title       String
+  message     String
+  urgency     String   // "CRITICAL" | "HIGH" | "MEDIUM" | "LOW"
+  relatedType String   // "OPPORTUNITY" | "HACKATHON" | "APPLICATION" | "EVENT" | "GOAL" | "CONTACT"
+  relatedId   String
+  read        Boolean  @default(false)
+  dismissed   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  @@map("dashboard_alerts")
+}
