@@ -1980,15 +1980,16 @@ function HackathonsView({ store, theme, password, onAddHackathon, onEditHackatho
                             </span>
                             <PriorityBadge priority={priority} />
                           </div>
-                          <button onClick={() => onEditHackathon(hack)} className="text-indigo-400 hover:text-indigo-300 text-[10px]">
-                            Edit
-                          </button>
-                          <button onClick={() => onDeleteHackathon(hack.id)} className="text-rose-500 hover:text-rose-400 text-[10px]">
-                            Delete
-                          </button>
+                          <div className="flex justify-end gap-2 pt-2 border-t-2 border-inherit opacity-0 group-hover:opacity-100 transition-all">
+                            <button onClick={() => onEditHackathon(hack)} className="text-indigo-400 hover:text-indigo-300 text-[10px]">
+                              Edit
+                            </button>
+                            <button onClick={() => onDeleteHackathon(hack.id)} className="text-rose-500 hover:text-rose-400 text-[10px]">
+                              Delete
+                            </button>
+                          </div>
                         </div>
-                      </div>
-                    );
+                      );
                   })
                 )}
                 </div>
@@ -1999,10 +2000,10 @@ function HackathonsView({ store, theme, password, onAddHackathon, onEditHackatho
       )}
 
       {subView === "table" && (
-        <div className={`border ${theme.border} rounded-2xl bg-[#0b0b0f] overflow-hidden`}>
+        <div className={`border ${theme.border} rounded-xl bg-inherit overflow-hidden shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]`}>
           <table className="w-full text-left border-collapse text-xs">
             <thead>
-              <tr className="border-b border-[#161623] bg-zinc-900/30 font-mono font-bold text-zinc-400">
+              <tr className={`border-b-2 ${theme.border} bg-zinc-900/30 font-mono font-bold text-zinc-400`}>
                 <th className="p-4">Name</th>
                 <th className="p-4">Organizer</th>
                 <th className="p-4">Deadline</th>
@@ -2010,7 +2011,7 @@ function HackathonsView({ store, theme, password, onAddHackathon, onEditHackatho
                 <th className="p-4 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#161623]">
+            <tbody className={`divide-y-2 ${theme.border}`}>
               {store.hackathons.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="p-6 text-center text-zinc-500 font-mono">No hackathons recorded.</td>
@@ -2066,10 +2067,10 @@ function ApplicationsView({ store, theme, password, onAddApplication, onEditAppl
         </button>
       </div>
 
-      <div className={`border ${theme.border} rounded-2xl bg-[#0b0b0f] overflow-hidden`}>
+      <div className={`border-2 ${theme.border} rounded-xl bg-inherit overflow-hidden shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]`}>
         <table className="w-full text-left border-collapse text-xs">
           <thead>
-            <tr className="border-b border-[#161623] bg-zinc-900/30 font-mono font-bold text-zinc-400">
+            <tr className={`border-b-2 ${theme.border} bg-zinc-900/30 font-mono font-bold text-zinc-400`}>
               <th className="p-4">Company</th>
               <th className="p-4">Role</th>
               <th className="p-4">Applied Date</th>
@@ -2078,7 +2079,7 @@ function ApplicationsView({ store, theme, password, onAddApplication, onEditAppl
               <th className="p-4 text-right">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-[#161623]">
+          <tbody className={`divide-y-2 ${theme.border}`}>
             {store.applications.length === 0 ? (
               <tr>
                 <td colSpan={6} className="p-6 text-center text-zinc-500 font-mono">No job applications recorded.</td>
@@ -2137,13 +2138,13 @@ function EventsView({ store, theme, password, onAddEvent, onEditEvent, onDeleteE
           <p className="text-xs text-zinc-500 font-mono">Conferences, workshops, college meetups, and schedules</p>
         </div>
         <div className="flex items-center gap-4">
-          <div className="flex items-center gap-1 bg-[#10101a] border border-[#1e1e2f] p-0.5 rounded-lg">
+          <div className={`flex items-center gap-1 ${theme.nestedBg} border ${theme.border} p-0.5 rounded-lg`}>
             {(["calendar", "agenda"] as const).map((view) => (
               <button
                 key={view}
                 onClick={() => setActiveSubView(view)}
                 className={`px-3 py-1.5 rounded-md text-[10px] font-bold uppercase transition-all ${
-                  activeSubView === view ? "bg-indigo-600 text-white" : "text-zinc-400 hover:text-zinc-200"
+                  activeSubView === view ? "bg-indigo-600 text-white shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]" : "text-zinc-400 hover:text-zinc-200"
                 }`}
               >
                 {view}
@@ -2260,7 +2261,7 @@ function RoadmapView({ store, theme, password, onAddRoadmap, onEditRoadmap, onDe
                   <span className="text-zinc-400">Mastery progress:</span>
                   <span className="font-bold text-indigo-400">{map.progress}%</span>
                 </div>
-                <div className="relative w-full h-2.5 bg-zinc-850 rounded-full border border-[#161623]">
+                <div className={`relative w-full h-2.5 bg-zinc-850 rounded-full border ${theme.border}`}>
                   <div className="absolute top-0 left-0 h-full rounded-full bg-gradient-to-r from-indigo-500 to-pink-500 transition-all" style={{ width: `${map.progress}%` }} />
                   <input
                     type="range"
@@ -2274,7 +2275,7 @@ function RoadmapView({ store, theme, password, onAddRoadmap, onEditRoadmap, onDe
               </div>
 
               {map.resources && (
-                <div className="p-3 bg-zinc-800/10 border border-[#161623] rounded-xl text-[11px] text-zinc-500 font-mono whitespace-pre-wrap leading-normal">
+                <div className={`p-3 ${theme.nestedBg} border ${theme.border} rounded-xl text-[11px] text-zinc-500 font-mono whitespace-pre-wrap leading-normal`}>
                   {map.resources}
                 </div>
               )}
@@ -2321,7 +2322,7 @@ function GoalsView({ store, theme, password, onAddGoal, onEditGoal, onDeleteGoal
                   <p className="text-[10px] text-zinc-650 font-mono py-4 text-center">No goals set</p>
                 ) : (
                   list.map((goal: any) => (
-                    <div key={goal.id} className="p-3 bg-[#0c0c14] border border-[#1e1e2f] rounded-xl space-y-3 relative group hover:border-indigo-500/30 transition-all">
+                    <div key={goal.id} className={`p-3 ${theme.nestedBg} border ${theme.border} rounded-xl space-y-3 relative group hover:border-indigo-500/30 transition-all`}>
                       <div>
                         <h4 className="text-xs font-bold text-zinc-200">{goal.title}</h4>
                         <p className="text-[10px] text-zinc-500 mt-1">{goal.description}</p>
@@ -2406,7 +2407,7 @@ function NetworkingView({ store, theme, password, onAddContact, onEditContact, o
                 </span>
               </div>
 
-              <div className="space-y-1.5 text-xs text-zinc-500 font-mono border-t border-[#161623] pt-3">
+              <div className={`space-y-1.5 text-xs text-zinc-500 font-mono border-t-2 ${theme.border} pt-3`}>
                 <p>Email: <span className="text-zinc-300 font-medium">{c.email}</span></p>
                 {c.linkedin && (
                   <p className="flex items-center gap-1">
@@ -2429,7 +2430,7 @@ function NetworkingView({ store, theme, password, onAddContact, onEditContact, o
                 </p>
               )}
 
-              <div className="flex justify-end gap-3 pt-3 border-t border-[#161623] opacity-0 group-hover:opacity-100 transition-all">
+              <div className={`flex justify-end gap-3 pt-3 border-t-2 ${theme.border} opacity-0 group-hover:opacity-100 transition-all`}>
                 <button onClick={() => onEditContact(c)} className="text-indigo-400 hover:text-indigo-300 text-xs font-semibold">
                   Edit
                 </button>
@@ -2454,9 +2455,9 @@ function NotesView({ store, theme, password, onAddNote, onEditNote, onDeleteNote
   }, [store.notes, selectedNoteId]);
 
   return (
-    <div className="h-[calc(100vh-140px)] flex border border-[#161623] rounded-2xl bg-[#0b0b0f] overflow-hidden animate-fadeIn">
+    <div className={`h-[calc(100vh-140px)] flex border-2 ${theme.border} rounded-xl bg-inherit overflow-hidden animate-fadeIn`}>
       {/* Sidebar selection */}
-      <div className="w-80 border-r border-[#161623] flex flex-col bg-[#09090d]/30 divide-y divide-[#161623] shrink-0">
+      <div className={`w-80 border-r-2 ${theme.border} flex flex-col bg-zinc-950/20 divide-y-2 ${theme.border} shrink-0`}>
         <div className="p-4 flex justify-between items-center bg-zinc-900/10">
           <span className="text-[10px] font-bold text-zinc-500 font-mono uppercase tracking-widest">
             Notes ({store.notes.length})
@@ -2500,10 +2501,10 @@ function NotesView({ store, theme, password, onAddNote, onEditNote, onDeleteNote
       </div>
 
       {/* Editor/Reader Workspace */}
-      <div className="flex-1 flex flex-col bg-[#08080c] overflow-y-auto p-8 relative">
+      <div className={`flex-1 flex flex-col ${theme.nestedBg} overflow-y-auto p-8 relative`}>
         {activeNote ? (
           <div className="space-y-6">
-            <div className="flex justify-between items-start border-b border-[#161623] pb-4">
+            <div className={`flex justify-between items-start border-b-2 ${theme.border} pb-4`}>
               <div>
                 <h3 className="text-xl font-bold text-zinc-100">{activeNote.title}</h3>
                 <p className="text-[10px] text-zinc-500 font-mono mt-1">
@@ -2564,7 +2565,7 @@ function RemindersView({ store, theme, password, onAddReminder, onToggleComplete
               <p className="text-xs text-zinc-500 font-mono py-4 text-center">No pending reminders.</p>
             ) : (
               store.reminders.filter((r: any) => !r.completed).map((rem: any) => (
-                <div key={rem.id} className="p-3 bg-[#0c0c14] border border-[#1e1e2f] rounded-xl flex items-center justify-between">
+                <div key={rem.id} className={`p-3 ${theme.nestedBg} border ${theme.border} rounded-xl flex items-center justify-between shadow-[1px_1px_0px_0px_rgba(0,0,0,0.15)]`}>
                   <div className="flex items-start gap-3">
                     <input
                       type="checkbox"
@@ -2599,7 +2600,7 @@ function RemindersView({ store, theme, password, onAddReminder, onToggleComplete
               <p className="text-xs text-zinc-500 font-mono py-4 text-center">No completed reminders.</p>
             ) : (
               store.reminders.filter((r: any) => r.completed).map((rem: any) => (
-                <div key={rem.id} className="p-3 bg-[#0c0c14]/50 border border-[#161623] rounded-xl flex items-center justify-between opacity-60">
+                <div key={rem.id} className={`p-3 ${theme.nestedBg} border ${theme.border} rounded-xl flex items-center justify-between opacity-60`}>
                   <div className="flex items-start gap-3">
                     <input
                       type="checkbox"
@@ -2637,7 +2638,7 @@ function TimelineView({ store, theme }: { store: any; theme: any }) {
         <p className="text-xs text-zinc-500 font-mono">Audit trails, notifications log, and automated CRM histories</p>
       </div>
 
-      <div className="relative border-l border-[#161623] ml-4 pl-6 space-y-6 py-4">
+      <div className={`relative border-l-2 ${theme.border} ml-4 pl-6 space-y-6 py-4`}>
         {store.activityLogs.length === 0 ? (
           <p className="text-xs text-zinc-500 font-mono">No logs recorded yet.</p>
         ) : (
@@ -2653,7 +2654,7 @@ function TimelineView({ store, theme }: { store: any; theme: any }) {
                   </span>
                 </div>
                 {log.metadata && (
-                  <div className="p-2.5 bg-zinc-800/10 border border-[#161623] rounded-lg text-[10px] text-zinc-500 font-mono whitespace-pre-wrap truncate">
+                  <div className={`p-2.5 ${theme.nestedBg} border ${theme.border} rounded-lg text-[10px] text-zinc-500 font-mono whitespace-pre-wrap truncate`}>
                     {JSON.stringify(JSON.parse(log.metadata), null, 2)}
                   </div>
                 )}
@@ -2671,8 +2672,8 @@ function CalendarView({ items, titleKey, dateKey, theme }: { items: any[]; title
   // Calendar month rendering
   const daysInMonth = 30; // Simply mock grid for demo stability
   return (
-    <div className={`border border-[#161623] rounded-2xl bg-[#0b0b0f] overflow-hidden p-6 space-y-4`}>
-      <div className="flex justify-between items-center border-b border-[#161623] pb-3">
+    <div className={`border-2 ${theme.border} rounded-xl bg-inherit shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] overflow-hidden p-6 space-y-4`}>
+      <div className={`flex justify-between items-center border-b-2 ${theme.border} pb-3`}>
         <span className="text-xs font-bold text-zinc-300 uppercase">Upcoming Calendar Items</span>
         <span className="text-[10px] text-zinc-500 font-mono">Active month agenda</span>
       </div>
@@ -2691,7 +2692,7 @@ function CalendarView({ items, titleKey, dateKey, theme }: { items: any[]; title
           });
 
           return (
-            <div key={index} className="min-h-20 bg-zinc-900/20 border border-[#161623] rounded-xl p-2 flex flex-col justify-between group hover:border-indigo-500/20 transition-all">
+            <div key={index} className={`min-h-20 ${theme.nestedBg} border ${theme.border} rounded-xl p-2 flex flex-col justify-between group hover:border-indigo-500/20 transition-all`}>
               <span className="text-[10px] font-bold font-mono text-zinc-500">{dayNum}</span>
               <div className="space-y-1">
                 {dayItems.slice(0, 3).map((di, idx) => {
