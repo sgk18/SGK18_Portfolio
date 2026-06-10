@@ -75,6 +75,9 @@ import {
   toggleReminderCompleted,
   deleteReminder,
   globalSearchAction,
+  markAlertReadAction,
+  dismissAlertAction,
+  runAuditAction,
 } from "@/app/actions/careeros";
 
 // ─── Query Client Instantiation ──────────────────────────────────────────────
@@ -120,6 +123,12 @@ const GOAL_STATUSES = ["NOT_STARTED", "ACTIVE", "COMPLETED", "ARCHIVED"];
 
 // ─── Primary Dashboard Component ──────────────────────────────────────────────
 function CareerOSAdmin() {
+  const [currentTime, setCurrentTime] = useState(0);
+  useEffect(() => {
+    const timer = setTimeout(() => setCurrentTime(Date.now()), 0);
+    return () => clearTimeout(timer);
+  }, []);
+
   const [password, setPassword] = useState("");
   const [authed, setAuthed] = useState(false);
   const [authError, setAuthError] = useState("");
@@ -140,15 +149,7 @@ function CareerOSAdmin() {
   const [modalEditItem, setModalEditItem] = useState<any>(null); // Item being edited (if any)
 
   const queryClient = useQueryClient();
-
-  // Load password from localStorage
-  useEffect(() => {
-    const saved = localStorage.getItem("careeros_pw");
-    if (saved) {
-      setPassword(saved);
-      verifyPassword(saved);
-    }
-  }, []);
+  const [alertsDropdownOpen, setAlertsDropdownOpen] = useState(false);
 
   const verifyPassword = async (pw: string) => {
     setAuthLoading(true);
@@ -169,6 +170,17 @@ function CareerOSAdmin() {
     }
   };
 
+  // Load password from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem("careeros_pw");
+    if (saved) {
+      setTimeout(() => {
+        setPassword(saved);
+        verifyPassword(saved);
+      }, 0);
+    }
+  }, []);
+
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     verifyPassword(password);
@@ -187,11 +199,34 @@ function CareerOSAdmin() {
     enabled: authed,
   });
 
+  const handleMarkAlertRead = async (id: string) => {
+    try {
+      await markAlertReadAction(password, id);
+      queryClient.invalidateQueries({ queryKey: ["dashboardData"] });
+    } catch (err: any) {
+      alert(`Failed to mark read: ${err.message}`);
+    }
+  };
+
+  const handleDismissAlert = async (id: string) => {
+    try {
+      await dismissAlertAction(password, id);
+      queryClient.invalidateQueries({ queryKey: ["dashboardData"] });
+    } catch (err: any) {
+      alert(`Failed to dismiss alert: ${err.message}`);
+    }
+  };
+
+  const unreadAlertsCount = useMemo(() => {
+    if (!store || !store.dashboardAlerts) return 0;
+    return store.dashboardAlerts.filter((a: any) => !a.read).length;
+  }, [store]);
+
   // Global search trigger
   useEffect(() => {
     if (!globalQuery.trim() || !authed) {
-      setGlobalSearchResults(null);
-      return;
+      const timer = setTimeout(() => setGlobalSearchResults(null), 0);
+      return () => clearTimeout(timer);
     }
     const delay = setTimeout(async () => {
       setGlobalSearchLoading(true);
@@ -497,6 +532,95 @@ function CareerOSAdmin() {
                 Actions
               </button>
             </div>
+
+            {/* Notification Bell with Dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => setAlertsDropdownOpen(!alertsDropdownOpen)}
+                className={`p-2.5 rounded-xl border ${theme.border} text-zinc-400 hover:text-zinc-150 hover:bg-zinc-800/35 transition-all relative flex items-center justify-center`}
+                title="System alerts"
+              >
+                <Bell size={13} />
+                {unreadAlertsCount > 0 && (
+                  <span className="absolute -top-1 -right-1 w-4.5 h-4.5 bg-rose-500 rounded-full flex items-center justify-center text-[9px] font-bold text-white font-mono scale-90 animate-pulse">
+                    {unreadAlertsCount}
+                  </span>
+                )}
+              </button>
+
+              {alertsDropdownOpen && (
+                <div className={`absolute right-0 mt-2 w-80 rounded-2xl border ${theme.card} shadow-2xl p-4 space-y-3 z-50 bg-[#0b0b0f] backdrop-blur-xl bg-opacity-95`}>
+                  <div className="flex justify-between items-center border-b border-[#161623] pb-2">
+                    <span className="text-[10px] font-bold text-zinc-400 font-mono uppercase tracking-widest">
+                      Alert Center
+                    </span>
+                    {unreadAlertsCount > 0 && (
+                      <span className="text-[9px] bg-rose-500/10 text-rose-400 border border-rose-500/20 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider font-mono">
+                        {unreadAlertsCount} New
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="space-y-2.5 max-h-72 overflow-y-auto scrollbar-none">
+                    {!store.dashboardAlerts || store.dashboardAlerts.length === 0 ? (
+                      <p className="text-[10px] text-zinc-650 font-mono py-6 text-center">No active alerts.</p>
+                    ) : (
+                      store.dashboardAlerts.map((alert: any) => {
+                        const urgencyColors = alert.urgency === "CRITICAL"
+                          ? "border-rose-500/20 bg-rose-500/5 text-rose-300"
+                          : alert.urgency === "HIGH"
+                          ? "border-amber-500/20 bg-amber-500/5 text-amber-300"
+                          : alert.urgency === "MEDIUM"
+                          ? "border-indigo-500/20 bg-indigo-500/5 text-indigo-300"
+                          : "border-zinc-800 bg-zinc-900/10 text-zinc-400";
+                        return (
+                          <div
+                            key={alert.id}
+                            className={`p-3 rounded-xl border ${urgencyColors} space-y-1 text-left relative group ${
+                              !alert.read ? "ring-1 ring-indigo-500/30" : ""
+                            }`}
+                          >
+                            <div className="flex justify-between items-start gap-2">
+                              <h4 className="text-[11px] font-bold leading-tight">
+                                {alert.title}
+                              </h4>
+                              <span className="text-[8px] font-bold uppercase tracking-widest px-1 py-0.5 rounded bg-zinc-850 text-zinc-400 shrink-0 font-mono scale-90">
+                                {alert.urgency}
+                              </span>
+                            </div>
+                            <p className="text-[10px] text-zinc-400 leading-normal">
+                              {alert.message}
+                            </p>
+                            <div className="flex justify-between items-center pt-1.5 border-t border-[#131320]/40 text-[9px] font-mono mt-1">
+                              <span className="text-zinc-500">
+                                {new Date(alert.createdAt).toLocaleDateString()}
+                              </span>
+                              <div className="flex gap-2">
+                                {!alert.read && (
+                                  <button
+                                    onClick={() => handleMarkAlertRead(alert.id)}
+                                    className="text-indigo-400 hover:text-indigo-300 font-bold"
+                                  >
+                                    Mark Read
+                                  </button>
+                                )}
+                                <button
+                                  onClick={() => handleDismissAlert(alert.id)}
+                                  className="text-zinc-500 hover:text-zinc-300 font-bold"
+                                >
+                                  Dismiss
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setActiveModal("reminder")}
@@ -513,7 +637,7 @@ function CareerOSAdmin() {
         <div className="p-8 space-y-8 max-w-7xl w-full mx-auto flex-1">
           {/* TAB 1: ANALYTICS MODULE */}
           {activeTab === "analytics" && (
-            <AnalyticsView store={store} theme={theme} setActiveTab={setActiveTab} />
+            <AnalyticsView store={store} theme={theme} setActiveTab={setActiveTab} password={password} />
           )}
 
           {/* TAB 2: CRM MODULE */}
@@ -779,7 +903,7 @@ function CareerOSAdmin() {
 // ─── SUB-COMPONENTS & TAB RENDERING LAYOUTS ──────────────────────────────────
 
 // 1. ANALYTICS MODULE VIEW
-function AnalyticsView({ store, theme, setActiveTab }: { store: any; theme: any; setActiveTab: (t: string) => void }) {
+function AnalyticsView({ store, theme, setActiveTab, password }: { store: any; theme: any; setActiveTab: (t: string) => void; password: any }) {
   // Compute metric calculations
   const totalOpp = store.opportunities.length;
   const totalApps = store.applications.length;
@@ -890,30 +1014,316 @@ function AnalyticsView({ store, theme, setActiveTab }: { store: any; theme: any;
         </div>
       </div>
 
-      {/* Recents logs list summary */}
-      <div className={`p-6 rounded-2xl border ${theme.card} space-y-4`}>
-        <div className="flex justify-between items-center">
-          <h3 className="text-sm font-bold tracking-tight">Recent System Logs</h3>
-          <button onClick={() => setActiveTab("timeline")} className="text-xs font-bold text-indigo-400 hover:text-indigo-300">
-            View All Logs →
-          </button>
-        </div>
-        <div className="divide-y divide-[#161623]">
-          {store.activityLogs.slice(0, 4).map((log: any) => (
-            <div key={log.id} className="py-3 flex items-center justify-between text-xs font-medium">
-              <div className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
-                <span className="text-zinc-300">{log.action}</span>
-                <span className="text-zinc-500 font-mono text-[10px]">
-                  {log.metadata && JSON.stringify(JSON.parse(log.metadata))}
+      {/* Grid of logs & proactive deadlines watch */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Deadline Watch Widget */}
+        <DeadlineWatchWidget store={store} theme={theme} password={password} />
+
+        {/* Recents logs list summary */}
+        <div className={`p-6 rounded-2xl border ${theme.card} space-y-4`}>
+          <div className="flex justify-between items-center">
+            <h3 className="text-sm font-bold tracking-tight">Recent System Logs</h3>
+            <button onClick={() => setActiveTab("timeline")} className="text-xs font-bold text-indigo-400 hover:text-indigo-300">
+              View All Logs →
+            </button>
+          </div>
+          <div className="divide-y divide-[#161623] max-h-[220px] overflow-y-auto scrollbar-none">
+            {store.activityLogs.slice(0, 5).map((log: any) => (
+              <div key={log.id} className="py-3 flex items-center justify-between text-xs font-medium">
+                <div className="flex items-center gap-2 overflow-hidden mr-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 shrink-0" />
+                  <span className="text-zinc-300 truncate">{log.action}</span>
+                  <span className="text-zinc-500 font-mono text-[10px] truncate hidden md:inline">
+                    {log.metadata && JSON.stringify(JSON.parse(log.metadata))}
+                  </span>
+                </div>
+                <span className="text-zinc-500 text-[10px] font-mono shrink-0">
+                  {new Date(log.createdAt).toLocaleDateString()}
                 </span>
               </div>
-              <span className="text-zinc-500 text-[10px] font-mono">
-                {new Date(log.createdAt).toLocaleDateString()}
-              </span>
-            </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Urgency Priority & Visual Badges ──────────────────────────────────────────
+export function getUrgencyPriority(deadlineStr?: string | null): "CRITICAL" | "HIGH" | "MEDIUM" | "LOW" {
+  if (!deadlineStr) return "LOW";
+  const deadline = new Date(deadlineStr);
+  const diffMs = deadline.getTime() - Date.now();
+  const diffHours = diffMs / (1000 * 60 * 60);
+  if (diffHours <= 0) return "CRITICAL";
+  if (diffHours < 24) return "CRITICAL";
+  if (diffHours < 24 * 3) return "HIGH";
+  if (diffHours < 24 * 7) return "MEDIUM";
+  return "LOW";
+}
+
+export function PriorityBadge({ priority }: { priority: "CRITICAL" | "HIGH" | "MEDIUM" | "LOW" }) {
+  const styles = {
+    CRITICAL: "bg-rose-500/10 border-rose-500/25 text-rose-400 border",
+    HIGH: "bg-orange-500/10 border-orange-500/25 text-orange-400 border",
+    MEDIUM: "bg-amber-500/10 border-amber-500/25 text-amber-400 border",
+    LOW: "bg-zinc-800 border-zinc-700 text-zinc-400 border",
+  };
+  return (
+    <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider font-mono ${styles[priority]}`}>
+      {priority}
+    </span>
+  );
+}
+
+function DeadlineWatchWidget({ store, theme, password }: { store: any; theme: any; password: any }) {
+  const queryClient = useQueryClient();
+  const [activeWatchTab, setActiveWatchTab] = useState<"urgent" | "upcoming" | "missed">("urgent");
+  const [currentTime, setCurrentTime] = useState<number | null>(null);
+
+  useEffect(() => {
+    setCurrentTime(Date.now());
+    const interval = setInterval(() => {
+      setCurrentTime(Date.now());
+    }, 10000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Collect all items with deadlines
+  const allItems = useMemo(() => {
+    const list: any[] = [];
+
+    // 1. Opportunities
+    store.opportunities.forEach((o: any) => {
+      if (o.deadline) {
+        list.push({
+          id: o.id,
+          title: `${o.title} @ ${o.company}`,
+          date: new Date(o.deadline),
+          type: "Opportunity",
+          status: o.status,
+          raw: o,
+        });
+      }
+    });
+
+    // 2. Hackathons
+    store.hackathons.forEach((h: any) => {
+      if (h.deadline) {
+        list.push({
+          id: h.id,
+          title: h.name,
+          date: new Date(h.deadline),
+          type: "Hackathon",
+          status: h.status,
+          raw: h,
+        });
+      }
+    });
+
+    // 3. Applications
+    store.applications.forEach((a: any) => {
+      if (a.nextFollowUp) {
+        list.push({
+          id: a.id,
+          title: `Follow up: ${a.role} @ ${a.company}`,
+          date: new Date(a.nextFollowUp),
+          type: "Application",
+          status: a.status,
+          raw: a,
+        });
+      }
+    });
+
+    // 4. Events
+    store.events.forEach((e: any) => {
+      if (e.startDate) {
+        list.push({
+          id: e.id,
+          title: e.title,
+          date: new Date(e.startDate),
+          type: "Event",
+          status: e.category,
+          raw: e,
+        });
+      }
+    });
+
+    // 5. Goals
+    store.goals.forEach((g: any) => {
+      if (g.targetDate) {
+        list.push({
+          id: g.id,
+          title: g.title,
+          date: new Date(g.targetDate),
+          type: "Goal",
+          status: g.status,
+          raw: g,
+        });
+      }
+    });
+
+    // 6. Contacts (CRM)
+    store.contacts.forEach((c: any) => {
+      if (c.nextFollowUp) {
+        list.push({
+          id: c.id,
+          title: `Connect with ${c.name}`,
+          date: new Date(c.nextFollowUp),
+          type: "Contact",
+          status: c.status,
+          raw: c,
+        });
+      }
+    });
+
+    return list.sort((a, b) => a.date.getTime() - b.date.getTime());
+  }, [store]);
+
+  const now = new Date();
+  const sevenDaysLater = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+  const thirtyDaysLater = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+
+  // Grouping
+  const urgentItems = allItems.filter(item => {
+    return item.date >= now && item.date <= sevenDaysLater && !["CLOSED", "REJECTED", "OFFER", "COMPLETED", "FINALIST", "WON", "ARCHIVED", "EXPIRED"].includes(item.status);
+  });
+
+  const upcomingItems = allItems.filter(item => {
+    return item.date > sevenDaysLater && item.date <= thirtyDaysLater && !["CLOSED", "REJECTED", "OFFER", "COMPLETED", "FINALIST", "WON", "ARCHIVED", "EXPIRED"].includes(item.status);
+  });
+
+  const missedItems = allItems.filter(item => {
+    return (item.date < now && !["CLOSED", "REJECTED", "OFFER", "COMPLETED", "FINALIST", "WON", "ARCHIVED"].includes(item.status)) || item.status === "EXPIRED";
+  });
+
+  // Archive action handler
+  const handleArchive = async (item: any) => {
+    try {
+      if (item.type === "Opportunity") {
+        await updateOpportunity(password, item.id, { ...item.raw, status: "CLOSED", deadline: item.raw.deadline ? new Date(item.raw.deadline).toISOString() : null });
+      } else if (item.type === "Hackathon") {
+        await updateHackathon(password, item.id, { ...item.raw, status: "COMPLETED", deadline: item.raw.deadline ? new Date(item.raw.deadline).toISOString() : null });
+      } else if (item.type === "Application") {
+        await updateApplication(password, item.id, { ...item.raw, status: "REJECTED", appliedDate: item.raw.appliedDate ? new Date(item.raw.appliedDate).toISOString() : null, nextFollowUp: item.raw.nextFollowUp ? new Date(item.raw.nextFollowUp).toISOString() : null });
+      } else if (item.type === "Goal") {
+        await updateGoal(password, item.id, { ...item.raw, status: "ARCHIVED", targetDate: item.raw.targetDate ? new Date(item.raw.targetDate).toISOString() : null });
+      } else if (item.type === "Contact") {
+        await updateContact(password, item.id, { ...item.raw, status: "CLOSED", lastContact: item.raw.lastContact ? new Date(item.raw.lastContact).toISOString() : null, nextFollowUp: null });
+      }
+      queryClient.invalidateQueries({ queryKey: ["dashboardData"] });
+    } catch (err: any) {
+      alert(`Archive failed: ${err.message}`);
+    }
+  };
+
+  // Helper to format countdown
+  const getCountdown = (date: Date) => {
+    if (!currentTime) return "...";
+    const diffMs = date.getTime() - currentTime;
+    if (diffMs < 0) return "Passed";
+    const diffHours = diffMs / (1000 * 60 * 60);
+    if (diffHours < 24) {
+      return `${Math.round(diffHours)}h left`;
+    }
+    const days = Math.round(diffHours / 24);
+    return `${days}d left`;
+  };
+
+  return (
+    <div className={`p-6 rounded-2xl border ${theme.card} space-y-4`}>
+      <div className="flex justify-between items-center">
+        <div>
+          <h3 className="text-sm font-bold tracking-tight">Proactive Deadline Watch</h3>
+          <p className="text-[10px] text-zinc-500 font-mono">Time-sensitive milestones intelligence</p>
+        </div>
+        <div className="flex gap-1 bg-[#10101a] border border-[#1e1e2f] p-0.5 rounded-lg">
+          {[
+            { id: "urgent", label: "7 Days", count: urgentItems.length },
+            { id: "upcoming", label: "30 Days", count: upcomingItems.length },
+            { id: "missed", label: "Missed", count: missedItems.length, highlight: missedItems.length > 0 },
+          ].map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveWatchTab(tab.id as any)}
+              className={`px-2 py-1 rounded text-[9px] font-bold uppercase transition-all flex items-center gap-1 ${
+                activeWatchTab === tab.id
+                  ? "bg-indigo-600 text-white"
+                  : tab.highlight
+                  ? "text-rose-400 hover:text-rose-300"
+                  : "text-zinc-500 hover:text-zinc-300"
+              }`}
+            >
+              <span>{tab.label}</span>
+              {tab.count > 0 && (
+                <span className={`px-1 rounded font-mono text-[8px] ${
+                  activeWatchTab === tab.id ? "bg-white/20 text-white" : tab.highlight ? "bg-rose-500/10 text-rose-400" : "bg-zinc-800 text-zinc-400"
+                }`}>
+                  {tab.count}
+                </span>
+              )}
+            </button>
           ))}
         </div>
+      </div>
+
+      <div className="space-y-2.5 max-h-[220px] overflow-y-auto scrollbar-none">
+        {activeWatchTab === "urgent" && (
+          urgentItems.length === 0 ? (
+            <p className="text-[10px] text-zinc-650 font-mono py-8 text-center">No urgent deadlines in the next 7 days.</p>
+          ) : (
+            urgentItems.map(item => (
+              <div key={item.id} className="flex items-center justify-between p-2.5 bg-[#0c0c14] border border-rose-500/10 rounded-xl">
+                <div className="min-w-0">
+                  <p className="text-xs font-bold text-zinc-200 truncate pr-2">{item.title}</p>
+                  <p className="text-[9px] text-zinc-500 font-mono mt-0.5">{item.type} · Due {item.date.toLocaleDateString()}</p>
+                </div>
+                <span className="px-2 py-0.5 rounded bg-rose-500/10 border border-rose-500/25 text-[9px] font-bold font-mono text-rose-400 shrink-0">
+                  {getCountdown(item.date)}
+                </span>
+              </div>
+            ))
+          )
+        )}
+
+        {activeWatchTab === "upcoming" && (
+          upcomingItems.length === 0 ? (
+            <p className="text-[10px] text-zinc-650 font-mono py-8 text-center">No deadlines in the next 8-30 days.</p>
+          ) : (
+            upcomingItems.map(item => (
+              <div key={item.id} className="flex items-center justify-between p-2.5 bg-[#0c0c14] border border-[#1e1e2f] rounded-xl">
+                <div className="min-w-0">
+                  <p className="text-xs font-bold text-zinc-200 truncate pr-2">{item.title}</p>
+                  <p className="text-[9px] text-zinc-500 font-mono mt-0.5">{item.type} · Due {item.date.toLocaleDateString()}</p>
+                </div>
+                <span className="px-2 py-0.5 rounded bg-indigo-500/10 border border-indigo-500/25 text-[9px] font-bold font-mono text-indigo-400 shrink-0">
+                  {getCountdown(item.date)}
+                </span>
+              </div>
+            ))
+          )
+        )}
+
+        {activeWatchTab === "missed" && (
+          missedItems.length === 0 ? (
+            <p className="text-[10px] text-zinc-650 font-mono py-8 text-center">No recently missed deadlines.</p>
+          ) : (
+            missedItems.map(item => (
+              <div key={item.id} className="flex items-center justify-between p-2.5 bg-[#0c0c14] border border-rose-500/20 rounded-xl">
+                <div className="min-w-0 mr-2">
+                  <p className="text-xs font-bold text-rose-300 truncate">{item.title}</p>
+                  <p className="text-[9px] text-rose-500/60 font-mono mt-0.5">{item.type} · Missed {item.date.toLocaleDateString()}</p>
+                </div>
+                <button
+                  onClick={() => handleArchive(item)}
+                  className="px-2 py-1 rounded bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/35 text-[9px] font-bold font-mono text-rose-400 transition-all shrink-0"
+                >
+                  Archive
+                </button>
+              </div>
+            ))
+          )
+        )}
       </div>
     </div>
   );
@@ -1159,23 +1569,38 @@ function OpportunitiesView({ store, theme, password, onAddOpportunity, onEditOpp
               </div>
               <div className="space-y-3.5 max-h-96 overflow-y-auto scrollbar-none">
                 {list.length === 0 ? (
-                  <p className="text-[10px] text-zinc-600 font-mono py-4 text-center">Empty column</p>
+                  <p className="text-[10px] text-zinc-650 font-mono py-4 text-center">Empty column</p>
                 ) : (
-                  list.map((opp: any) => (
-                    <div key={opp.id} className="p-3 bg-[#0c0c14] border border-[#1e1e2f] rounded-xl space-y-2 relative group hover:border-indigo-500/30 transition-all">
-                      <div>
-                        <h4 className="text-xs font-bold text-zinc-200">{opp.title}</h4>
-                        <p className="text-[10px] text-zinc-400 font-semibold">{opp.company}</p>
-                      </div>
-                      <div className="flex justify-between items-center text-[9px] pt-1">
-                        <span className="px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-400 font-bold uppercase tracking-wider scale-90 -translate-x-1">
-                          {opp.type}
-                        </span>
-                        <span className="text-zinc-500 font-mono">
-                          {opp.priority} Priority
-                        </span>
-                      </div>
-                      <div className="flex justify-end gap-2 pt-2 border-t border-[#131320]/60 opacity-0 group-hover:opacity-100 transition-all">
+                  list.map((opp: any) => {
+                    const isExpired = opp.status === "EXPIRED" || (opp.deadline && new Date(opp.deadline) < new Date());
+                    const borderClass = isExpired
+                      ? "border-rose-500/35 hover:border-rose-500/60"
+                      : "border-[#1e1e2f] hover:border-indigo-500/30";
+                    return (
+                      <div key={opp.id} className={`p-3 bg-[#0c0c14] border rounded-xl space-y-2 relative group transition-all ${borderClass}`}>
+                        <div>
+                          <div className="flex justify-between items-start gap-1">
+                            <h4 className="text-xs font-bold text-zinc-200">{opp.title}</h4>
+                            {isExpired && (
+                              <span className="px-1.5 py-0.5 rounded bg-rose-500/10 text-[8px] font-bold text-rose-400 uppercase font-mono tracking-wider shrink-0 scale-90">
+                                Expired
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-[10px] text-zinc-400 font-semibold">{opp.company}</p>
+                        </div>
+                        {opp.deadline && (
+                          <p className="text-[9px] text-zinc-500 font-mono">
+                            Deadline: {new Date(opp.deadline).toLocaleDateString()}
+                          </p>
+                        )}
+                        <div className="flex justify-between items-center text-[9px] pt-1">
+                          <span className="px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-400 font-bold uppercase tracking-wider scale-90 -translate-x-1">
+                            {opp.type}
+                          </span>
+                          <PriorityBadge priority={opp.priority} />
+                        </div>
+                        <div className="flex justify-end gap-2 pt-2 border-t border-[#131320]/60 opacity-0 group-hover:opacity-100 transition-all">
                         <select
                           value={opp.status}
                           onChange={(e) => handleStatusChange(opp.id, e.target.value)}
@@ -1192,8 +1617,9 @@ function OpportunitiesView({ store, theme, password, onAddOpportunity, onEditOpp
                           Delete
                         </button>
                       </div>
-                    </div>
-                  ))
+                      </div>
+                    );
+                  })
                 )}
               </div>
             </div>
@@ -1254,20 +1680,39 @@ function HackathonsView({ store, theme, password, onAddHackathon, onEditHackatho
                 </div>
                 <div className="space-y-3 max-h-96 overflow-y-auto scrollbar-none">
                   {list.length === 0 ? (
-                    <p className="text-[10px] text-zinc-600 font-mono py-4 text-center">Empty</p>
+                    <p className="text-[10px] text-zinc-650 font-mono py-4 text-center">Empty</p>
                   ) : (
-                    list.map((hack: any) => (
-                      <div key={hack.id} className="p-3 bg-[#0c0c14] border border-[#1e1e2f] rounded-xl space-y-2 relative group hover:border-indigo-500/30 transition-all">
-                        <div>
-                          <h4 className="text-xs font-bold text-zinc-200">{hack.name}</h4>
-                          <p className="text-[10px] text-zinc-400 font-semibold">{hack.organizer}</p>
-                        </div>
-                        {hack.deadline && (
-                          <p className="text-[9px] text-zinc-500 font-mono">
-                            Deadline: {new Date(hack.deadline).toLocaleDateString()}
-                          </p>
-                        )}
-                        <div className="flex justify-end gap-2 pt-2 border-t border-[#131320]/60 opacity-0 group-hover:opacity-100 transition-all">
+                    list.map((hack: any) => {
+                      const isExpired = hack.status === "EXPIRED" || (hack.deadline && new Date(hack.deadline) < new Date());
+                      const priority = getUrgencyPriority(hack.deadline);
+                      const borderClass = isExpired
+                        ? "border-rose-500/35 hover:border-rose-500/60"
+                        : "border-[#1e1e2f] hover:border-indigo-500/30";
+                      return (
+                        <div key={hack.id} className={`p-3 bg-[#0c0c14] border rounded-xl space-y-2 relative group transition-all ${borderClass}`}>
+                          <div>
+                            <div className="flex justify-between items-start gap-1">
+                              <h4 className="text-xs font-bold text-zinc-200">{hack.name}</h4>
+                              {isExpired && (
+                                <span className="px-1.5 py-0.5 rounded bg-rose-500/10 text-[8px] font-bold text-rose-400 uppercase font-mono tracking-wider shrink-0 scale-90">
+                                  Expired
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-[10px] text-zinc-400 font-semibold">{hack.organizer}</p>
+                          </div>
+                          {hack.deadline && (
+                            <p className="text-[9px] text-zinc-500 font-mono">
+                              Deadline: {new Date(hack.deadline).toLocaleDateString()}
+                            </p>
+                          )}
+                          <div className="flex justify-between items-center text-[9px] pt-1">
+                            <span className="text-zinc-500 text-[8px] font-mono uppercase tracking-wider font-bold">
+                              Submissions
+                            </span>
+                            <PriorityBadge priority={priority} />
+                          </div>
+                          <div className="flex justify-end gap-2 pt-2 border-t border-[#131320]/60 opacity-0 group-hover:opacity-100 transition-all">
                           <button onClick={() => onEditHackathon(hack)} className="text-indigo-400 hover:text-indigo-300 text-[10px]">
                             Edit
                           </button>
@@ -1276,8 +1721,9 @@ function HackathonsView({ store, theme, password, onAddHackathon, onEditHackatho
                           </button>
                         </div>
                       </div>
-                    ))
-                  )}
+                    );
+                  })
+                )}
                 </div>
               </div>
             );
@@ -1371,29 +1817,39 @@ function ApplicationsView({ store, theme, password, onAddApplication, onEditAppl
                 <td colSpan={6} className="p-6 text-center text-zinc-500 font-mono">No job applications recorded.</td>
               </tr>
             ) : (
-              store.applications.map((app: any) => (
-                <tr key={app.id} className="hover:bg-zinc-800/20">
-                  <td className="p-4 font-bold">{app.company}</td>
-                  <td className="p-4 text-zinc-400 font-semibold">{app.role}</td>
-                  <td className="p-4 font-mono text-zinc-500">
-                    {app.appliedDate ? new Date(app.appliedDate).toLocaleDateString() : "-"}
-                  </td>
-                  <td className="p-4 font-mono text-zinc-500">
-                    {app.nextFollowUp ? new Date(app.nextFollowUp).toLocaleDateString() : "-"}
-                  </td>
-                  <td className="p-4">
-                    <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold border uppercase tracking-wider ${
-                      app.status === "OFFER" ? theme.green : app.status === "REJECTED" ? theme.red : theme.accent
-                    }`}>
-                      {app.status}
-                    </span>
-                  </td>
-                  <td className="p-4 text-right space-x-3">
-                    <button onClick={() => onEditApplication(app)} className="text-indigo-400 hover:text-indigo-300">Edit</button>
-                    <button onClick={() => onDeleteApplication(app.id)} className="text-rose-500 hover:text-rose-400">Delete</button>
-                  </td>
-                </tr>
-              ))
+              store.applications.map((app: any) => {
+                const isExpired = app.status === "EXPIRED" || (app.nextFollowUp && new Date(app.nextFollowUp) < new Date() && app.status !== "OFFER" && app.status !== "REJECTED");
+                return (
+                  <tr key={app.id} className={`hover:bg-zinc-800/20 ${isExpired ? "bg-rose-500/5 text-rose-250 border-rose-500/20" : ""}`}>
+                    <td className="p-4 font-bold flex items-center gap-2">
+                      {app.company}
+                      {isExpired && (
+                        <span className="px-1.5 py-0.2 bg-rose-500/10 text-[8px] font-bold border border-rose-500/25 text-rose-400 uppercase tracking-widest font-mono rounded scale-90">
+                          Missed Follow-up
+                        </span>
+                      )}
+                    </td>
+                    <td className="p-4 text-zinc-400 font-semibold">{app.role}</td>
+                    <td className="p-4 font-mono text-zinc-500">
+                      {app.appliedDate ? new Date(app.appliedDate).toLocaleDateString() : "-"}
+                    </td>
+                    <td className="p-4 font-mono text-zinc-500">
+                      {app.nextFollowUp ? new Date(app.nextFollowUp).toLocaleDateString() : "-"}
+                    </td>
+                    <td className="p-4">
+                      <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold border uppercase tracking-wider ${
+                        app.status === "OFFER" ? theme.green : (app.status === "REJECTED" || app.status === "EXPIRED") ? theme.red : theme.accent
+                      }`}>
+                        {app.status}
+                      </span>
+                    </td>
+                    <td className="p-4 text-right space-x-3">
+                      <button onClick={() => onEditApplication(app)} className="text-indigo-400 hover:text-indigo-300">Edit</button>
+                      <button onClick={() => onDeleteApplication(app.id)} className="text-rose-500 hover:text-rose-400">Delete</button>
+                    </td>
+                  </tr>
+                );
+              })
             )}
           </tbody>
         </table>
@@ -1971,11 +2427,39 @@ function CalendarView({ items, titleKey, dateKey, theme }: { items: any[]; title
             <div key={index} className="min-h-20 bg-zinc-900/20 border border-[#161623] rounded-xl p-2 flex flex-col justify-between group hover:border-indigo-500/20 transition-all">
               <span className="text-[10px] font-bold font-mono text-zinc-500">{dayNum}</span>
               <div className="space-y-1">
-                {dayItems.slice(0, 2).map((di, idx) => (
-                  <div key={idx} className="bg-indigo-500/10 border border-indigo-500/20 rounded px-1 py-0.5 text-[8px] font-bold text-indigo-400 truncate max-w-full" title={di[titleKey]}>
-                    {di[titleKey]}
-                  </div>
-                ))}
+                {dayItems.slice(0, 3).map((di, idx) => {
+                  let colorClasses = "bg-indigo-500/10 border-indigo-500/20 text-indigo-400";
+                  if (di.category) {
+                    const cat = String(di.category).toUpperCase();
+                    if (cat.includes("WORKSHOP")) {
+                      colorClasses = "bg-emerald-500/10 border-emerald-500/20 text-emerald-400";
+                    } else if (cat.includes("CONFERENCE")) {
+                      colorClasses = "bg-amber-500/10 border-amber-500/20 text-amber-400";
+                    } else if (cat.includes("MEETUP")) {
+                      colorClasses = "bg-purple-500/10 border-purple-500/20 text-purple-400";
+                    } else if (cat.includes("HACKATHON")) {
+                      colorClasses = "bg-sky-500/10 border-sky-500/20 text-sky-400";
+                    }
+                  } else if (di.status) {
+                    const st = String(di.status).toUpperCase();
+                    if (st === "WON") {
+                      colorClasses = "bg-yellow-500/10 border-yellow-500/20 text-yellow-400";
+                    } else if (st === "REGISTERED") {
+                      colorClasses = "bg-emerald-500/10 border-emerald-500/20 text-emerald-400";
+                    } else if (st === "PLANNING" || st === "RESEARCHING") {
+                      colorClasses = "bg-sky-500/10 border-sky-500/20 text-sky-400";
+                    } else if (st === "SUBMITTED") {
+                      colorClasses = "bg-indigo-500/10 border-indigo-500/20 text-indigo-400";
+                    } else if (st === "EXPIRED") {
+                      colorClasses = "bg-rose-500/10 border-rose-500/20 text-rose-400";
+                    }
+                  }
+                  return (
+                    <div key={idx} className={`border rounded px-1.5 py-0.5 text-[8px] font-extrabold truncate max-w-full leading-tight ${colorClasses}`} title={di[titleKey]}>
+                      {di[titleKey]}
+                    </div>
+                  );
+                })}
               </div>
             </div>
           );
@@ -2055,28 +2539,34 @@ function ModalPanel({ type, theme, password, item, onClose, onSuccess }: { type:
 
   useEffect(() => {
     if (item) {
-      setFormData({
-        ...item,
-        // Format dates correctly for inputs
-        deadline: item.deadline ? new Date(item.deadline).toISOString().substring(0, 10) : "",
-        eventDate: item.eventDate ? new Date(item.eventDate).toISOString().substring(0, 10) : "",
-        appliedDate: item.appliedDate ? new Date(item.appliedDate).toISOString().substring(0, 10) : "",
-        nextFollowUp: item.nextFollowUp ? new Date(item.nextFollowUp).toISOString().substring(0, 10) : "",
-        startDate: item.startDate ? new Date(item.startDate).toISOString().substring(0, 16) : "",
-        endDate: item.endDate ? new Date(item.endDate).toISOString().substring(0, 16) : "",
-        reminderDate: item.reminderDate ? new Date(item.reminderDate).toISOString().substring(0, 16) : "",
-        targetDate: item.targetDate ? new Date(item.targetDate).toISOString().substring(0, 10) : "",
-      });
+      const timer = setTimeout(() => {
+        setFormData({
+          ...item,
+          // Format dates correctly for inputs
+          deadline: item.deadline ? new Date(item.deadline).toISOString().substring(0, 10) : "",
+          eventDate: item.eventDate ? new Date(item.eventDate).toISOString().substring(0, 10) : "",
+          appliedDate: item.appliedDate ? new Date(item.appliedDate).toISOString().substring(0, 10) : "",
+          nextFollowUp: item.nextFollowUp ? new Date(item.nextFollowUp).toISOString().substring(0, 10) : "",
+          startDate: item.startDate ? new Date(item.startDate).toISOString().substring(0, 16) : "",
+          endDate: item.endDate ? new Date(item.endDate).toISOString().substring(0, 16) : "",
+          reminderDate: item.reminderDate ? new Date(item.reminderDate).toISOString().substring(0, 16) : "",
+          targetDate: item.targetDate ? new Date(item.targetDate).toISOString().substring(0, 10) : "",
+        });
+      }, 0);
+      return () => clearTimeout(timer);
     } else {
-      // Setup default placeholder schema
-      if (type === "opportunity") setFormData({ status: "DISCOVERED", type: "INTERNSHIP", priority: "MEDIUM" });
-      if (type === "hackathon") setFormData({ status: "RESEARCHING" });
-      if (type === "application") setFormData({ status: "SAVED" });
-      if (type === "event") setFormData({ category: "HACKATHON" });
-      if (type === "roadmap") setFormData({ progress: 0 });
-      if (type === "goal") setFormData({ category: "WEEKLY", status: "ACTIVE", progress: 0 });
-      if (type === "contact") setFormData({ status: "NEW" });
-      if (type === "reminder") setFormData({ type: "BOTH" });
+      const timer = setTimeout(() => {
+        // Setup default placeholder schema
+        if (type === "opportunity") setFormData({ status: "DISCOVERED", type: "INTERNSHIP", priority: "MEDIUM" });
+        if (type === "hackathon") setFormData({ status: "RESEARCHING" });
+        if (type === "application") setFormData({ status: "SAVED" });
+        if (type === "event") setFormData({ category: "HACKATHON" });
+        if (type === "roadmap") setFormData({ progress: 0 });
+        if (type === "goal") setFormData({ category: "WEEKLY", status: "ACTIVE", progress: 0 });
+        if (type === "contact") setFormData({ status: "NEW" });
+        if (type === "reminder") setFormData({ type: "BOTH" });
+      }, 0);
+      return () => clearTimeout(timer);
     }
   }, [type, item]);
 
