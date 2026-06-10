@@ -10,8 +10,12 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 function createPrismaClient(): PrismaClient {
-  const tursoUrl = process.env.TURSO_DATABASE_URL;
-  const authToken = process.env.TURSO_AUTH_TOKEN;
+  const tursoUrl = process.env.TURSO_DATABASE_URL || (process.env.DATABASE_URL?.startsWith('libsql:') || process.env.DATABASE_URL?.startsWith('https:') ? process.env.DATABASE_URL : undefined);
+  const authToken = process.env.TURSO_AUTH_TOKEN || process.env.DATABASE_AUTH_TOKEN;
+
+  if (process.env.NODE_ENV === 'production' && !tursoUrl) {
+    console.warn('Warning: TURSO_DATABASE_URL or DATABASE_URL is not set. Serverless SQLite fallback might fail on Vercel.');
+  }
 
   const adapter = new PrismaLibSql({
     url: tursoUrl || `file:${path.join(process.cwd(), 'prisma', 'dev.db')}`,
