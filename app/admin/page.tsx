@@ -1,414 +1,2450 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import {
+  QueryClient,
+  QueryClientProvider,
+  useQuery,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
+import {
+  Briefcase,
+  Trophy,
+  FileCheck2,
+  Calendar,
+  Compass,
+  Target,
+  Users,
+  FileText,
+  Bell,
+  Activity,
+  BarChart3,
+  Search,
+  Plus,
+  Moon,
+  Sun,
+  Laptop,
+  CheckCircle,
+  Inbox,
+  Send,
+  Save,
+  Trash2,
+  Clock,
+  ExternalLink,
+  ChevronRight,
+  Sparkles,
+  Link,
+  Sliders,
+  AlertCircle,
+  ListTodo,
+  TrendingUp,
+  Award,
+  Layers,
+  HelpCircle,
+} from "lucide-react";
+import {
+  verifyPasswordAction,
+  getDashboardData,
+  createOpportunity,
+  updateOpportunity,
+  deleteOpportunity,
+  createHackathon,
+  updateHackathon,
+  deleteHackathon,
+  createApplication,
+  updateApplication,
+  deleteApplication,
+  createEvent,
+  updateEvent,
+  deleteEvent,
+  createLearningRoadmap,
+  updateLearningRoadmap,
+  deleteLearningRoadmap,
+  createGoal,
+  updateGoal,
+  deleteGoal,
+  createContact,
+  updateContact,
+  deleteContact,
+  createNote,
+  updateNote,
+  deleteNote,
+  createReminder,
+  updateReminder,
+  toggleReminderCompleted,
+  deleteReminder,
+  globalSearchAction,
+} from "@/app/actions/careeros";
 
-// ─── Types ───────────────────────────────────────────────────────────────────
-interface AnalyticsSummary {
-  totalVisitors: number;
-  totalPageViews: number;
-  totalDownloads: number;
-  totalContacts: number;
-  pageViews: Record<string, number>;
-  referrers: Record<string, number>;
-  viewsByProject: Record<string, number>;
-  recentVisits: Array<{
-    id: string;
-    timestamp: string;
-    page: string;
-    referrer: string;
-  }>;
-}
+// ─── Query Client Instantiation ──────────────────────────────────────────────
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: false,
+    },
+  },
+});
 
-interface Contact {
-  id: string;
-  name: string;
-  email: string;
-  subject: string;
-  message: string;
-  createdAt: string;
-  status: "pending" | "reviewed" | "ignored";
-}
-
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleDateString() + " " + new Date(dateString).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-};
-
-const statusColor = {
-  pending: "border-[#FFD700] text-[#FFD700] bg-[#1a1400]",
-  reviewed: "border-[#00FF41] text-[#00FF41] bg-[#001a00]",
-  ignored: "border-[#E3000F] text-[#E3000F] bg-[#1a0000]",
-};
-
-function StatusBadge({ status }: { status: Contact["status"] }) {
+export default function AdminPageWrapper() {
   return (
-    <span
-      className={`font-mono text-xs border px-2 py-0.5 uppercase ${statusColor[status]}`}
-    >
-      {status}
-    </span>
+    <QueryClientProvider client={queryClient}>
+      <CareerOSAdmin />
+    </QueryClientProvider>
   );
 }
 
-// ─── Main Page ────────────────────────────────────────────────────────────────
-export default function AdminPage() {
+// ─── Constants ──────────────────────────────────────────────────────────────
+const TABS = [
+  { id: "analytics", label: "Analytics", icon: BarChart3 },
+  { id: "crm", label: "Recruiter CRM", icon: Inbox },
+  { id: "opportunities", label: "Opportunities", icon: Briefcase },
+  { id: "hackathons", label: "Hackathons", icon: Trophy },
+  { id: "applications", label: "Applications", icon: FileCheck2 },
+  { id: "events", label: "Events", icon: Calendar },
+  { id: "roadmap", label: "Roadmap", icon: Compass },
+  { id: "goals", label: "Goals", icon: Target },
+  { id: "networking", label: "Networking", icon: Users },
+  { id: "notes", label: "Notes", icon: FileText },
+  { id: "reminders", label: "Reminders", icon: Bell },
+  { id: "timeline", label: "Timeline", icon: Activity },
+];
+
+const OPPORTUNITY_TYPES = ["INTERNSHIP", "JOB", "FREELANCE", "OPEN_SOURCE", "STARTUP", "COLLABORATION"];
+const OPPORTUNITY_STATUSES = ["DISCOVERED", "RESEARCHING", "APPLIED", "IN_PROGRESS", "INTERVIEW", "OFFER", "REJECTED", "CLOSED"];
+const HACKATHON_STATUSES = ["RESEARCHING", "PLANNING", "REGISTERED", "SUBMITTED", "COMPLETED", "FINALIST", "WON"];
+const APPLICATION_STATUSES = ["SAVED", "APPLIED", "OA", "INTERVIEW", "FINAL_ROUND", "OFFER", "REJECTED"];
+const GOAL_CATEGORIES = ["ANNUAL", "QUARTERLY", "MONTHLY", "WEEKLY"];
+const GOAL_STATUSES = ["NOT_STARTED", "ACTIVE", "COMPLETED", "ARCHIVED"];
+
+// ─── Primary Dashboard Component ──────────────────────────────────────────────
+function CareerOSAdmin() {
   const [password, setPassword] = useState("");
   const [authed, setAuthed] = useState(false);
   const [authError, setAuthError] = useState("");
+  const [authLoading, setAuthLoading] = useState(false);
 
-  const [analytics, setAnalytics] = useState<AnalyticsSummary | null>(null);
-  const [contacts, setContacts] = useState<Contact[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState("analytics");
+  const [isDarkMode, setIsDarkMode] = useState(true);
 
-  const fetchData = useCallback(async (pw: string) => {
-    setLoading(true);
-    try {
-      const [analyticsRes, contactsRes] = await Promise.all([
-        fetch("/api/admin/analytics", { headers: { "x-admin-password": pw } }),
-        fetch("/api/admin/contacts", { headers: { "x-admin-password": pw } }),
-      ]);
+  // Command palette and search states
+  const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
+  const [commandQuery, setCommandQuery] = useState("");
+  const [globalQuery, setGlobalQuery] = useState("");
+  const [globalSearchResults, setGlobalSearchResults] = useState<any>(null);
+  const [globalSearchLoading, setGlobalSearchLoading] = useState(false);
 
-      if (analyticsRes.status === 401 || contactsRes.status === 401) {
-        setAuthed(false);
-        setAuthError("Incorrect password.");
-        return;
-      }
+  // Active Creation Modals
+  const [activeModal, setActiveModal] = useState<string | null>(null); // "opportunity" | "hackathon" | "application" | "event" | "roadmap" | "goal" | "contact" | "note" | "reminder"
+  const [modalEditItem, setModalEditItem] = useState<any>(null); // Item being edited (if any)
 
-      if (!analyticsRes.ok || !contactsRes.ok) {
-        setAuthed(false);
-        setAuthError(
-          `Server/Database error (Analytics: ${analyticsRes.status}, Contacts: ${contactsRes.status}).`
-        );
-        return;
-      }
+  const queryClient = useQueryClient();
 
-      setAnalytics(await analyticsRes.json());
-      setContacts(await contactsRes.json());
-    } catch {
-      setAuthError("Failed to fetch data.");
-    } finally {
-      setLoading(false);
+  // Load password from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem("careeros_pw");
+    if (saved) {
+      setPassword(saved);
+      verifyPassword(saved);
     }
   }, []);
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const verifyPassword = async (pw: string) => {
+    setAuthLoading(true);
     setAuthError("");
-    setLoading(true);
-
-    const res = await fetch("/api/admin/analytics", {
-      headers: { "x-admin-password": password },
-    });
-
-    if (res.status === 401) {
-      setAuthError("Incorrect password.");
-      setLoading(false);
-      return;
+    try {
+      const res = await verifyPasswordAction(pw);
+      if (res.success) {
+        setAuthed(true);
+        localStorage.setItem("careeros_pw", pw);
+      } else {
+        setAuthError(res.error || "Invalid Access Key");
+        localStorage.removeItem("careeros_pw");
+      }
+    } catch {
+      setAuthError("Server verification error");
+    } finally {
+      setAuthLoading(false);
     }
-
-    if (!res.ok) {
-      setAuthError(
-        `Server/Database error: ${res.status}. Please check server console logs.`
-      );
-      setLoading(false);
-      return;
-    }
-
-    setAuthed(true);
-    await fetchData(password);
   };
 
-  const updateStatus = async (id: string, status: Contact["status"]) => {
-    await fetch("/api/admin/contacts", {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        "x-admin-password": password,
-      },
-      body: JSON.stringify({ id, status }),
-    });
-    setContacts((prev) =>
-      prev.map((c) => (c.id === id ? { ...c, status } : c))
-    );
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    verifyPassword(password);
   };
 
-  // ─── Login Screen ───────────────────────────────────────────────────────────
+  const handleLogout = () => {
+    localStorage.removeItem("careeros_pw");
+    setAuthed(false);
+    setPassword("");
+  };
+
+  // React Query Fetching
+  const { data: store, isLoading: storeLoading, error: storeError } = useQuery({
+    queryKey: ["dashboardData", password],
+    queryFn: () => getDashboardData(password),
+    enabled: authed,
+  });
+
+  // Global search trigger
+  useEffect(() => {
+    if (!globalQuery.trim() || !authed) {
+      setGlobalSearchResults(null);
+      return;
+    }
+    const delay = setTimeout(async () => {
+      setGlobalSearchLoading(true);
+      try {
+        const res = await globalSearchAction(password, globalQuery);
+        setGlobalSearchResults(res);
+      } catch (e) {
+        console.error("Global search failed:", e);
+      } finally {
+        setGlobalSearchLoading(false);
+      }
+    }, 300);
+    return () => clearTimeout(delay);
+  }, [globalQuery, password, authed]);
+
+  // Keyboard Shortcuts Hook
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === "k") {
+        e.preventDefault();
+        setCommandPaletteOpen((prev) => !prev);
+      }
+      if (e.key === "Escape") {
+        setCommandPaletteOpen(false);
+        setActiveModal(null);
+        setModalEditItem(null);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  // Generic Mutation helper
+  const executeMutation = async (actionFn: any, successMessage?: string) => {
+    try {
+      await actionFn();
+      queryClient.invalidateQueries({ queryKey: ["dashboardData"] });
+      setActiveModal(null);
+      setModalEditItem(null);
+    } catch (err: any) {
+      alert(`Action failed: ${err.message}`);
+    }
+  };
+
+  // UI styling references based on mode
+  const theme = useMemo(() => {
+    if (isDarkMode) {
+      return {
+        bg: "bg-[#07070a] text-zinc-100",
+        sidebar: "bg-[#09090d]/80 border-[#161623]",
+        card: "bg-[#0b0b0f] border-[#161623]",
+        input: "bg-[#0c0c14] border-[#1e1e2f] text-zinc-100 placeholder-zinc-700",
+        border: "border-[#161623]",
+        accent: "text-indigo-400 bg-indigo-500/10 border-indigo-500/20",
+        green: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
+        red: "text-rose-400 bg-rose-500/10 border-rose-500/20",
+        orange: "text-amber-400 bg-amber-500/10 border-amber-500/20",
+        hover: "hover:bg-[#12121e]",
+        selected: "bg-indigo-500/10 text-indigo-400 border-indigo-500/25",
+        textMuted: "text-zinc-500",
+      };
+    } else {
+      return {
+        bg: "bg-zinc-50 text-zinc-950",
+        sidebar: "bg-white border-zinc-200",
+        card: "bg-white border-zinc-200 shadow-sm",
+        input: "bg-zinc-100 border-zinc-300 text-zinc-950 placeholder-zinc-400",
+        border: "border-zinc-200",
+        accent: "text-indigo-600 bg-indigo-50 border-indigo-100",
+        green: "text-emerald-600 bg-emerald-50 border-emerald-100",
+        red: "text-rose-600 bg-rose-50 border-rose-100",
+        orange: "text-amber-600 bg-amber-50 border-amber-100",
+        hover: "hover:bg-zinc-100",
+        selected: "bg-indigo-50 text-indigo-700 border-indigo-200",
+        textMuted: "text-zinc-400",
+      };
+    }
+  }, [isDarkMode]);
+
+  // Auth Screen
   if (!authed) {
     return (
-      <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center px-6">
-        <div className="border-2 border-[#E3000F] bg-[#141414] shadow-[6px_6px_0px_#E3000F] p-8 w-full max-w-sm flex flex-col gap-6">
-          <div>
-            <div className="flex items-center gap-3 mb-2">
-              <span className="w-3 h-3 bg-[#E3000F] border border-[#E3000F] inline-block" />
-              <h1 className="font-black text-2xl uppercase text-white tracking-tight">
-                ADMIN ACCESS
-              </h1>
+      <div className="min-h-screen bg-[#07070a] flex items-center justify-center px-6 selection:bg-indigo-500/20">
+        <div className="w-full max-w-sm p-8 bg-[#0b0b0f] border border-[#161623] rounded-2xl shadow-xl space-y-6">
+          <div className="text-center space-y-2">
+            <div className="w-12 h-12 mx-auto rounded-xl bg-indigo-500/10 border border-indigo-500/25 flex items-center justify-center">
+              <Sparkles size={20} className="text-indigo-400" />
             </div>
-            <p className="font-mono text-xs text-[#888]">
-              Restricted. Authorised personnel only.
-            </p>
+            <h1 className="text-2xl font-bold font-heading text-zinc-100">CareerOS Console</h1>
+            <p className="text-xs text-zinc-500 font-mono">Restricted access portal</p>
           </div>
 
           <form onSubmit={handleLogin} className="space-y-4">
-            <div>
+            <div className="space-y-1">
+              <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest font-mono">
+                Secret Access Key
+              </label>
               <input
                 type="password"
-                className="border-2 border-[#E3000F] bg-[#0A0A0A] text-white font-mono text-sm px-4 py-3 w-full rounded-none focus:outline-none focus:shadow-[4px_4px_0px_#E3000F] placeholder:text-[#444] transition-all"
-                placeholder="ENTER PASSWORD"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••••••"
+                className="w-full px-4 py-3 rounded-xl bg-[#0c0c14] border border-[#161623] text-zinc-100 placeholder-zinc-800 text-sm focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 transition-all font-mono"
                 required
               />
+              {authError && (
+                <p className="text-xs text-rose-400 flex items-center gap-1 mt-1 font-mono">
+                  <AlertCircle size={12} /> {authError}
+                </p>
+              )}
             </div>
             <button
               type="submit"
-              disabled={loading}
-              className="bg-[#E3000F] text-white border-2 border-[#E3000F] font-black uppercase px-6 py-3 w-full rounded-none shadow-[3px_3px_0px_#fff] hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[5px_5px_0px_#fff] transition-all tracking-widest disabled:opacity-50"
+              disabled={authLoading}
+              className="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs uppercase tracking-wider transition-all disabled:opacity-50 flex items-center justify-center gap-2"
             >
-              {loading ? "AUTHENTICATING..." : "AUTHENTICATE →"}
+              {authLoading ? (
+                <span className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+              ) : (
+                "Authenticate"
+              )}
             </button>
           </form>
-
-          {authError && (
-            <p className="font-mono text-xs text-[#E3000F] border border-[#E3000F] bg-[#1a0000] px-3 py-2">
-              ACCESS DENIED - {authError}
-            </p>
-          )}
         </div>
       </div>
     );
   }
 
-  // ─── Dashboard ──────────────────────────────────────────────────────────────
-  return (
-    <div className="min-h-screen bg-[#0A0A0A] pb-10 font-medium">
-      <header className="border-b-2 border-[#E3000F] bg-[#0A0A0A] px-6 py-4 flex items-center justify-between sticky top-0 z-50">
-        <div className="flex items-center gap-3">
-          <span className="w-3 h-3 bg-[#E3000F] inline-block" />
-          <span className="font-black text-white uppercase tracking-tight text-lg">
-            SGK / ADMIN
-          </span>
+  // Dashboard Loader/Error Screen
+  if (storeLoading) {
+    return (
+      <div className="min-h-screen bg-[#07070a] flex flex-col gap-4 items-center justify-center">
+        <div className="w-8 h-8 border-3 border-zinc-700 border-t-indigo-500 rounded-full animate-spin" />
+        <p className="text-xs text-zinc-500 font-mono animate-pulse">Initializing Personal Career OS...</p>
+      </div>
+    );
+  }
+
+  if (storeError || !store) {
+    return (
+      <div className="min-h-screen bg-[#07070a] flex flex-col gap-4 items-center justify-center p-6 text-center">
+        <div className="p-3 bg-rose-500/10 border border-rose-500/25 rounded-2xl text-rose-400">
+          <AlertCircle size={28} />
         </div>
-        <div className="flex items-center gap-4">
-          <span className="font-mono text-xs text-[#888] hidden sm:inline">
-            AUTHENTICATED
-          </span>
-          <span className="w-2 h-2 bg-[#00FF41] inline-block animate-pulse" />
+        <div className="space-y-1">
+          <h2 className="text-lg font-bold text-zinc-200">Failed to Load Dashboard Database</h2>
+          <p className="text-xs text-zinc-500 font-mono max-w-sm">
+            Check logs. Make sure database file is valid and Prisma generated models match.
+          </p>
+        </div>
+        <button
+          onClick={handleLogout}
+          className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs rounded-xl font-bold uppercase transition-all"
+        >
+          Reset Session
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className={`min-h-screen flex font-sans ${theme.bg} selection:bg-indigo-500/25 relative overflow-hidden transition-colors duration-200`}>
+      {/* ─── SIDE NAVIGATION BAR ────────────────────────────────────────────────── */}
+      <aside className={`w-64 border-r ${theme.sidebar} flex flex-col shrink-0 z-20 backdrop-blur-md`}>
+        {/* App Logo & Details */}
+        <div className="p-6 border-b border-inherit flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="p-2 rounded-xl bg-indigo-500/15 border border-indigo-500/25 flex items-center justify-center">
+              <Sparkles size={16} className="text-indigo-400" />
+            </div>
+            <div>
+              <span className="font-extrabold text-sm tracking-wide bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+                CareerOS
+              </span>
+              <p className="text-[9px] text-zinc-500 font-mono">v1.2.0-beta</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" title="Database Connected" />
+          </div>
+        </div>
+
+        {/* Navigation Tab Links */}
+        <nav className="flex-1 overflow-y-auto px-4 py-6 space-y-1 scrollbar-none">
+          {TABS.map((tab) => {
+            const Icon = tab.icon;
+            const isSelected = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all border border-transparent ${
+                  isSelected ? theme.selected : `text-zinc-400 hover:text-zinc-200 ${theme.hover}`
+                }`}
+              >
+                <Icon size={14} className={isSelected ? "text-indigo-400" : "text-zinc-500"} />
+                <span>{tab.label}</span>
+              </button>
+            );
+          })}
+        </nav>
+
+        {/* User Sidebar Footer Controls */}
+        <div className="p-4 border-t border-inherit space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center font-bold text-xs text-zinc-300">
+                S
+              </div>
+              <div className="text-left">
+                <p className="text-xs font-bold text-zinc-200">Suryachalam</p>
+                <p className="text-[10px] text-zinc-500 font-mono">Developer</p>
+              </div>
+            </div>
+            <button
+              onClick={() => setIsDarkMode(!isDarkMode)}
+              className={`p-2 rounded-lg border ${theme.border} text-zinc-400 hover:text-zinc-100 ${theme.hover} transition-all`}
+            >
+              {isDarkMode ? <Sun size={12} /> : <Moon size={12} />}
+            </button>
+          </div>
           <button
-            onClick={() => {
-              setAuthed(false);
-              setPassword("");
-            }}
-            className="font-mono text-xs text-[#E3000F] border border-[#E3000F] px-3 py-1 hover:bg-[#E3000F] hover:text-white transition-all rounded-none"
+            onClick={handleLogout}
+            className="w-full py-2.5 rounded-xl border border-rose-500/20 bg-rose-500/5 hover:bg-rose-500/10 text-rose-400 font-bold text-xs tracking-wide uppercase transition-all"
           >
-            LOGOUT
+            Logout OS
           </button>
         </div>
-      </header>
+      </aside>
 
-      <main className="max-w-6xl mx-auto mt-8 space-y-8">
-        {!analytics && loading && (
-          <div className="mx-6 border-2 border-[#E3000F] bg-[#141414] p-5 animate-pulse">
-            <div className="h-3 bg-[#1E1E1E] w-24 mb-3" />
-            <div className="h-8 bg-[#1E1E1E] w-16" />
-          </div>
-        )}
-
-        {authError && (
-          <div className="font-mono text-xs text-[#E3000F] border border-[#E3000F] bg-[#1a0000] px-4 py-3 mx-6">
-            ⚠ FAILED TO FETCH — {authError}
-          </div>
-        )}
-
-        {analytics && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 px-6">
-            <div className="border-2 border-[#E3000F] bg-[#141414] shadow-[4px_4px_0px_#E3000F] p-5">
-              <p className="font-mono text-xs text-[#888] uppercase tracking-widest mb-2">
-                TOTAL VISITS
-              </p>
-              <p className="font-black text-4xl text-white">
-                {analytics.totalVisitors}
-              </p>
-              <p className="font-mono text-xs text-[#E3000F] mt-1">↑ all time</p>
-            </div>
-            <div className="border-2 border-[#E3000F] bg-[#141414] shadow-[4px_4px_0px_#E3000F] p-5">
-              <p className="font-mono text-xs text-[#888] uppercase tracking-widest mb-2">
-                PAGE VIEWS
-              </p>
-              <p className="font-black text-4xl text-white">
-                {analytics.totalPageViews}
-              </p>
-              <p className="font-mono text-xs text-[#E3000F] mt-1">↑ all time</p>
-            </div>
-            <div className="border-2 border-[#E3000F] bg-[#141414] shadow-[4px_4px_0px_#E3000F] p-5">
-              <p className="font-mono text-xs text-[#888] uppercase tracking-widest mb-2">
-                DOWNLOADS
-              </p>
-              <p className="font-black text-4xl text-white">
-                {analytics.totalDownloads}
-              </p>
-              <p className="font-mono text-xs text-[#E3000F] mt-1">↑ resumes</p>
-            </div>
-            <div className="border-2 border-[#E3000F] bg-[#141414] shadow-[4px_4px_0px_#E3000F] p-5">
-              <p className="font-mono text-xs text-[#888] uppercase tracking-widest mb-2">
-                MESSAGES
-              </p>
-              <p className="font-black text-4xl text-white">
-                {analytics.totalContacts}
-              </p>
-              <p className="font-mono text-xs text-[#E3000F] mt-1">↑ received</p>
-            </div>
-          </div>
-        )}
-
-        {analytics && (
-          <div className="grid md:grid-cols-2 gap-6 px-6">
-            <div className="border-2 border-[#E3000F] bg-[#141414] shadow-[4px_4px_0px_#E3000F]">
-              <div className="border-b-2 border-[#E3000F] px-5 py-3 flex items-center gap-2">
-                <span className="w-2 h-2 bg-[#E3000F] inline-block" />
-                <h2 className="font-black text-sm uppercase text-white tracking-widest">
-                  RECENT VISITS
-                </h2>
-              </div>
-              <div className="divide-y divide-[#1E1E1E]">
-                {analytics.recentVisits.map((visit) => (
-                  <div
-                    key={visit.id}
-                    className="px-5 py-3 flex justify-between items-center hover:bg-[#1E1E1E] transition-colors"
-                  >
-                    <span className="font-mono text-sm text-white max-w-[40%] truncate">
-                      {visit.page}
-                    </span>
-                    <span className="font-mono text-xs text-[#888] max-w-[30%] truncate">
-                      {visit.referrer || "direct"}
-                    </span>
-                    <span className="font-mono text-xs text-[#E3000F]">
-                      {formatDate(visit.timestamp)}
-                    </span>
-                  </div>
-                ))}
-                {analytics.recentVisits.length === 0 && (
-                  <div className="px-5 py-10 text-center">
-                    <p className="font-mono text-sm text-[#444] uppercase tracking-widest">
-                      [ NO VISITS ]
-                    </p>
+      {/* ─── CENTRAL WORKSPACE CANVAS ───────────────────────────────────────────── */}
+      <main className="flex-1 flex flex-col min-w-0 overflow-y-auto relative">
+        {/* Global Toolbar Header */}
+        <header className={`h-16 shrink-0 border-b ${theme.border} px-8 flex items-center justify-between sticky top-0 z-10 bg-inherit/90 backdrop-blur-md`}>
+          <div className="flex items-center gap-4 w-96 relative">
+            <Search size={14} className="text-zinc-500 absolute left-3" />
+            <input
+              type="text"
+              placeholder="Search contacts, roadmap, jobs... (Ctrl+K)"
+              value={globalQuery}
+              onChange={(e) => setGlobalQuery(e.target.value)}
+              className={`w-full pl-9 pr-4 py-2 rounded-xl text-xs font-medium border focus:outline-none focus:border-indigo-500/50 transition-all ${theme.input}`}
+            />
+            {/* Global Search Popup Dropdown */}
+            {globalQuery.trim() && (
+              <div className={`absolute top-12 left-0 w-full rounded-xl border ${theme.card} shadow-xl p-4 space-y-4 max-h-96 overflow-y-auto z-50 bg-[#0b0b0f]`}>
+                <div className="flex justify-between items-center border-b border-[#161623] pb-2">
+                  <span className="text-[10px] font-bold text-zinc-500 font-mono uppercase tracking-widest">
+                    Search Results
+                  </span>
+                  {globalSearchLoading && (
+                    <span className="w-3 h-3 border-2 border-zinc-700 border-t-indigo-500 rounded-full animate-spin" />
+                  )}
+                </div>
+                {globalSearchResults && Object.values(globalSearchResults).every((arr: any) => arr.length === 0) ? (
+                  <p className="text-xs text-zinc-500 font-mono py-4 text-center">No matching records found.</p>
+                ) : (
+                  <div className="space-y-4">
+                    {globalSearchResults &&
+                      Object.entries(globalSearchResults).map(([key, items]: any) => {
+                        if (items.length === 0) return null;
+                        return (
+                          <div key={key} className="space-y-1.5">
+                            <span className="text-[9px] font-bold text-indigo-400 uppercase tracking-widest font-mono">
+                              {key}
+                            </span>
+                            <div className="space-y-1">
+                              {items.map((item: any) => (
+                                <button
+                                  key={item.id}
+                                  onClick={() => {
+                                    setActiveTab(key === "contacts" ? "crm" : key);
+                                    setGlobalQuery("");
+                                  }}
+                                  className={`w-full text-left p-2 rounded-lg text-xs font-semibold hover:bg-zinc-800/40 border border-transparent transition-all flex items-center justify-between`}
+                                >
+                                  <span className="truncate max-w-[250px]">{item.title || item.name || item.topic}</span>
+                                  <span className="text-[10px] text-zinc-500 font-mono capitalize">
+                                    {item.company || item.status || "view"} →
+                                  </span>
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        );
+                      })}
                   </div>
                 )}
-              </div>
-            </div>
-
-            <div className="border-2 border-[#E3000F] bg-[#141414] shadow-[4px_4px_0px_#E3000F]">
-              <div className="border-b-2 border-[#E3000F] px-5 py-3 flex items-center gap-2">
-                <span className="w-2 h-2 bg-[#E3000F] inline-block" />
-                <h2 className="font-black text-sm uppercase text-white tracking-widest">
-                  TOP REFERRERS
-                </h2>
-              </div>
-              <div className="divide-y divide-[#1E1E1E]">
-                {Object.entries(analytics.referrers)
-                  .sort(([, a], [, b]) => b - a)
-                  .slice(0, 5)
-                  .map(([referrer, count]) => (
-                    <div
-                      key={referrer}
-                      className="px-5 py-3 flex justify-between items-center hover:bg-[#1E1E1E] transition-colors"
-                    >
-                      <span className="font-mono text-sm text-white max-w-[70%] truncate">
-                        {referrer}
-                      </span>
-                      <span className="font-mono text-xs text-[#E3000F]">
-                        {count} VISITS
-                      </span>
-                    </div>
-                  ))}
-                {Object.keys(analytics.referrers).length === 0 && (
-                  <div className="px-5 py-10 text-center">
-                    <p className="font-mono text-sm text-[#444] uppercase tracking-widest">
-                      [ NO REFERRERS ]
-                    </p>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-
-        <div className="border-2 border-[#E3000F] bg-[#141414] shadow-[4px_4px_0px_#E3000F] mx-6 mb-6">
-          <div className="border-b-2 border-[#E3000F] px-5 py-3 flex items-center gap-2">
-            <span className="w-2 h-2 bg-[#E3000F] inline-block" />
-            <h2 className="font-black text-sm uppercase text-white tracking-widest">
-              MESSAGES
-            </h2>
-            <span className="ml-auto font-mono text-xs text-[#E3000F] border border-[#E3000F] px-2 py-0.5">
-              {contacts.length} TOTAL
-            </span>
-          </div>
-
-          <div className="divide-y divide-[#1E1E1E]">
-            {contacts.length === 0 && (
-              <div className="px-5 py-10 text-center">
-                <p className="font-mono text-sm text-[#444] uppercase tracking-widest">
-                  [ NO MESSAGES ]
-                </p>
               </div>
             )}
-            {contacts.map((contact) => (
-              <div
-                key={contact.id}
-                className="px-5 py-4 hover:bg-[#1E1E1E] transition-colors grid grid-cols-1 md:grid-cols-12 gap-4 items-start"
-              >
-                {/* Name + Email */}
-                <div className="md:col-span-3">
-                  <p className="font-bold text-white text-sm">
-                    {contact.name}
-                  </p>
-                  <p className="font-mono text-xs text-[#888]">
-                    {contact.email}
-                  </p>
-                </div>
-                {/* Subject */}
-                <div className="md:col-span-3">
-                  <p className="font-medium text-white text-sm">
-                    {contact.subject}
-                  </p>
-                </div>
-                {/* Message preview */}
-                <div className="md:col-span-3">
-                  <p className="font-mono text-xs text-[#888] line-clamp-2">
-                    {contact.message}
-                  </p>
-                </div>
-                {/* Date */}
-                <div className="md:col-span-1">
-                  <p className="font-mono text-xs text-[#E3000F]">
-                    {formatDate(contact.createdAt)}
-                  </p>
-                </div>
-                {/* Status badge + action */}
-                <div className="md:col-span-2 flex flex-col gap-2 items-start md:items-end">
-                  <StatusBadge status={contact.status} />
-                  {contact.status !== "reviewed" && (
-                    <button
-                      onClick={() => updateStatus(contact.id, "reviewed")}
-                      className="font-mono text-xs border border-[#888] text-[#888] px-2 py-0.5 hover:border-[#00FF41] hover:text-[#00FF41] hover:bg-[#001a00] transition-all rounded-none uppercase"
-                    >
-                      MARK REVIEWED
-                    </button>
-                  )}
-                  {contact.status !== "ignored" && contact.status !== "reviewed" && (
-                    <button
-                      onClick={() => updateStatus(contact.id, "ignored")}
-                      className="font-mono text-xs border border-[#888] text-[#888] px-2 py-0.5 hover:border-[#E3000F] hover:text-[#E3000F] hover:bg-[#1a0000] transition-all rounded-none uppercase mt-1"
-                    >
-                      IGNORE
-                    </button>
-                  )}
-                </div>
-              </div>
-            ))}
           </div>
+
+          <div className="flex items-center gap-4">
+            {/* Quick Modals launching panel */}
+            <div className="flex items-center gap-1.5 bg-[#10101a] border border-[#1e1e2f] p-0.5 rounded-xl">
+              <button
+                onClick={() => {
+                  setCommandPaletteOpen(true);
+                }}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-zinc-400 hover:text-zinc-200 text-[10px] font-bold uppercase transition-all"
+              >
+                <Sliders size={12} />
+                Actions
+              </button>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setActiveModal("reminder")}
+                className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs tracking-wide uppercase transition-all"
+              >
+                <Plus size={12} />
+                Schedule Reminder
+              </button>
+            </div>
+          </div>
+        </header>
+
+        {/* Core Canvas Body Renderer */}
+        <div className="p-8 space-y-8 max-w-7xl w-full mx-auto flex-1">
+          {/* TAB 1: ANALYTICS MODULE */}
+          {activeTab === "analytics" && (
+            <AnalyticsView store={store} theme={theme} setActiveTab={setActiveTab} />
+          )}
+
+          {/* TAB 2: CRM MODULE */}
+          {activeTab === "crm" && (
+            <CRMView
+              store={store}
+              theme={theme}
+              password={password}
+              onEditContact={(item) => {
+                setModalEditItem(item);
+                setActiveModal("contact");
+              }}
+            />
+          )}
+
+          {/* TAB 3: OPPORTUNITIES MODULE */}
+          {activeTab === "opportunities" && (
+            <OpportunitiesView
+              store={store}
+              theme={theme}
+              password={password}
+              onAddOpportunity={() => {
+                setModalEditItem(null);
+                setActiveModal("opportunity");
+              }}
+              onEditOpportunity={(item) => {
+                setModalEditItem(item);
+                setActiveModal("opportunity");
+              }}
+              onDeleteOpportunity={(id) => {
+                if (confirm("Delete opportunity?")) {
+                  executeMutation(() => deleteOpportunity(password, id));
+                }
+              }}
+            />
+          )}
+
+          {/* TAB 4: HACKATHONS MODULE */}
+          {activeTab === "hackathons" && (
+            <HackathonsView
+              store={store}
+              theme={theme}
+              password={password}
+              onAddHackathon={() => {
+                setModalEditItem(null);
+                setActiveModal("hackathon");
+              }}
+              onEditHackathon={(item) => {
+                setModalEditItem(item);
+                setActiveModal("hackathon");
+              }}
+              onDeleteHackathon={(id) => {
+                if (confirm("Delete hackathon record?")) {
+                  executeMutation(() => deleteHackathon(password, id));
+                }
+              }}
+            />
+          )}
+
+          {/* TAB 5: APPLICATIONS MODULE */}
+          {activeTab === "applications" && (
+            <ApplicationsView
+              store={store}
+              theme={theme}
+              password={password}
+              onAddApplication={() => {
+                setModalEditItem(null);
+                setActiveModal("application");
+              }}
+              onEditApplication={(item) => {
+                setModalEditItem(item);
+                setActiveModal("application");
+              }}
+              onDeleteApplication={(id) => {
+                if (confirm("Delete job application tracker?")) {
+                  executeMutation(() => deleteApplication(password, id));
+                }
+              }}
+            />
+          )}
+
+          {/* TAB 6: EVENTS MODULE */}
+          {activeTab === "events" && (
+            <EventsView
+              store={store}
+              theme={theme}
+              password={password}
+              onAddEvent={() => {
+                setModalEditItem(null);
+                setActiveModal("event");
+              }}
+              onEditEvent={(item) => {
+                setModalEditItem(item);
+                setActiveModal("event");
+              }}
+              onDeleteEvent={(id) => {
+                if (confirm("Delete event?")) {
+                  executeMutation(() => deleteEvent(password, id));
+                }
+              }}
+            />
+          )}
+
+          {/* TAB 7: ROADMAP MODULE */}
+          {activeTab === "roadmap" && (
+            <RoadmapView
+              store={store}
+              theme={theme}
+              password={password}
+              onAddRoadmap={() => {
+                setModalEditItem(null);
+                setActiveModal("roadmap");
+              }}
+              onEditRoadmap={(item) => {
+                setModalEditItem(item);
+                setActiveModal("roadmap");
+              }}
+              onDeleteRoadmap={(id) => {
+                if (confirm("Delete roadmap topic?")) {
+                  executeMutation(() => deleteLearningRoadmap(password, id));
+                }
+              }}
+            />
+          )}
+
+          {/* TAB 8: GOALS MODULE */}
+          {activeTab === "goals" && (
+            <GoalsView
+              store={store}
+              theme={theme}
+              password={password}
+              onAddGoal={() => {
+                setModalEditItem(null);
+                setActiveModal("goal");
+              }}
+              onEditGoal={(item) => {
+                setModalEditItem(item);
+                setActiveModal("goal");
+              }}
+              onDeleteGoal={(id) => {
+                if (confirm("Delete goal?")) {
+                  executeMutation(() => deleteGoal(password, id));
+                }
+              }}
+            />
+          )}
+
+          {/* TAB 9: NETWORKING TRACKER */}
+          {activeTab === "networking" && (
+            <NetworkingView
+              store={store}
+              theme={theme}
+              password={password}
+              onAddContact={() => {
+                setModalEditItem(null);
+                setActiveModal("contact");
+              }}
+              onEditContact={(item) => {
+                setModalEditItem(item);
+                setActiveModal("contact");
+              }}
+              onDeleteContact={(id) => {
+                if (confirm("Delete networking contact?")) {
+                  executeMutation(() => deleteContact(password, id));
+                }
+              }}
+            />
+          )}
+
+          {/* TAB 10: NOTES SYSTEM */}
+          {activeTab === "notes" && (
+            <NotesView
+              store={store}
+              theme={theme}
+              password={password}
+              onAddNote={() => {
+                setModalEditItem(null);
+                setActiveModal("note");
+              }}
+              onEditNote={(item) => {
+                setModalEditItem(item);
+                setActiveModal("note");
+              }}
+              onDeleteNote={(id) => {
+                if (confirm("Delete note?")) {
+                  executeMutation(() => deleteNote(password, id));
+                }
+              }}
+            />
+          )}
+
+          {/* TAB 11: REMINDER ENGINE */}
+          {activeTab === "reminders" && (
+            <RemindersView
+              store={store}
+              theme={theme}
+              password={password}
+              onAddReminder={() => {
+                setModalEditItem(null);
+                setActiveModal("reminder");
+              }}
+              onToggleCompleted={async (id, completed) => {
+                await toggleReminderCompleted(password, id, completed);
+                queryClient.invalidateQueries({ queryKey: ["dashboardData"] });
+              }}
+              onDeleteReminder={async (id) => {
+                if (confirm("Delete reminder?")) {
+                  await deleteReminder(password, id);
+                  queryClient.invalidateQueries({ queryKey: ["dashboardData"] });
+                }
+              }}
+            />
+          )}
+
+          {/* TAB 12: ACTIVITY TIMELINE */}
+          {activeTab === "timeline" && (
+            <TimelineView store={store} theme={theme} />
+          )}
         </div>
       </main>
+
+      {/* ─── GLOBAL COMMAND PALETTE (CTRL+K OVERLAY) ───────────────────────────── */}
+      {commandPaletteOpen && (
+        <CommandPaletteOverlay
+          theme={theme}
+          onClose={() => setCommandPaletteOpen(false)}
+          onTriggerAction={(actionId) => {
+            setCommandPaletteOpen(false);
+            if (actionId === "add-opp") setActiveModal("opportunity");
+            if (actionId === "add-hack") setActiveModal("hackathon");
+            if (actionId === "add-app") setActiveModal("application");
+            if (actionId === "add-evt") setActiveModal("event");
+            if (actionId === "add-goal") setActiveModal("goal");
+            if (actionId === "add-contact") setActiveModal("contact");
+            if (actionId === "add-note") setActiveModal("note");
+            if (actionId === "add-reminder") setActiveModal("reminder");
+          }}
+        />
+      )}
+
+      {/* ─── MODALS CONFIGURATOR PANEL ──────────────────────────────────────────── */}
+      {activeModal && (
+        <ModalPanel
+          type={activeModal}
+          theme={theme}
+          password={password}
+          item={modalEditItem}
+          onClose={() => {
+            setActiveModal(null);
+            setModalEditItem(null);
+          }}
+          onSuccess={() => {
+            queryClient.invalidateQueries({ queryKey: ["dashboardData"] });
+            setActiveModal(null);
+            setModalEditItem(null);
+          }}
+        />
+      )}
     </div>
   );
 }
+
+// ─── SUB-COMPONENTS & TAB RENDERING LAYOUTS ──────────────────────────────────
+
+// 1. ANALYTICS MODULE VIEW
+function AnalyticsView({ store, theme, setActiveTab }: { store: any; theme: any; setActiveTab: (t: string) => void }) {
+  // Compute metric calculations
+  const totalOpp = store.opportunities.length;
+  const totalApps = store.applications.length;
+  const activeRoadmapCount = store.roadmaps.filter((r: any) => r.progress < 100).length;
+  const completedGoals = store.goals.filter((g: any) => g.status === "COMPLETED").length;
+  const hackathonsWon = store.hackathons.filter((h: any) => h.status === "WON").length;
+  const eventsCount = store.events.length;
+  const networkCount = store.contacts.length;
+
+  return (
+    <div className="space-y-8 animate-fadeIn">
+      {/* Metric Cards Banner Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        {[
+          { label: "Total Opportunities", value: totalOpp, detail: "Central listings", icon: Briefcase, color: theme.accent, tab: "opportunities" },
+          { label: "Applications Sent", value: totalApps, detail: "Sent trackings", icon: FileCheck2, color: theme.green, tab: "applications" },
+          { label: "Hackathons Won", value: hackathonsWon, detail: "Award recognitions", icon: Trophy, color: theme.orange, tab: "hackathons" },
+          { label: "Goal Progress", value: `${completedGoals} Done`, detail: "Checklists success", icon: Target, color: theme.red, tab: "goals" },
+        ].map((c, i) => (
+          <button
+            key={i}
+            onClick={() => setActiveTab(c.tab)}
+            className={`p-6 rounded-2xl border text-left flex items-start justify-between cursor-pointer group transition-all duration-200 ${theme.card} hover:scale-[1.01] hover:shadow-md`}
+          >
+            <div className="space-y-2">
+              <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest font-mono">{c.label}</p>
+              <h3 className="text-3xl font-black">{c.value}</h3>
+              <p className="text-xs text-zinc-500">{c.detail}</p>
+            </div>
+            <div className={`p-3 rounded-xl border ${c.color} group-hover:scale-105 transition-all`}>
+              <c.icon size={16} />
+            </div>
+          </button>
+        ))}
+      </div>
+
+      {/* Analytics Charts Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* Visitor Traffic Custom SVG Line Chart */}
+        <div className={`lg:col-span-8 p-6 rounded-2xl border ${theme.card} space-y-6`}>
+          <div className="flex justify-between items-center">
+            <div>
+              <h3 className="text-sm font-bold tracking-tight">Active Opportunities Distribution</h3>
+              <p className="text-xs text-zinc-500">Breakdown of listings categorised by status</p>
+            </div>
+            <div className="flex gap-2">
+              <span className="flex items-center gap-1 text-[10px] font-mono text-indigo-400 font-bold">
+                <span className="w-2 h-2 rounded-full bg-indigo-500" /> Active Jobs
+              </span>
+            </div>
+          </div>
+
+          {/* Simple Visual Representation representing distribution metrics */}
+          <div className="h-64 flex items-end justify-between gap-3 pt-6 border-b border-[#161623] px-4">
+            {OPPORTUNITY_STATUSES.map((status) => {
+              const count = store.opportunities.filter((o: any) => o.status === status).length;
+              const maxCount = Math.max(...OPPORTUNITY_STATUSES.map(s => store.opportunities.filter((o: any) => o.status === s).length), 1);
+              const heightPct = (count / maxCount) * 100;
+              return (
+                <div key={status} className="flex-1 flex flex-col items-center gap-2 group">
+                  <div className="w-full bg-indigo-500/10 border border-indigo-500/20 group-hover:bg-indigo-500/20 group-hover:border-indigo-500/40 rounded-t-lg transition-all relative flex flex-col justify-end" style={{ height: `${Math.max(heightPct, 6)}%` }}>
+                    {count > 0 && (
+                      <span className="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] font-bold font-mono text-zinc-200">
+                        {count}
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-[8px] font-bold text-zinc-500 uppercase tracking-wider truncate w-full text-center" title={status}>
+                    {status.substring(0, 5)}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Mini status tracking list sidebar */}
+        <div className={`lg:col-span-4 p-6 rounded-2xl border ${theme.card} flex flex-col justify-between`}>
+          <div className="space-y-4">
+            <h3 className="text-sm font-bold tracking-tight">Core Career Metrics</h3>
+            <div className="space-y-3.5">
+              {[
+                { label: "Learning Roadmaps", value: activeRoadmapCount, sub: "Ongoing syllabus", icon: Compass, color: "text-indigo-400 bg-indigo-500/10" },
+                { label: "Networking Directory", value: networkCount, sub: "Contacts stored", icon: Users, color: "text-emerald-400 bg-emerald-500/10" },
+                { label: "Events Planned", value: eventsCount, sub: "Meetups scheduled", icon: Calendar, color: "text-amber-400 bg-amber-500/10" },
+              ].map((m, i) => (
+                <div key={i} className="flex items-center justify-between p-3.5 bg-zinc-800/20 rounded-xl border border-[#161623]">
+                  <div className="flex items-center gap-3">
+                    <div className={`p-2.5 rounded-lg ${m.color}`}>
+                      <m.icon size={14} />
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-zinc-200">{m.label}</p>
+                      <p className="text-[10px] text-zinc-500">{m.sub}</p>
+                    </div>
+                  </div>
+                  <span className="text-lg font-black">{m.value}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="border-t border-[#161623] pt-4 mt-4 text-center">
+            <p className="text-[10px] text-zinc-500 font-mono">
+              System Database Status: <span className="text-emerald-400 font-bold uppercase">Ready</span>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Recents logs list summary */}
+      <div className={`p-6 rounded-2xl border ${theme.card} space-y-4`}>
+        <div className="flex justify-between items-center">
+          <h3 className="text-sm font-bold tracking-tight">Recent System Logs</h3>
+          <button onClick={() => setActiveTab("timeline")} className="text-xs font-bold text-indigo-400 hover:text-indigo-300">
+            View All Logs →
+          </button>
+        </div>
+        <div className="divide-y divide-[#161623]">
+          {store.activityLogs.slice(0, 4).map((log: any) => (
+            <div key={log.id} className="py-3 flex items-center justify-between text-xs font-medium">
+              <div className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
+                <span className="text-zinc-300">{log.action}</span>
+                <span className="text-zinc-500 font-mono text-[10px]">
+                  {log.metadata && JSON.stringify(JSON.parse(log.metadata))}
+                </span>
+              </div>
+              <span className="text-zinc-500 text-[10px] font-mono">
+                {new Date(log.createdAt).toLocaleDateString()}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// 2. RECRUITER CRM MODULE VIEW
+function CRMView({ store, theme, password, onEditContact }: { store: any; theme: any; password: any; onEditContact: (i: any) => void }) {
+  const [activeContactId, setActiveContactId] = useState<string | null>(null);
+  const [replyText, setReplyText] = useState("");
+  const [sendingReply, setSendingReply] = useState(false);
+  const [savingNotes, setSavingNotes] = useState(false);
+
+  const queryClient = useQueryClient();
+
+  const activeContact = useMemo(() => {
+    return store.contacts.find((c: any) => c.id === activeContactId) || null;
+  }, [store.contacts, activeContactId]);
+
+  const handleSendReply = async () => {
+    if (!activeContact || !replyText.trim()) return;
+
+    const activeConv = activeContact.conversations[0];
+    if (!activeConv) {
+      alert("No active conversation thread found.");
+      return;
+    }
+
+    setSendingReply(true);
+    try {
+      const res = await fetch("/api/admin/crm/reply", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-admin-password": password,
+        },
+        body: JSON.stringify({
+          conversationId: activeConv.id,
+          content: replyText,
+        }),
+      });
+
+      if (res.ok) {
+        setReplyText("");
+        queryClient.invalidateQueries({ queryKey: ["dashboardData"] });
+      } else {
+        const err = await res.json();
+        alert(`Failed: ${err.error}`);
+      }
+    } catch (err: any) {
+      alert(`Error sending: ${err.message}`);
+    } finally {
+      setSendingReply(false);
+    }
+  };
+
+  return (
+    <div className="h-[calc(100vh-140px)] flex border border-[#161623] rounded-2xl bg-[#0b0b0f] overflow-hidden animate-fadeIn">
+      {/* Sidebar List */}
+      <div className="w-80 border-r border-[#161623] flex flex-col bg-[#09090d]/30 divide-y divide-[#161623] shrink-0">
+        <div className="p-4">
+          <span className="text-[10px] font-bold text-zinc-500 font-mono uppercase tracking-widest">
+            Inbox Threads ({store.contacts.length})
+          </span>
+        </div>
+        <div className="flex-1 overflow-y-auto divide-y divide-[#131320]/60">
+          {store.contacts.length === 0 ? (
+            <p className="p-6 text-xs text-zinc-500 font-mono text-center">No messages in inbox.</p>
+          ) : (
+            store.contacts.map((c: any) => {
+              const lastConv = c.conversations[0];
+              const lastMsg = lastConv?.messages[0];
+              const isSelected = c.id === activeContactId;
+              return (
+                <div
+                  key={c.id}
+                  onClick={() => setActiveContactId(c.id)}
+                  className={`p-4 cursor-pointer text-left transition-all hover:bg-zinc-800/20 border-l-2 ${
+                    isSelected ? "bg-indigo-500/5 border-l-indigo-500" : "border-l-transparent"
+                  }`}
+                >
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="font-bold text-xs truncate max-w-[150px]">{c.name}</span>
+                    <span className="text-[9px] text-zinc-500 font-mono">
+                      {lastConv ? new Date(lastConv.lastMessageAt).toLocaleDateString() : ""}
+                    </span>
+                  </div>
+                  <div className="text-[10px] text-zinc-400 font-semibold truncate">
+                    {c.company ? `@ ${c.company}` : "Recruiter"}
+                  </div>
+                  <div className="text-[11px] text-zinc-500 truncate italic mt-1">
+                    {lastMsg ? lastMsg.content : "No messages"}
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+      </div>
+
+      {/* Main Conversation Window */}
+      <div className="flex-1 flex flex-col bg-[#08080c] overflow-hidden relative">
+        {activeContact ? (
+          <>
+            {/* Header info */}
+            <header className="h-14 border-b border-[#161623] px-6 flex items-center justify-between bg-zinc-900/30">
+              <div>
+                <h3 className="font-bold text-xs">{activeContact.name}</h3>
+                <p className="text-[10px] text-zinc-500">
+                  {activeContact.email} {activeContact.company ? `· Recruiter at ${activeContact.company}` : ""}
+                </p>
+              </div>
+              <button
+                onClick={() => onEditContact(activeContact)}
+                className="px-3 py-1.5 rounded-lg border border-[#161623] hover:bg-zinc-800/40 text-[10px] font-bold uppercase transition-all"
+              >
+                Profile Settings
+              </button>
+            </header>
+
+            {/* Message timelines */}
+            <div className="flex-1 overflow-y-auto p-6 space-y-6">
+              {activeContact.conversations.map((conv: any) => (
+                <div key={conv.id} className="space-y-4">
+                  <div className="flex items-center gap-3 my-4">
+                    <div className="h-px flex-1 bg-[#161623]" />
+                    <span className="text-[9px] font-mono font-bold text-zinc-600 uppercase tracking-widest bg-[#08080c] px-3">
+                      Thread: {conv.subject}
+                    </span>
+                    <div className="h-px flex-1 bg-[#161623]" />
+                  </div>
+
+                  {conv.messages.map((m: any) => {
+                    const isSurya = m.senderType === "SURYA";
+                    return (
+                      <div key={m.id} className={`flex ${isSurya ? "justify-end" : "justify-start"}`}>
+                        <div className="max-w-[70%] space-y-1">
+                          <div className={`px-4 py-3 rounded-2xl text-xs leading-relaxed ${
+                            isSurya
+                              ? "bg-indigo-500/10 border border-indigo-500/20 text-indigo-200 rounded-tr-none"
+                              : "bg-[#101017] border border-[#161623] text-zinc-200 rounded-tl-none"
+                          }`}>
+                            {m.content}
+                          </div>
+                          <p className={`text-[8px] font-mono text-zinc-500 text-right`}>
+                            {new Date(m.createdAt).toLocaleString()}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ))}
+            </div>
+
+            {/* Footer Form reply */}
+            <footer className="p-4 border-t border-[#161623] bg-zinc-900/10">
+              <div className="bg-[#0b0b11] border border-[#171727] rounded-xl p-3 flex flex-col">
+                <textarea
+                  rows={2}
+                  placeholder={`Reply to ${activeContact.name}...`}
+                  value={replyText}
+                  onChange={(e) => setReplyText(e.target.value)}
+                  className="bg-transparent text-zinc-200 placeholder-zinc-700 text-xs focus:outline-none resize-none"
+                />
+                <div className="flex justify-between items-center mt-3 pt-3 border-t border-[#161623]">
+                  <span className="text-[10px] text-zinc-500 font-mono">Direct Resend sync</span>
+                  <button
+                    onClick={handleSendReply}
+                    disabled={sendingReply || !replyText.trim()}
+                    className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-bold text-xs uppercase transition-all"
+                  >
+                    <Send size={11} />
+                    {sendingReply ? "Sending..." : "Send Reply"}
+                  </button>
+                </div>
+              </div>
+            </footer>
+          </>
+        ) : (
+          <div className="flex-1 flex flex-col items-center justify-center p-8 gap-4 text-center">
+            <Inbox size={24} className="text-zinc-600" />
+            <div>
+              <h4 className="text-xs font-bold text-zinc-300">No Recruiter Conversation Selected</h4>
+              <p className="text-[11px] text-zinc-500 max-w-xs mt-1">
+                Choose a recruiter contact thread from the list on the left to read messages and reply.
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// 3. OPPORTUNITIES MODULE VIEW
+function OpportunitiesView({ store, theme, password, onAddOpportunity, onEditOpportunity, onDeleteOpportunity }: { store: any; theme: any; password: any; onAddOpportunity: () => void; onEditOpportunity: (i: any) => void; onDeleteOpportunity: (id: string) => void }) {
+  const queryClient = useQueryClient();
+
+  // Handle status update mutation
+  const handleStatusChange = async (id: string, newStatus: string) => {
+    const opp = store.opportunities.find((o: any) => o.id === id);
+    if (!opp) return;
+
+    try {
+      await updateOpportunity(password, id, {
+        ...opp,
+        status: newStatus,
+        deadline: opp.deadline ? new Date(opp.deadline).toISOString() : null,
+      });
+      queryClient.invalidateQueries({ queryKey: ["dashboardData"] });
+    } catch (e: any) {
+      alert(`Update status failed: ${e.message}`);
+    }
+  };
+
+  return (
+    <div className="space-y-6 animate-fadeIn">
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="text-lg font-bold tracking-tight">Opportunities Listing</h2>
+          <p className="text-xs text-zinc-500 font-mono">Manage jobs, internships, startups, and collaborations</p>
+        </div>
+        <button
+          onClick={onAddOpportunity}
+          className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs uppercase tracking-wide transition-all"
+        >
+          <Plus size={12} /> Add Opportunity
+        </button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        {OPPORTUNITY_STATUSES.slice(0, 4).map((status) => {
+          const list = store.opportunities.filter((o: any) => o.status === status);
+          return (
+            <div key={status} className={`p-4 rounded-2xl border ${theme.card} space-y-4`}>
+              <div className="flex justify-between items-center border-b border-[#161623] pb-2">
+                <span className="text-[10px] font-bold text-zinc-400 font-mono uppercase tracking-widest">
+                  {status}
+                </span>
+                <span className="text-[10px] bg-zinc-800 text-zinc-300 font-mono font-bold px-2 py-0.5 rounded-full">
+                  {list.length}
+                </span>
+              </div>
+              <div className="space-y-3.5 max-h-96 overflow-y-auto scrollbar-none">
+                {list.length === 0 ? (
+                  <p className="text-[10px] text-zinc-600 font-mono py-4 text-center">Empty column</p>
+                ) : (
+                  list.map((opp: any) => (
+                    <div key={opp.id} className="p-3 bg-[#0c0c14] border border-[#1e1e2f] rounded-xl space-y-2 relative group hover:border-indigo-500/30 transition-all">
+                      <div>
+                        <h4 className="text-xs font-bold text-zinc-200">{opp.title}</h4>
+                        <p className="text-[10px] text-zinc-400 font-semibold">{opp.company}</p>
+                      </div>
+                      <div className="flex justify-between items-center text-[9px] pt-1">
+                        <span className="px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-400 font-bold uppercase tracking-wider scale-90 -translate-x-1">
+                          {opp.type}
+                        </span>
+                        <span className="text-zinc-500 font-mono">
+                          {opp.priority} Priority
+                        </span>
+                      </div>
+                      <div className="flex justify-end gap-2 pt-2 border-t border-[#131320]/60 opacity-0 group-hover:opacity-100 transition-all">
+                        <select
+                          value={opp.status}
+                          onChange={(e) => handleStatusChange(opp.id, e.target.value)}
+                          className="bg-zinc-850 border border-zinc-700 rounded text-[9px] px-1 focus:outline-none"
+                        >
+                          {OPPORTUNITY_STATUSES.map(st => (
+                            <option key={st} value={st}>{st}</option>
+                          ))}
+                        </select>
+                        <button onClick={() => onEditOpportunity(opp)} className="text-zinc-400 hover:text-indigo-400 text-[10px]">
+                          Edit
+                        </button>
+                        <button onClick={() => onDeleteOpportunity(opp.id)} className="text-rose-500 hover:text-rose-400 text-[10px]">
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// 4. HACKATHONS MODULE VIEW
+function HackathonsView({ store, theme, password, onAddHackathon, onEditHackathon, onDeleteHackathon }: { store: any; theme: any; password: any; onAddHackathon: () => void; onEditHackathon: (i: any) => void; onDeleteHackathon: (id: string) => void }) {
+  const [subView, setSubView] = useState<"kanban" | "table" | "calendar">("kanban");
+
+  return (
+    <div className="space-y-6 animate-fadeIn">
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="text-lg font-bold tracking-tight">Hackathon Tracker</h2>
+          <p className="text-xs text-zinc-500 font-mono">Participations, projects submission dates, and rankings</p>
+        </div>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-1 bg-[#10101a] border border-[#1e1e2f] p-0.5 rounded-lg">
+            {(["kanban", "table", "calendar"] as const).map((view) => (
+              <button
+                key={view}
+                onClick={() => setSubView(view)}
+                className={`px-3 py-1.5 rounded-md text-[10px] font-bold uppercase transition-all ${
+                  subView === view ? "bg-indigo-600 text-white" : "text-zinc-400 hover:text-zinc-200"
+                }`}
+              >
+                {view}
+              </button>
+            ))}
+          </div>
+          <button
+            onClick={onAddHackathon}
+            className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs uppercase tracking-wide transition-all"
+          >
+            <Plus size={12} /> Add Hackathon
+          </button>
+        </div>
+      </div>
+
+      {subView === "kanban" && (
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          {HACKATHON_STATUSES.slice(0, 4).map((status) => {
+            const list = store.hackathons.filter((h: any) => h.status === status);
+            return (
+              <div key={status} className={`p-4 rounded-2xl border ${theme.card} space-y-4`}>
+                <div className="flex justify-between items-center border-b border-[#161623] pb-2">
+                  <span className="text-[10px] font-bold text-zinc-400 font-mono uppercase tracking-widest">
+                    {status}
+                  </span>
+                  <span className="text-[10px] bg-zinc-800 text-zinc-300 font-mono font-bold px-2 py-0.5 rounded-full">
+                    {list.length}
+                  </span>
+                </div>
+                <div className="space-y-3 max-h-96 overflow-y-auto scrollbar-none">
+                  {list.length === 0 ? (
+                    <p className="text-[10px] text-zinc-600 font-mono py-4 text-center">Empty</p>
+                  ) : (
+                    list.map((hack: any) => (
+                      <div key={hack.id} className="p-3 bg-[#0c0c14] border border-[#1e1e2f] rounded-xl space-y-2 relative group hover:border-indigo-500/30 transition-all">
+                        <div>
+                          <h4 className="text-xs font-bold text-zinc-200">{hack.name}</h4>
+                          <p className="text-[10px] text-zinc-400 font-semibold">{hack.organizer}</p>
+                        </div>
+                        {hack.deadline && (
+                          <p className="text-[9px] text-zinc-500 font-mono">
+                            Deadline: {new Date(hack.deadline).toLocaleDateString()}
+                          </p>
+                        )}
+                        <div className="flex justify-end gap-2 pt-2 border-t border-[#131320]/60 opacity-0 group-hover:opacity-100 transition-all">
+                          <button onClick={() => onEditHackathon(hack)} className="text-indigo-400 hover:text-indigo-300 text-[10px]">
+                            Edit
+                          </button>
+                          <button onClick={() => onDeleteHackathon(hack.id)} className="text-rose-500 hover:text-rose-400 text-[10px]">
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {subView === "table" && (
+        <div className={`border ${theme.border} rounded-2xl bg-[#0b0b0f] overflow-hidden`}>
+          <table className="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr className="border-b border-[#161623] bg-zinc-900/30 font-mono font-bold text-zinc-400">
+                <th className="p-4">Name</th>
+                <th className="p-4">Organizer</th>
+                <th className="p-4">Deadline</th>
+                <th className="p-4">Status</th>
+                <th className="p-4 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[#161623]">
+              {store.hackathons.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="p-6 text-center text-zinc-500 font-mono">No hackathons recorded.</td>
+                </tr>
+              ) : (
+                store.hackathons.map((h: any) => (
+                  <tr key={h.id} className="hover:bg-zinc-800/20">
+                    <td className="p-4 font-bold">{h.name}</td>
+                    <td className="p-4 text-zinc-400">{h.organizer}</td>
+                    <td className="p-4 font-mono text-zinc-500">
+                      {h.deadline ? new Date(h.deadline).toLocaleDateString() : "-"}
+                    </td>
+                    <td className="p-4">
+                      <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold border uppercase tracking-wider ${
+                        h.status === "WON" ? theme.green : theme.accent
+                      }`}>
+                        {h.status}
+                      </span>
+                    </td>
+                    <td className="p-4 text-right space-x-3">
+                      <button onClick={() => onEditHackathon(h)} className="text-indigo-400 hover:text-indigo-300">Edit</button>
+                      <button onClick={() => onDeleteHackathon(h.id)} className="text-rose-500 hover:text-rose-400">Delete</button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {subView === "calendar" && (
+        <CalendarView items={store.hackathons} titleKey="name" dateKey="deadline" theme={theme} />
+      )}
+    </div>
+  );
+}
+
+// 5. APPLICATIONS TRACKER MODULE VIEW
+function ApplicationsView({ store, theme, password, onAddApplication, onEditApplication, onDeleteApplication }: { store: any; theme: any; password: any; onAddApplication: () => void; onEditApplication: (i: any) => void; onDeleteApplication: (id: string) => void }) {
+  return (
+    <div className="space-y-6 animate-fadeIn">
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="text-lg font-bold tracking-tight">Job Applications Tracker</h2>
+          <p className="text-xs text-zinc-500 font-mono">Job & internship applications, response statuses, and OA tests</p>
+        </div>
+        <button
+          onClick={onAddApplication}
+          className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs uppercase tracking-wide transition-all"
+        >
+          <Plus size={12} /> Add Application
+        </button>
+      </div>
+
+      <div className={`border ${theme.border} rounded-2xl bg-[#0b0b0f] overflow-hidden`}>
+        <table className="w-full text-left border-collapse text-xs">
+          <thead>
+            <tr className="border-b border-[#161623] bg-zinc-900/30 font-mono font-bold text-zinc-400">
+              <th className="p-4">Company</th>
+              <th className="p-4">Role</th>
+              <th className="p-4">Applied Date</th>
+              <th className="p-4">Follow Up</th>
+              <th className="p-4">Status</th>
+              <th className="p-4 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-[#161623]">
+            {store.applications.length === 0 ? (
+              <tr>
+                <td colSpan={6} className="p-6 text-center text-zinc-500 font-mono">No job applications recorded.</td>
+              </tr>
+            ) : (
+              store.applications.map((app: any) => (
+                <tr key={app.id} className="hover:bg-zinc-800/20">
+                  <td className="p-4 font-bold">{app.company}</td>
+                  <td className="p-4 text-zinc-400 font-semibold">{app.role}</td>
+                  <td className="p-4 font-mono text-zinc-500">
+                    {app.appliedDate ? new Date(app.appliedDate).toLocaleDateString() : "-"}
+                  </td>
+                  <td className="p-4 font-mono text-zinc-500">
+                    {app.nextFollowUp ? new Date(app.nextFollowUp).toLocaleDateString() : "-"}
+                  </td>
+                  <td className="p-4">
+                    <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold border uppercase tracking-wider ${
+                      app.status === "OFFER" ? theme.green : app.status === "REJECTED" ? theme.red : theme.accent
+                    }`}>
+                      {app.status}
+                    </span>
+                  </td>
+                  <td className="p-4 text-right space-x-3">
+                    <button onClick={() => onEditApplication(app)} className="text-indigo-400 hover:text-indigo-300">Edit</button>
+                    <button onClick={() => onDeleteApplication(app.id)} className="text-rose-500 hover:text-rose-400">Delete</button>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+// 6. EVENT PLANNER MODULE VIEW
+function EventsView({ store, theme, password, onAddEvent, onEditEvent, onDeleteEvent }: { store: any; theme: any; password: any; onAddEvent: () => void; onEditEvent: (i: any) => void; onDeleteEvent: (id: string) => void }) {
+  const [activeSubView, setActiveSubView] = useState<"calendar" | "agenda">("calendar");
+
+  return (
+    <div className="space-y-6 animate-fadeIn">
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="text-lg font-bold tracking-tight">Event Planner</h2>
+          <p className="text-xs text-zinc-500 font-mono">Conferences, workshops, college meetups, and schedules</p>
+        </div>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-1 bg-[#10101a] border border-[#1e1e2f] p-0.5 rounded-lg">
+            {(["calendar", "agenda"] as const).map((view) => (
+              <button
+                key={view}
+                onClick={() => setActiveSubView(view)}
+                className={`px-3 py-1.5 rounded-md text-[10px] font-bold uppercase transition-all ${
+                  activeSubView === view ? "bg-indigo-600 text-white" : "text-zinc-400 hover:text-zinc-200"
+                }`}
+              >
+                {view}
+              </button>
+            ))}
+          </div>
+          <button
+            onClick={onAddEvent}
+            className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs uppercase tracking-wide transition-all"
+          >
+            <Plus size={12} /> Add Event
+          </button>
+        </div>
+      </div>
+
+      {activeSubView === "calendar" ? (
+        <CalendarView items={store.events} titleKey="title" dateKey="startDate" theme={theme} />
+      ) : (
+        <div className="space-y-4">
+          {store.events.length === 0 ? (
+            <div className={`p-12 text-center rounded-2xl border border-dashed ${theme.border} text-zinc-500`}>
+              No events scheduled in agenda.
+            </div>
+          ) : (
+            store.events.map((evt: any) => (
+              <div key={evt.id} className={`p-4 rounded-xl border ${theme.card} flex items-center justify-between`}>
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider ${theme.accent}`}>
+                      {evt.category}
+                    </span>
+                    <h4 className="text-xs font-bold text-zinc-200">{evt.title}</h4>
+                  </div>
+                  <p className="text-[10px] text-zinc-500 font-mono">
+                    {new Date(evt.startDate).toLocaleDateString()} @ {evt.location || "Online"}
+                  </p>
+                </div>
+                <div className="flex gap-3 text-xs font-semibold">
+                  <button onClick={() => onEditEvent(evt)} className="text-indigo-400 hover:text-indigo-300">Edit</button>
+                  <button onClick={() => onDeleteEvent(evt.id)} className="text-rose-500 hover:text-rose-400">Delete</button>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// 7. LEARNING ROADMAP MODULE VIEW
+function RoadmapView({ store, theme, password, onAddRoadmap, onEditRoadmap, onDeleteRoadmap }: { store: any; theme: any; password: any; onAddRoadmap: () => void; onEditRoadmap: (i: any) => void; onDeleteRoadmap: (id: string) => void }) {
+  const queryClient = useQueryClient();
+
+  const handleProgressSlider = async (id: string, val: number) => {
+    const roadmap = store.roadmaps.find((r: any) => r.id === id);
+    if (!roadmap) return;
+
+    try {
+      await updateLearningRoadmap(password, id, {
+        ...roadmap,
+        progress: val,
+        targetDate: roadmap.targetDate ? new Date(roadmap.targetDate).toISOString() : null,
+      });
+      queryClient.invalidateQueries({ queryKey: ["dashboardData"] });
+    } catch (e: any) {
+      alert(`Update progress failed: ${e.message}`);
+    }
+  };
+
+  return (
+    <div className="space-y-6 animate-fadeIn">
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="text-lg font-bold tracking-tight">Learning Syllabus Roadmaps</h2>
+          <p className="text-xs text-zinc-500 font-mono">Track syllabus, technical topics, reading items and progress milestones</p>
+        </div>
+        <button
+          onClick={onAddRoadmap}
+          className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs uppercase tracking-wide transition-all"
+        >
+          <Plus size={12} /> Add Topic
+        </button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {store.roadmaps.length === 0 ? (
+          <p className="col-span-2 p-12 text-center text-zinc-500 font-mono border border-dashed border-[#161623] rounded-2xl">
+            No active roadmaps found. Add technical syllabus to track learning goals.
+          </p>
+        ) : (
+          store.roadmaps.map((map: any) => (
+            <div key={map.id} className={`p-6 rounded-2xl border ${theme.card} space-y-4`}>
+              <div className="flex justify-between items-start">
+                <div>
+                  <span className="text-[10px] font-bold font-mono text-zinc-500 uppercase tracking-widest">
+                    {map.category || "General"}
+                  </span>
+                  <h4 className="text-sm font-bold text-zinc-200 mt-0.5">{map.topic}</h4>
+                </div>
+                <div className="flex gap-2">
+                  <button onClick={() => onEditRoadmap(map)} className="text-xs font-semibold text-indigo-400 hover:text-indigo-300">
+                    Edit
+                  </button>
+                  <button onClick={() => onDeleteRoadmap(map.id)} className="text-xs font-semibold text-rose-500 hover:text-rose-400">
+                    Delete
+                  </button>
+                </div>
+              </div>
+
+              {/* Progress Slider representation */}
+              <div className="space-y-2">
+                <div className="flex justify-between items-center text-xs">
+                  <span className="text-zinc-400">Mastery progress:</span>
+                  <span className="font-bold text-indigo-400">{map.progress}%</span>
+                </div>
+                <div className="relative w-full h-2.5 bg-zinc-850 rounded-full border border-[#161623]">
+                  <div className="absolute top-0 left-0 h-full rounded-full bg-gradient-to-r from-indigo-500 to-pink-500 transition-all" style={{ width: `${map.progress}%` }} />
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    value={map.progress}
+                    onChange={(e) => handleProgressSlider(map.id, parseInt(e.target.value))}
+                    className="absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer"
+                  />
+                </div>
+              </div>
+
+              {map.resources && (
+                <div className="p-3 bg-zinc-800/10 border border-[#161623] rounded-xl text-[11px] text-zinc-500 font-mono whitespace-pre-wrap leading-normal">
+                  {map.resources}
+                </div>
+              )}
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  );
+}
+
+// 8. GOALS SYSTEM MODULE VIEW
+function GoalsView({ store, theme, password, onAddGoal, onEditGoal, onDeleteGoal }: { store: any; theme: any; password: any; onAddGoal: () => void; onEditGoal: (i: any) => void; onDeleteGoal: (id: string) => void }) {
+  return (
+    <div className="space-y-6 animate-fadeIn">
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="text-lg font-bold tracking-tight">Structured Goal Tracker</h2>
+          <p className="text-xs text-zinc-500 font-mono">Annual, Quarterly, Monthly, and Weekly metrics tracking goals</p>
+        </div>
+        <button
+          onClick={onAddGoal}
+          className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs uppercase tracking-wide transition-all"
+        >
+          <Plus size={12} /> Define Goal
+        </button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        {GOAL_CATEGORIES.map((category) => {
+          const list = store.goals.filter((g: any) => g.category === category);
+          return (
+            <div key={category} className={`p-4 rounded-2xl border ${theme.card} space-y-4`}>
+              <div className="flex justify-between items-center border-b border-[#161623] pb-2">
+                <span className="text-[10px] font-bold text-zinc-400 font-mono uppercase tracking-widest">
+                  {category}
+                </span>
+                <span className="text-[10px] bg-zinc-800 text-zinc-300 font-mono font-bold px-2 py-0.5 rounded-full">
+                  {list.length}
+                </span>
+              </div>
+              <div className="space-y-3 max-h-[450px] overflow-y-auto scrollbar-none">
+                {list.length === 0 ? (
+                  <p className="text-[10px] text-zinc-650 font-mono py-4 text-center">No goals set</p>
+                ) : (
+                  list.map((goal: any) => (
+                    <div key={goal.id} className="p-3 bg-[#0c0c14] border border-[#1e1e2f] rounded-xl space-y-3 relative group hover:border-indigo-500/30 transition-all">
+                      <div>
+                        <h4 className="text-xs font-bold text-zinc-200">{goal.title}</h4>
+                        <p className="text-[10px] text-zinc-500 mt-1">{goal.description}</p>
+                      </div>
+
+                      {/* Mini Goal Progress slider visual */}
+                      <div className="space-y-1.5">
+                        <div className="flex justify-between items-center text-[9px] font-mono text-zinc-500">
+                          <span>Progress:</span>
+                          <span className="font-bold">{goal.progress}%</span>
+                        </div>
+                        <div className="w-full h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+                          <div className="h-full bg-indigo-500 rounded-full" style={{ width: `${goal.progress}%` }} />
+                        </div>
+                      </div>
+
+                      <div className="flex justify-between items-center text-[9px] pt-1">
+                        <span className={`px-1.5 py-0.5 rounded text-[8px] font-mono font-bold border uppercase ${
+                          goal.status === "COMPLETED" ? theme.green : theme.orange
+                        }`}>
+                          {goal.status}
+                        </span>
+                        {goal.targetDate && (
+                          <span className="text-zinc-500 font-mono">
+                            By {new Date(goal.targetDate).toLocaleDateString()}
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="flex justify-end gap-2 pt-2 border-t border-[#131320]/60 opacity-0 group-hover:opacity-100 transition-all">
+                        <button onClick={() => onEditGoal(goal)} className="text-indigo-400 hover:text-indigo-300 text-[10px]">
+                          Edit
+                        </button>
+                        <button onClick={() => onDeleteGoal(goal.id)} className="text-rose-500 hover:text-rose-400 text-[10px]">
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// 9. NETWORKING DIRECTORY VIEW
+function NetworkingView({ store, theme, password, onAddContact, onEditContact, onDeleteContact }: { store: any; theme: any; password: any; onAddContact: () => void; onEditContact: (i: any) => void; onDeleteContact: (id: string) => void }) {
+  return (
+    <div className="space-y-6 animate-fadeIn">
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="text-lg font-bold tracking-tight">Networking Tracker</h2>
+          <p className="text-xs text-zinc-500 font-mono">Manage professional connections, LinkedIn profiles, and follow ups</p>
+        </div>
+        <button
+          onClick={onAddContact}
+          className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs uppercase tracking-wide transition-all"
+        >
+          <Plus size={12} /> Add Contact
+        </button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {store.contacts.length === 0 ? (
+          <p className="col-span-3 p-12 text-center text-zinc-500 font-mono border border-dashed border-[#161623] rounded-2xl">
+            No contacts recorded. Add professional networking contacts to track.
+          </p>
+        ) : (
+          store.contacts.map((c: any) => (
+            <div key={c.id} className={`p-5 rounded-2xl border ${theme.card} space-y-4 relative group hover:border-indigo-500/30 transition-all`}>
+              <div className="flex justify-between items-start">
+                <div>
+                  <h4 className="text-sm font-bold text-zinc-200">{c.name}</h4>
+                  <p className="text-xs text-zinc-400 font-semibold">{c.role ? `${c.role} ` : ""}{c.company ? `@ ${c.company}` : ""}</p>
+                </div>
+                <span className={`px-2 py-0.5 rounded-full text-[9px] font-mono font-bold border uppercase ${theme.accent}`}>
+                  {c.status}
+                </span>
+              </div>
+
+              <div className="space-y-1.5 text-xs text-zinc-500 font-mono border-t border-[#161623] pt-3">
+                <p>Email: <span className="text-zinc-300 font-medium">{c.email}</span></p>
+                {c.linkedin && (
+                  <p className="flex items-center gap-1">
+                    LinkedIn:{" "}
+                    <a href={c.linkedin} target="_blank" rel="noopener noreferrer" className="text-indigo-400 hover:underline flex items-center gap-0.5">
+                      View profile <ExternalLink size={10} />
+                    </a>
+                  </p>
+                )}
+                {c.nextFollowUp && (
+                  <p className="text-amber-400 font-bold">
+                    Follow-up: {new Date(c.nextFollowUp).toLocaleDateString()}
+                  </p>
+                )}
+              </div>
+
+              {c.notes && (
+                <p className="text-[11px] text-zinc-500 italic truncate max-w-full">
+                  Notes: {c.notes}
+                </p>
+              )}
+
+              <div className="flex justify-end gap-3 pt-3 border-t border-[#161623] opacity-0 group-hover:opacity-100 transition-all">
+                <button onClick={() => onEditContact(c)} className="text-indigo-400 hover:text-indigo-300 text-xs font-semibold">
+                  Edit
+                </button>
+                <button onClick={() => onDeleteContact(c.id)} className="text-rose-500 hover:text-rose-400 text-xs font-semibold">
+                  Delete
+                </button>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  );
+}
+
+// 10. NOTES MODULE VIEW
+function NotesView({ store, theme, password, onAddNote, onEditNote, onDeleteNote }: { store: any; theme: any; password: any; onAddNote: () => void; onEditNote: (i: any) => void; onDeleteNote: (id: string) => void }) {
+  const [selectedNoteId, setSelectedNoteId] = useState<string | null>(null);
+
+  const activeNote = useMemo(() => {
+    return store.notes.find((n: any) => n.id === selectedNoteId) || null;
+  }, [store.notes, selectedNoteId]);
+
+  return (
+    <div className="h-[calc(100vh-140px)] flex border border-[#161623] rounded-2xl bg-[#0b0b0f] overflow-hidden animate-fadeIn">
+      {/* Sidebar selection */}
+      <div className="w-80 border-r border-[#161623] flex flex-col bg-[#09090d]/30 divide-y divide-[#161623] shrink-0">
+        <div className="p-4 flex justify-between items-center bg-zinc-900/10">
+          <span className="text-[10px] font-bold text-zinc-500 font-mono uppercase tracking-widest">
+            Notes ({store.notes.length})
+          </span>
+          <button onClick={onAddNote} className="text-indigo-400 hover:text-indigo-300 text-xs font-bold flex items-center gap-0.5 uppercase">
+            <Plus size={12} /> Add
+          </button>
+        </div>
+        <div className="flex-1 overflow-y-auto divide-y divide-[#131320]/60">
+          {store.notes.length === 0 ? (
+            <p className="p-6 text-xs text-zinc-500 font-mono text-center">No notes recorded.</p>
+          ) : (
+            store.notes.map((n: any) => {
+              const isSelected = n.id === selectedNoteId;
+              return (
+                <div
+                  key={n.id}
+                  onClick={() => setSelectedNoteId(n.id)}
+                  className={`p-4 cursor-pointer text-left transition-all hover:bg-zinc-800/20 border-l-2 ${
+                    isSelected ? "bg-indigo-500/5 border-l-indigo-500" : "border-l-transparent"
+                  }`}
+                >
+                  <h4 className="font-bold text-xs truncate text-zinc-200">{n.title}</h4>
+                  <p className="text-[10px] text-zinc-500 font-mono mt-1">
+                    {new Date(n.updatedAt).toLocaleDateString()}
+                  </p>
+                  {n.tags && (
+                    <div className="flex gap-1.5 flex-wrap mt-2">
+                      {n.tags.split(",").map((t: string) => (
+                        <span key={t} className="text-[8px] font-mono text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 px-1.5 py-0.5 rounded">
+                          {t.trim()}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })
+          )}
+        </div>
+      </div>
+
+      {/* Editor/Reader Workspace */}
+      <div className="flex-1 flex flex-col bg-[#08080c] overflow-y-auto p-8 relative">
+        {activeNote ? (
+          <div className="space-y-6">
+            <div className="flex justify-between items-start border-b border-[#161623] pb-4">
+              <div>
+                <h3 className="text-xl font-bold text-zinc-100">{activeNote.title}</h3>
+                <p className="text-[10px] text-zinc-500 font-mono mt-1">
+                  Last updated: {new Date(activeNote.updatedAt).toLocaleString()}
+                </p>
+              </div>
+              <div className="flex gap-3 text-xs font-semibold">
+                <button onClick={() => onEditNote(activeNote)} className="text-indigo-400 hover:text-indigo-300">Edit</button>
+                <button onClick={() => onDeleteNote(activeNote.id)} className="text-rose-500 hover:text-rose-400">Delete</button>
+              </div>
+            </div>
+
+            <div className="text-xs text-zinc-300 leading-relaxed font-mono whitespace-pre-wrap">
+              {activeNote.content}
+            </div>
+          </div>
+        ) : (
+          <div className="h-full flex flex-col items-center justify-center text-center gap-4 text-zinc-650">
+            <FileText size={24} className="text-zinc-600" />
+            <div>
+              <h4 className="text-xs font-bold text-zinc-300">No Note Selected</h4>
+              <p className="text-[11px] text-zinc-500 max-w-xs mt-1">
+                Select a document from the panel on the left to read or configure note entries.
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// 11. REMINDER ENGINE MODULE VIEW
+function RemindersView({ store, theme, password, onAddReminder, onToggleCompleted, onDeleteReminder }: { store: any; theme: any; password: any; onAddReminder: () => void; onToggleCompleted: (id: string, completed: boolean) => void; onDeleteReminder: (id: string) => void }) {
+  return (
+    <div className="space-y-6 animate-fadeIn">
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="text-lg font-bold tracking-tight">System Reminders</h2>
+          <p className="text-xs text-zinc-500 font-mono">Reminders engine, email notifications, and alerts statuses</p>
+        </div>
+        <button
+          onClick={onAddReminder}
+          className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs uppercase tracking-wide transition-all"
+        >
+          <Plus size={12} /> Add Reminder
+        </button>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* Pending Section */}
+        <div className={`p-6 rounded-2xl border ${theme.card} space-y-4`}>
+          <h3 className="text-xs font-bold text-indigo-400 font-mono uppercase tracking-widest">
+            Pending Reminders
+          </h3>
+          <div className="space-y-3">
+            {store.reminders.filter((r: any) => !r.completed).length === 0 ? (
+              <p className="text-xs text-zinc-500 font-mono py-4 text-center">No pending reminders.</p>
+            ) : (
+              store.reminders.filter((r: any) => !r.completed).map((rem: any) => (
+                <div key={rem.id} className="p-3 bg-[#0c0c14] border border-[#1e1e2f] rounded-xl flex items-center justify-between">
+                  <div className="flex items-start gap-3">
+                    <input
+                      type="checkbox"
+                      checked={false}
+                      onChange={() => onToggleCompleted(rem.id, true)}
+                      className="mt-1 accent-indigo-500 cursor-pointer"
+                    />
+                    <div>
+                      <h4 className="text-xs font-bold text-zinc-200">{rem.title}</h4>
+                      <p className="text-[10px] text-zinc-500 mt-0.5">{rem.message}</p>
+                      <p className="text-[9px] text-amber-400 font-bold font-mono mt-1">
+                        Trigger: {new Date(rem.reminderDate).toLocaleString()} (Type: {rem.type})
+                      </p>
+                    </div>
+                  </div>
+                  <button onClick={() => onDeleteReminder(rem.id)} className="text-rose-500 hover:text-rose-400 p-1.5 rounded-lg hover:bg-rose-500/5 transition-all">
+                    <Trash2 size={12} />
+                  </button>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+
+        {/* Completed Section */}
+        <div className={`p-6 rounded-2xl border ${theme.card} space-y-4`}>
+          <h3 className="text-xs font-bold text-zinc-500 font-mono uppercase tracking-widest">
+            Dispatched & Completed Reminders
+          </h3>
+          <div className="space-y-3">
+            {store.reminders.filter((r: any) => r.completed).length === 0 ? (
+              <p className="text-xs text-zinc-500 font-mono py-4 text-center">No completed reminders.</p>
+            ) : (
+              store.reminders.filter((r: any) => r.completed).map((rem: any) => (
+                <div key={rem.id} className="p-3 bg-[#0c0c14]/50 border border-[#161623] rounded-xl flex items-center justify-between opacity-60">
+                  <div className="flex items-start gap-3">
+                    <input
+                      type="checkbox"
+                      checked={true}
+                      onChange={() => onToggleCompleted(rem.id, false)}
+                      className="mt-1 accent-indigo-500 cursor-pointer"
+                    />
+                    <div>
+                      <h4 className="text-xs font-bold text-zinc-400 line-through">{rem.title}</h4>
+                      <p className="text-[10px] text-zinc-500 mt-0.5">{rem.message}</p>
+                      <p className="text-[9px] text-zinc-650 font-mono mt-1">
+                        Completed at: {new Date(rem.updatedAt).toLocaleString()}
+                      </p>
+                    </div>
+                  </div>
+                  <button onClick={() => onDeleteReminder(rem.id)} className="text-rose-500 hover:text-rose-400 p-1.5 rounded-lg hover:bg-rose-500/5 transition-all">
+                    <Trash2 size={12} />
+                  </button>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// 12. TIMELINE MODULE VIEW
+function TimelineView({ store, theme }: { store: any; theme: any }) {
+  return (
+    <div className="space-y-6 animate-fadeIn">
+      <div>
+        <h2 className="text-lg font-bold tracking-tight">System Activities</h2>
+        <p className="text-xs text-zinc-500 font-mono">Audit trails, notifications log, and automated CRM histories</p>
+      </div>
+
+      <div className="relative border-l border-[#161623] ml-4 pl-6 space-y-6 py-4">
+        {store.activityLogs.length === 0 ? (
+          <p className="text-xs text-zinc-500 font-mono">No logs recorded yet.</p>
+        ) : (
+          store.activityLogs.map((log: any) => (
+            <div key={log.id} className="relative">
+              {/* Dot decoration */}
+              <span className="absolute -left-[31px] top-1.5 w-2.5 h-2.5 rounded-full bg-indigo-500 border border-[#07070a]" />
+              <div className={`p-4 rounded-xl border ${theme.card} space-y-2`}>
+                <div className="flex justify-between items-center">
+                  <h4 className="text-xs font-bold text-zinc-200">{log.action}</h4>
+                  <span className="text-[9px] text-zinc-500 font-mono">
+                    {new Date(log.createdAt).toLocaleString()}
+                  </span>
+                </div>
+                {log.metadata && (
+                  <div className="p-2.5 bg-zinc-800/10 border border-[#161623] rounded-lg text-[10px] text-zinc-500 font-mono whitespace-pre-wrap truncate">
+                    {JSON.stringify(JSON.parse(log.metadata), null, 2)}
+                  </div>
+                )}
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─── REUSE-ABLE GRAPHICS CALENDAR MONTH GRID ─────────────────────────────────
+function CalendarView({ items, titleKey, dateKey, theme }: { items: any[]; titleKey: string; dateKey: string; theme: any }) {
+  // Calendar month rendering
+  const daysInMonth = 30; // Simply mock grid for demo stability
+  return (
+    <div className={`border border-[#161623] rounded-2xl bg-[#0b0b0f] overflow-hidden p-6 space-y-4`}>
+      <div className="flex justify-between items-center border-b border-[#161623] pb-3">
+        <span className="text-xs font-bold text-zinc-300 uppercase">Upcoming Calendar Items</span>
+        <span className="text-[10px] text-zinc-500 font-mono">Active month agenda</span>
+      </div>
+      <div className="grid grid-cols-7 gap-2">
+        {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
+          <span key={day} className="text-center text-[10px] font-bold font-mono text-zinc-500 uppercase py-1">
+            {day}
+          </span>
+        ))}
+        {Array.from({ length: daysInMonth }).map((_, index) => {
+          const dayNum = index + 1;
+          const dayItems = items.filter((item) => {
+            if (!item[dateKey]) return false;
+            const itemDate = new Date(item[dateKey]).getDate();
+            return itemDate === dayNum;
+          });
+
+          return (
+            <div key={index} className="min-h-20 bg-zinc-900/20 border border-[#161623] rounded-xl p-2 flex flex-col justify-between group hover:border-indigo-500/20 transition-all">
+              <span className="text-[10px] font-bold font-mono text-zinc-500">{dayNum}</span>
+              <div className="space-y-1">
+                {dayItems.slice(0, 2).map((di, idx) => (
+                  <div key={idx} className="bg-indigo-500/10 border border-indigo-500/20 rounded px-1 py-0.5 text-[8px] font-bold text-indigo-400 truncate max-w-full" title={di[titleKey]}>
+                    {di[titleKey]}
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ─── COMMAND PALETTE KEYBOARD OVERLAY ──────────────────────────────────────────
+function CommandPaletteOverlay({ theme, onClose, onTriggerAction }: { theme: any; onClose: () => void; onTriggerAction: (id: string) => void }) {
+  const [query, setQuery] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
+
+  const commands = useMemo(() => {
+    const list = [
+      { id: "add-opp", label: "Add Opportunity Listing", desc: "Create a job, internship, or freelance entry" },
+      { id: "add-hack", label: "Create Hackathon Item", desc: "Register a hackathon tracker" },
+      { id: "add-app", label: "Create Job Application Tracker", desc: "Track custom job application OA status" },
+      { id: "add-evt", label: "Create Event Scheduler", desc: "Add meetups, webinars or workshops schedules" },
+      { id: "add-goal", label: "Define Annual/Weekly Goal", desc: "Set target achievements goals" },
+      { id: "add-contact", label: "Add Networking Connection", desc: "Register professional contact notes" },
+      { id: "add-note", label: "Write Markdown Note Document", desc: "Save research items, startup ideas" },
+      { id: "add-reminder", label: "Schedule Email Notification", desc: "Set dashboard alerts and trigger engines" },
+    ];
+    if (!query) return list;
+    return list.filter(c => c.label.toLowerCase().includes(query.toLowerCase()));
+  }, [query]);
+
+  return (
+    <div className="fixed inset-0 bg-[#07070a]/60 backdrop-blur-sm flex items-start justify-center pt-24 z-50 animate-fadeIn" onClick={onClose}>
+      <div className="w-full max-w-xl border border-[#161623] rounded-2xl bg-[#0b0b0f] shadow-2xl overflow-hidden flex flex-col" onClick={(e) => e.stopPropagation()}>
+        <div className="p-4 border-b border-[#161623] relative">
+          <Search size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500" />
+          <input
+            ref={inputRef}
+            type="text"
+            placeholder="Type a command or search action..."
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            className="w-full bg-transparent pl-8 focus:outline-none text-xs text-zinc-100 placeholder-zinc-700"
+          />
+        </div>
+        <div className="p-2 max-h-80 overflow-y-auto divide-y divide-[#131320]/30">
+          {commands.length === 0 ? (
+            <p className="text-xs text-zinc-500 font-mono py-6 text-center">No commands match.</p>
+          ) : (
+            commands.map((cmd) => (
+              <button
+                key={cmd.id}
+                onClick={() => onTriggerAction(cmd.id)}
+                className="w-full text-left p-3 rounded-lg hover:bg-zinc-800/40 transition-all flex flex-col gap-0.5"
+              >
+                <span className="text-xs font-bold text-zinc-200">{cmd.label}</span>
+                <span className="text-[10px] text-zinc-500 font-medium">{cmd.desc}</span>
+              </button>
+            ))
+          )}
+        </div>
+        <div className="p-3.5 border-t border-[#161623] bg-zinc-900/30 flex justify-between items-center text-[9px] text-zinc-500 font-mono">
+          <span>↑↓ to navigate · enter to select</span>
+          <span>esc to close</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── DYNAMIC DIALOG COMPONENT PANEL ───────────────────────────────────────────
+function ModalPanel({ type, theme, password, item, onClose, onSuccess }: { type: string; theme: any; password: any; item: any; onClose: () => void; onSuccess: () => void }) {
+  const [formData, setFormData] = useState<any>({});
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (item) {
+      setFormData({
+        ...item,
+        // Format dates correctly for inputs
+        deadline: item.deadline ? new Date(item.deadline).toISOString().substring(0, 10) : "",
+        eventDate: item.eventDate ? new Date(item.eventDate).toISOString().substring(0, 10) : "",
+        appliedDate: item.appliedDate ? new Date(item.appliedDate).toISOString().substring(0, 10) : "",
+        nextFollowUp: item.nextFollowUp ? new Date(item.nextFollowUp).toISOString().substring(0, 10) : "",
+        startDate: item.startDate ? new Date(item.startDate).toISOString().substring(0, 16) : "",
+        endDate: item.endDate ? new Date(item.endDate).toISOString().substring(0, 16) : "",
+        reminderDate: item.reminderDate ? new Date(item.reminderDate).toISOString().substring(0, 16) : "",
+        targetDate: item.targetDate ? new Date(item.targetDate).toISOString().substring(0, 10) : "",
+      });
+    } else {
+      // Setup default placeholder schema
+      if (type === "opportunity") setFormData({ status: "DISCOVERED", type: "INTERNSHIP", priority: "MEDIUM" });
+      if (type === "hackathon") setFormData({ status: "RESEARCHING" });
+      if (type === "application") setFormData({ status: "SAVED" });
+      if (type === "event") setFormData({ category: "HACKATHON" });
+      if (type === "roadmap") setFormData({ progress: 0 });
+      if (type === "goal") setFormData({ category: "WEEKLY", status: "ACTIVE", progress: 0 });
+      if (type === "contact") setFormData({ status: "NEW" });
+      if (type === "reminder") setFormData({ type: "BOTH" });
+    }
+  }, [type, item]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      if (type === "opportunity") {
+        if (item) await updateOpportunity(password, item.id, formData);
+        else await createOpportunity(password, formData);
+      }
+      if (type === "hackathon") {
+        if (item) await updateHackathon(password, item.id, formData);
+        else await createHackathon(password, formData);
+      }
+      if (type === "application") {
+        if (item) await updateApplication(password, item.id, formData);
+        else await createApplication(password, formData);
+      }
+      if (type === "event") {
+        if (item) await updateEvent(password, item.id, formData);
+        else await createEvent(password, formData);
+      }
+      if (type === "roadmap") {
+        if (item) await updateLearningRoadmap(password, item.id, { ...formData, progress: parseInt(formData.progress || "0") });
+        else await createLearningRoadmap(password, { ...formData, progress: parseInt(formData.progress || "0") });
+      }
+      if (type === "goal") {
+        if (item) await updateGoal(password, item.id, { ...formData, progress: parseInt(formData.progress || "0") });
+        else await createGoal(password, { ...formData, progress: parseInt(formData.progress || "0") });
+      }
+      if (type === "contact") {
+        if (item) await updateContact(password, item.id, formData);
+        else await createContact(password, formData);
+      }
+      if (type === "note") {
+        if (item) await updateNote(password, item.id, formData);
+        else await createNote(password, formData);
+      }
+      if (type === "reminder") {
+        if (item) await updateReminder(password, item.id, formData);
+        else await createReminder(password, formData);
+      }
+      onSuccess();
+    } catch (err: any) {
+      alert(`Save failed: ${err.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleFieldChange = (key: string, val: any) => {
+    setFormData((prev: any) => ({ ...prev, [key]: val }));
+  };
+
+  return (
+    <div className="fixed inset-0 bg-[#07070a]/60 backdrop-blur-sm flex items-center justify-center p-6 z-50 animate-fadeIn" onClick={onClose}>
+      <div className="w-full max-w-md border border-[#161623] rounded-2xl bg-[#0b0b0f] shadow-2xl overflow-hidden flex flex-col" onClick={(e) => e.stopPropagation()}>
+        <header className="px-6 py-4 border-b border-[#161623] flex justify-between items-center bg-zinc-900/10">
+          <h3 className="text-xs font-bold font-mono uppercase tracking-widest text-zinc-300">
+            {item ? "Configure" : "Define"} {type}
+          </h3>
+        </header>
+
+        <form onSubmit={handleSubmit} className="p-6 space-y-4 max-h-[500px] overflow-y-auto">
+          {/* Opportunity fields */}
+          {type === "opportunity" && (
+            <>
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest font-mono">Title</label>
+                <input required type="text" value={formData.title || ""} onChange={(e) => handleFieldChange("title", e.target.value)} className={`w-full p-2.5 rounded-lg text-xs border ${theme.input}`} />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest font-mono">Company</label>
+                <input required type="text" value={formData.company || ""} onChange={(e) => handleFieldChange("company", e.target.value)} className={`w-full p-2.5 rounded-lg text-xs border ${theme.input}`} />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest font-mono">Type</label>
+                  <select value={formData.type || "INTERNSHIP"} onChange={(e) => handleFieldChange("type", e.target.value)} className={`w-full p-2.5 rounded-lg text-xs border ${theme.input}`}>
+                    {OPPORTUNITY_TYPES.map(t => (
+                      <option key={t} value={t}>{t}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest font-mono">Priority</label>
+                  <select value={formData.priority || "MEDIUM"} onChange={(e) => handleFieldChange("priority", e.target.value)} className={`w-full p-2.5 rounded-lg text-xs border ${theme.input}`}>
+                    <option value="HIGH">HIGH</option>
+                    <option value="MEDIUM">MEDIUM</option>
+                    <option value="LOW">LOW</option>
+                  </select>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest font-mono">Status</label>
+                  <select value={formData.status || "DISCOVERED"} onChange={(e) => handleFieldChange("status", e.target.value)} className={`w-full p-2.5 rounded-lg text-xs border ${theme.input}`}>
+                    {OPPORTUNITY_STATUSES.map(s => (
+                      <option key={s} value={s}>{s}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest font-mono">Deadline</label>
+                  <input type="date" value={formData.deadline || ""} onChange={(e) => handleFieldChange("deadline", e.target.value)} className={`w-full p-2.5 rounded-lg text-xs border ${theme.input}`} />
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* Hackathon fields */}
+          {type === "hackathon" && (
+            <>
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest font-mono">Name</label>
+                <input required type="text" value={formData.name || ""} onChange={(e) => handleFieldChange("name", e.target.value)} className={`w-full p-2.5 rounded-lg text-xs border ${theme.input}`} />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest font-mono">Organizer</label>
+                <input required type="text" value={formData.organizer || ""} onChange={(e) => handleFieldChange("organizer", e.target.value)} className={`w-full p-2.5 rounded-lg text-xs border ${theme.input}`} />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest font-mono">Deadline</label>
+                  <input type="date" value={formData.deadline || ""} onChange={(e) => handleFieldChange("deadline", e.target.value)} className={`w-full p-2.5 rounded-lg text-xs border ${theme.input}`} />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest font-mono">Status</label>
+                  <select value={formData.status || "RESEARCHING"} onChange={(e) => handleFieldChange("status", e.target.value)} className={`w-full p-2.5 rounded-lg text-xs border ${theme.input}`}>
+                    {HACKATHON_STATUSES.map(s => (
+                      <option key={s} value={s}>{s}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* Application fields */}
+          {type === "application" && (
+            <>
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest font-mono">Company</label>
+                <input required type="text" value={formData.company || ""} onChange={(e) => handleFieldChange("company", e.target.value)} className={`w-full p-2.5 rounded-lg text-xs border ${theme.input}`} />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest font-mono">Role</label>
+                <input required type="text" value={formData.role || ""} onChange={(e) => handleFieldChange("role", e.target.value)} className={`w-full p-2.5 rounded-lg text-xs border ${theme.input}`} />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest font-mono">Location</label>
+                  <input type="text" value={formData.location || ""} onChange={(e) => handleFieldChange("location", e.target.value)} className={`w-full p-2.5 rounded-lg text-xs border ${theme.input}`} />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest font-mono">Status</label>
+                  <select value={formData.status || "SAVED"} onChange={(e) => handleFieldChange("status", e.target.value)} className={`w-full p-2.5 rounded-lg text-xs border ${theme.input}`}>
+                    {APPLICATION_STATUSES.map(s => (
+                      <option key={s} value={s}>{s}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest font-mono">Applied Date</label>
+                  <input type="date" value={formData.appliedDate || ""} onChange={(e) => handleFieldChange("appliedDate", e.target.value)} className={`w-full p-2.5 rounded-lg text-xs border ${theme.input}`} />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest font-mono">Follow Up Date</label>
+                  <input type="date" value={formData.nextFollowUp || ""} onChange={(e) => handleFieldChange("nextFollowUp", e.target.value)} className={`w-full p-2.5 rounded-lg text-xs border ${theme.input}`} />
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* Event fields */}
+          {type === "event" && (
+            <>
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest font-mono">Title</label>
+                <input required type="text" value={formData.title || ""} onChange={(e) => handleFieldChange("title", e.target.value)} className={`w-full p-2.5 rounded-lg text-xs border ${theme.input}`} />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest font-mono">Category</label>
+                  <input required type="text" placeholder="HACKATHON" value={formData.category || "HACKATHON"} onChange={(e) => handleFieldChange("category", e.target.value)} className={`w-full p-2.5 rounded-lg text-xs border ${theme.input}`} />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest font-mono">Location</label>
+                  <input type="text" placeholder="Online" value={formData.location || ""} onChange={(e) => handleFieldChange("location", e.target.value)} className={`w-full p-2.5 rounded-lg text-xs border ${theme.input}`} />
+                </div>
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest font-mono">Start Date/Time</label>
+                <input required type="datetime-local" value={formData.startDate || ""} onChange={(e) => handleFieldChange("startDate", e.target.value)} className={`w-full p-2.5 rounded-lg text-xs border ${theme.input}`} />
+              </div>
+            </>
+          )}
+
+          {/* Learning Roadmap fields */}
+          {type === "roadmap" && (
+            <>
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest font-mono">Topic Name</label>
+                <input required type="text" placeholder="System Design" value={formData.topic || ""} onChange={(e) => handleFieldChange("topic", e.target.value)} className={`w-full p-2.5 rounded-lg text-xs border ${theme.input}`} />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest font-mono">Category</label>
+                  <input type="text" placeholder="Backend Development" value={formData.category || ""} onChange={(e) => handleFieldChange("category", e.target.value)} className={`w-full p-2.5 rounded-lg text-xs border ${theme.input}`} />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest font-mono">Target Date</label>
+                  <input type="date" value={formData.targetDate || ""} onChange={(e) => handleFieldChange("targetDate", e.target.value)} className={`w-full p-2.5 rounded-lg text-xs border ${theme.input}`} />
+                </div>
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest font-mono">Resources Links</label>
+                <textarea rows={2} placeholder="Markdown list of links..." value={formData.resources || ""} onChange={(e) => handleFieldChange("resources", e.target.value)} className={`w-full p-2.5 rounded-lg text-xs border ${theme.input}`} />
+              </div>
+            </>
+          )}
+
+          {/* Goal fields */}
+          {type === "goal" && (
+            <>
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest font-mono">Title</label>
+                <input required type="text" value={formData.title || ""} onChange={(e) => handleFieldChange("title", e.target.value)} className={`w-full p-2.5 rounded-lg text-xs border ${theme.input}`} />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest font-mono">Category</label>
+                  <select value={formData.category || "WEEKLY"} onChange={(e) => handleFieldChange("category", e.target.value)} className={`w-full p-2.5 rounded-lg text-xs border ${theme.input}`}>
+                    {GOAL_CATEGORIES.map(c => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest font-mono">Status</label>
+                  <select value={formData.status || "ACTIVE"} onChange={(e) => handleFieldChange("status", e.target.value)} className={`w-full p-2.5 rounded-lg text-xs border ${theme.input}`}>
+                    {GOAL_STATUSES.map(s => (
+                      <option key={s} value={s}>{s}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* Networking Contact fields */}
+          {type === "contact" && (
+            <>
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest font-mono">Name</label>
+                <input required type="text" value={formData.name || ""} onChange={(e) => handleFieldChange("name", e.target.value)} className={`w-full p-2.5 rounded-lg text-xs border ${theme.input}`} />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest font-mono">Email</label>
+                <input required type="email" value={formData.email || ""} onChange={(e) => handleFieldChange("email", e.target.value)} className={`w-full p-2.5 rounded-lg text-xs border ${theme.input}`} />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest font-mono">Company</label>
+                  <input type="text" value={formData.company || ""} onChange={(e) => handleFieldChange("company", e.target.value)} className={`w-full p-2.5 rounded-lg text-xs border ${theme.input}`} />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest font-mono">Role</label>
+                  <input type="text" value={formData.role || ""} onChange={(e) => handleFieldChange("role", e.target.value)} className={`w-full p-2.5 rounded-lg text-xs border ${theme.input}`} />
+                </div>
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest font-mono">LinkedIn Profile URL</label>
+                <input type="text" placeholder="https://linkedin.com/in/..." value={formData.linkedin || ""} onChange={(e) => handleFieldChange("linkedin", e.target.value)} className={`w-full p-2.5 rounded-lg text-xs border ${theme.input}`} />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest font-mono">Last Contact</label>
+                  <input type="date" value={formData.lastContact || ""} onChange={(e) => handleFieldChange("lastContact", e.target.value)} className={`w-full p-2.5 rounded-lg text-xs border ${theme.input}`} />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest font-mono">Next Follow-up</label>
+                  <input type="date" value={formData.nextFollowUp || ""} onChange={(e) => handleFieldChange("nextFollowUp", e.target.value)} className={`w-full p-2.5 rounded-lg text-xs border ${theme.input}`} />
+                </div>
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest font-mono">Status</label>
+                <select value={formData.status || "NEW"} onChange={(e) => handleFieldChange("status", e.target.value)} className={`w-full p-2.5 rounded-lg text-xs border ${theme.input}`}>
+                  <option value="NEW">NEW</option>
+                  <option value="CONTACTED">CONTACTED</option>
+                  <option value="REPLIED">REPLIED</option>
+                  <option value="NETWORKING">NETWORKING</option>
+                  <option value="INTERVIEW">INTERVIEW</option>
+                  <option value="OPPORTUNITY">OPPORTUNITY</option>
+                  <option value="CLOSED">CLOSED</option>
+                </select>
+              </div>
+            </>
+          )}
+
+          {/* Note fields */}
+          {type === "note" && (
+            <>
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest font-mono">Title</label>
+                <input required type="text" value={formData.title || ""} onChange={(e) => handleFieldChange("title", e.target.value)} className={`w-full p-2.5 rounded-lg text-xs border ${theme.input}`} />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest font-mono">Tags (comma separated)</label>
+                <input type="text" placeholder="ideas, database" value={formData.tags || ""} onChange={(e) => handleFieldChange("tags", e.target.value)} className={`w-full p-2.5 rounded-lg text-xs border ${theme.input}`} />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest font-mono">Markdown Content</label>
+                <textarea required rows={6} placeholder="# Meeting notes..." value={formData.content || ""} onChange={(e) => handleFieldChange("content", e.target.value)} className={`w-full p-2.5 rounded-lg text-xs border ${theme.input} font-mono`} />
+              </div>
+            </>
+          )}
+
+          {/* Reminder fields */}
+          {type === "reminder" && (
+            <>
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest font-mono">Title</label>
+                <input required type="text" placeholder="Follow up with Recruiter" value={formData.title || ""} onChange={(e) => handleFieldChange("title", e.target.value)} className={`w-full p-2.5 rounded-lg text-xs border ${theme.input}`} />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest font-mono">Message details</label>
+                <input type="text" value={formData.message || ""} onChange={(e) => handleFieldChange("message", e.target.value)} className={`w-full p-2.5 rounded-lg text-xs border ${theme.input}`} />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest font-mono">Alert Type</label>
+                  <select value={formData.type || "BOTH"} onChange={(e) => handleFieldChange("type", e.target.value)} className={`w-full p-2.5 rounded-lg text-xs border ${theme.input}`}>
+                    <option value="BOTH">EMAIL + DASHBOARD</option>
+                    <option value="EMAIL">EMAIL ONLY</option>
+                    <option value="DASHBOARD">DASHBOARD ONLY</option>
+                  </select>
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest font-mono">Reminder Date/Time</label>
+                  <input required type="datetime-local" value={formData.reminderDate || ""} onChange={(e) => handleFieldChange("reminderDate", e.target.value)} className={`w-full p-2.5 rounded-lg text-xs border ${theme.input}`} />
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* Custom Notes text fields across general modals */}
+          {type !== "note" && type !== "reminder" && type !== "event" && (
+            <div className="space-y-1">
+              <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest font-mono">Private Notes</label>
+              <textarea rows={2} value={formData.notes || ""} onChange={(e) => handleFieldChange("notes", e.target.value)} className={`w-full p-2.5 rounded-lg text-xs border ${theme.input}`} />
+            </div>
+          )}
+
+          <footer className="pt-4 flex justify-end gap-3 border-t border-[#161623]">
+            <button type="button" onClick={onClose} className="px-4 py-2.5 rounded-xl border border-[#161623] hover:bg-zinc-950 text-zinc-400 hover:text-zinc-200 text-xs font-bold uppercase transition-all">
+              Cancel
+            </button>
+            <button type="submit" disabled={loading} className="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs uppercase transition-all">
+              {loading ? "Saving..." : "Save Changes"}
+            </button>
+          </footer>
+        </form>
+      </div>
+    </div>
+  );
+}
+

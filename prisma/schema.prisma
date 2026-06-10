@@ -16,6 +16,8 @@ model Contact {
   status        String         @default("NEW")
   source        String?        @default("PORTAL")
   notes         String?
+  lastContact   DateTime?
+  nextFollowUp  DateTime?
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
   conversations Conversation[]
@@ -80,4 +82,121 @@ model ProjectView {
   createdAt DateTime @default(now())
 
   @@map("project_views")
+}
+
+model Opportunity {
+  id        String    @id @default(cuid())
+  title     String
+  company   String
+  type      String    // "INTERNSHIP" | "JOB" | "FREELANCE" | "OPEN_SOURCE" | "STARTUP" | "COLLABORATION"
+  status    String    // "DISCOVERED" | "RESEARCHING" | "APPLIED" | "IN_PROGRESS" | "INTERVIEW" | "OFFER" | "REJECTED" | "CLOSED"
+  source    String?
+  priority  String    @default("MEDIUM") // "HIGH" | "MEDIUM" | "LOW"
+  notes     String?
+  deadline  DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@map("opportunities")
+}
+
+model Hackathon {
+  id          String    @id @default(cuid())
+  name        String
+  organizer   String
+  website     String?
+  deadline    DateTime?
+  eventDate   DateTime?
+  status      String    // "RESEARCHING" | "PLANNING" | "REGISTERED" | "SUBMITTED" | "COMPLETED" | "FINALIST" | "WON"
+  prize       String?
+  teamMembers String?
+  notes       String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("hackathons")
+}
+
+model Application {
+  id           String    @id @default(cuid())
+  company      String
+  role         String
+  location     String?
+  appliedDate  DateTime?
+  nextFollowUp DateTime?
+  status       String    // "SAVED" | "APPLIED" | "OA" | "INTERVIEW" | "FINAL_ROUND" | "OFFER" | "REJECTED"
+  notes        String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@map("applications")
+}
+
+model Event {
+  id               String    @id @default(cuid())
+  title            String
+  category         String    // "HACKATHON" | "MEETUP" | "CONFERENCE" | "WORKSHOP" | "COLLEGE_EVENT"
+  location         String?
+  startDate        DateTime
+  endDate          DateTime?
+  registrationLink String?
+  notes            String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@map("events")
+}
+
+model LearningRoadmap {
+  id         String    @id @default(cuid())
+  topic      String
+  category   String?
+  progress   Int       @default(0) // 0-100
+  targetDate DateTime?
+  resources  String?   // Store resources text or JSON
+  notes      String?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  @@map("learning_roadmaps")
+}
+
+model Goal {
+  id          String    @id @default(cuid())
+  title       String
+  description String?
+  category    String    // "ANNUAL" | "QUARTERLY" | "MONTHLY" | "WEEKLY"
+  status      String    // "NOT_STARTED" | "ACTIVE" | "COMPLETED" | "ARCHIVED"
+  progress    Int       @default(0) // 0-100
+  targetDate  DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("goals")
+}
+
+model Note {
+  id        String    @id @default(cuid())
+  title     String
+  content   String
+  tags      String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@map("notes")
+}
+
+model Reminder {
+  id           String    @id @default(cuid())
+  title        String
+  message      String?
+  reminderDate DateTime
+  type         String    // "EMAIL" | "DASHBOARD" | "BOTH"
+  completed    Boolean   @default(false)
+  targetType   String?   // "HACKATHON" | "APPLICATION" | "CONTACT" | "GOAL" etc.
+  targetId     String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@map("reminders")
 }
