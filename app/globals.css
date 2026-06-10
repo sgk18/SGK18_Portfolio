@@ -131,5 +131,12 @@ body {
     background-color: var(--color-nb-red);
     color: white;
   }
+
+  /* Neo-Brutalist Admin Console Specific Overrides */
+  .admin-console-container,
+  .admin-console-container * {
+    border-radius: 0px !important;
+  }
 }
+
 

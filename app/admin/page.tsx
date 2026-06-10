@@ -136,7 +136,7 @@ function CareerOSAdmin() {
   const [authLoading, setAuthLoading] = useState(false);
 
   const [activeTab, setActiveTab] = useState("analytics");
-  const [isDarkMode, setIsDarkMode] = useState(true);
+  const [isDarkMode, setIsDarkMode] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   // Command palette and search states
@@ -277,37 +277,37 @@ function CareerOSAdmin() {
   const theme = useMemo(() => {
     if (isDarkMode) {
       return {
-        bg: "bg-[#09090b] text-zinc-100",
-        sidebar: "bg-[#0e0e11] border-zinc-800",
-        card: "bg-[#0e0e11] border-zinc-800 shadow-[2px_2px_0px_0px_#18181b]",
-        input: "bg-[#16161c] border-zinc-800 text-zinc-100 placeholder-zinc-600",
-        border: "border-zinc-800",
-        accent: "text-indigo-400 bg-indigo-500/10 border-indigo-500/20",
-        green: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
-        red: "text-rose-400 bg-rose-500/10 border-rose-500/20",
-        orange: "text-amber-400 bg-amber-500/10 border-amber-500/20",
-        hover: "hover:bg-zinc-900/60",
-        selected: "bg-indigo-950/40 text-indigo-400 border-indigo-500/30 shadow-[1px_1px_0px_0px_#4f46e5]",
-        textMuted: "text-zinc-550",
-        nestedBg: "bg-zinc-900/40",
-        nestedCard: "bg-[#0e0e11] border border-zinc-800 shadow-[1px_1px_0px_0px_#18181b]",
+        bg: "bg-[#0A0A0A] text-[#FFFFFF]",
+        sidebar: "bg-[#141414] border-2 border-white",
+        card: "bg-[#141414] border-2 border-white shadow-[4px_4px_0px_0px_#E3000F]",
+        input: "bg-[#222222] border-2 border-white text-white placeholder-zinc-500",
+        border: "border-white border-2",
+        accent: "text-[#E3000F] bg-[#E3000F]/10 border-2 border-[#E3000F]",
+        green: "text-[#10b981] bg-[#10b981]/10 border-2 border-[#10b981]",
+        red: "text-[#E3000F] bg-[#E3000F]/10 border-2 border-[#E3000F]",
+        orange: "text-[#f59e0b] bg-[#f59e0b]/10 border-2 border-[#f59e0b]",
+        hover: "hover:bg-[#222222] hover:text-[#E3000F]",
+        selected: "bg-[#E3000F] text-white border-2 border-white shadow-[2px_2px_0px_0px_#FFFFFF]",
+        textMuted: "text-zinc-400",
+        nestedBg: "bg-[#1a1a1a]",
+        nestedCard: "bg-[#141414] border-2 border-zinc-700 shadow-[2px_2px_0px_0px_#FFFFFF]",
       };
     } else {
       return {
-        bg: "bg-[#f4f4f5] text-zinc-950",
-        sidebar: "bg-white border-zinc-900",
-        card: "bg-white border-zinc-900 shadow-[3px_3px_0px_0px_#09090b]",
-        input: "bg-zinc-50 border-zinc-900 text-zinc-955 placeholder-zinc-400",
-        border: "border-zinc-900",
-        accent: "text-indigo-600 bg-indigo-50 border-indigo-900/20",
-        green: "text-emerald-600 bg-emerald-50 border-emerald-900/20",
-        red: "text-rose-600 bg-rose-50 border-rose-900/20",
-        orange: "text-amber-600 bg-amber-50 border-amber-900/20",
-        hover: "hover:bg-zinc-100",
-        selected: "bg-indigo-50 text-indigo-700 border-indigo-900 shadow-[2px_2px_0px_0px_#09090b]",
-        textMuted: "text-zinc-400",
-        nestedBg: "bg-zinc-200/50",
-        nestedCard: "bg-white border border-zinc-900 shadow-[2px_2px_0px_0px_#09090b]",
+        bg: "bg-[#FFF5F5] text-[#0A0A0A]",
+        sidebar: "bg-white border-2 border-[#0A0A0A]",
+        card: "bg-white border-2 border-[#0A0A0A] shadow-[4px_4px_0px_0px_#0A0A0A]",
+        input: "bg-[#FFF5F5] border-2 border-[#0A0A0A] text-[#0A0A0A] placeholder-[#888888]",
+        border: "border-[#0A0A0A] border-2",
+        accent: "text-[#E3000F] bg-[#E3000F]/10 border-2 border-[#E3000F]",
+        green: "text-[#10b981] bg-[#10b981]/10 border-2 border-[#10b981]",
+        red: "text-[#E3000F] bg-[#E3000F]/10 border-2 border-[#E3000F]",
+        orange: "text-[#f59e0b] bg-[#f59e0b]/10 border-2 border-[#f59e0b]",
+        hover: "hover:bg-[#FFF5F5] hover:text-[#E3000F]",
+        selected: "bg-[#E3000F] text-white border-2 border-[#0A0A0A] shadow-[3px_3px_0px_0px_#0A0A0A]",
+        textMuted: "text-[#555555]",
+        nestedBg: "bg-[#FFF5F5]/60",
+        nestedCard: "bg-white border-2 border-[#0A0A0A] shadow-[2px_2px_0px_0px_#0A0A0A]",
       };
     }
   }, [isDarkMode]);
@@ -315,19 +315,19 @@ function CareerOSAdmin() {
   // Auth Screen
   if (!authed) {
     return (
-      <div className="min-h-screen bg-[#07070a] flex items-center justify-center px-6 selection:bg-indigo-500/20">
-        <div className="w-full max-w-sm p-8 bg-[#0b0b0f] border border-[#161623] rounded-2xl shadow-xl space-y-6">
+      <div className="admin-console-container min-h-screen bg-[#FFF5F5] flex items-center justify-center px-6 selection:bg-[#E3000F]/20">
+        <div className="w-full max-w-sm p-8 bg-white border-2 border-[#0A0A0A] shadow-[6px_6px_0px_#0A0A0A] space-y-6">
           <div className="text-center space-y-2">
-            <div className="w-12 h-12 mx-auto rounded-xl bg-indigo-500/10 border border-indigo-500/25 flex items-center justify-center">
-              <Sparkles size={20} className="text-indigo-400" />
+            <div className="w-12 h-12 mx-auto bg-[#E3000F]/10 border-2 border-[#0A0A0A] flex items-center justify-center">
+              <Sparkles size={20} className="text-[#E3000F]" />
             </div>
-            <h1 className="text-2xl font-bold font-heading text-zinc-100">CareerOS Console</h1>
+            <h1 className="text-2xl font-black font-heading text-[#0A0A0A] uppercase tracking-tight">CareerOS Console</h1>
             <p className="text-xs text-zinc-500 font-mono">Restricted access portal</p>
           </div>
 
           <form onSubmit={handleLogin} className="space-y-4">
             <div className="space-y-1">
-              <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest font-mono">
+              <label className="text-[10px] font-bold text-zinc-650 uppercase tracking-widest font-mono">
                 Secret Access Key
               </label>
               <input
@@ -335,11 +335,11 @@ function CareerOSAdmin() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••••••"
-                className="w-full px-4 py-3 rounded-xl bg-[#0c0c14] border border-[#161623] text-zinc-100 placeholder-zinc-800 text-sm focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 transition-all font-mono"
+                className="w-full px-4 py-3 bg-[#FFF5F5] border-2 border-[#0A0A0A] text-[#0A0A0A] placeholder-zinc-400 text-sm focus:outline-none focus:border-[#E3000F] transition-all font-mono"
                 required
               />
               {authError && (
-                <p className="text-xs text-rose-400 flex items-center gap-1 mt-1 font-mono">
+                <p className="text-xs text-rose-600 flex items-center gap-1 mt-1 font-mono font-bold">
                   <AlertCircle size={12} /> {authError}
                 </p>
               )}
@@ -347,10 +347,10 @@ function CareerOSAdmin() {
             <button
               type="submit"
               disabled={authLoading}
-              className="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs uppercase tracking-wider transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+              className="w-full py-3 bg-[#E3000F] border-2 border-[#0A0A0A] shadow-[3px_3px_0px_#0A0A0A] hover:bg-[#FF1A1A] hover:shadow-[5px_5px_0px_#0A0A0A] text-white font-bold text-xs uppercase tracking-wider transition-all disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
             >
               {authLoading ? (
-                <span className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                <span className="w-4 h-4 border-2 border-white/20 border-t-white animate-spin" />
               ) : (
                 "Authenticate"
               )}
@@ -364,28 +364,28 @@ function CareerOSAdmin() {
   // Dashboard Loader/Error Screen
   if (storeLoading) {
     return (
-      <div className="min-h-screen bg-[#07070a] flex flex-col gap-4 items-center justify-center">
-        <div className="w-8 h-8 border-3 border-zinc-700 border-t-indigo-500 rounded-full animate-spin" />
-        <p className="text-xs text-zinc-500 font-mono animate-pulse">Initializing Personal Career OS...</p>
+      <div className="min-h-screen bg-[#FFF5F5] flex flex-col gap-4 items-center justify-center">
+        <div className="w-8 h-8 border-4 border-[#0A0A0A] border-t-[#E3000F] animate-spin" />
+        <p className="text-xs text-[#0A0A0A] font-mono animate-pulse">Initializing Personal Career OS...</p>
       </div>
     );
   }
 
   if (storeError || !store) {
     return (
-      <div className="min-h-screen bg-[#07070a] flex flex-col gap-4 items-center justify-center p-6 text-center">
-        <div className="p-3 bg-rose-500/10 border border-rose-500/25 rounded-2xl text-rose-400">
+      <div className="min-h-screen bg-[#FFF5F5] flex flex-col gap-4 items-center justify-center p-6 text-center">
+        <div className="p-3 bg-[#E3000F]/10 border-2 border-[#0A0A0A] text-[#E3000F] shadow-[3px_3px_0px_#0A0A0A]">
           <AlertCircle size={28} />
         </div>
         <div className="space-y-1">
-          <h2 className="text-lg font-bold text-zinc-200">Failed to Load Dashboard Database</h2>
-          <p className="text-xs text-zinc-500 font-mono max-w-sm">
+          <h2 className="text-lg font-black text-[#0A0A0A] uppercase tracking-tight">Failed to Load Dashboard Database</h2>
+          <p className="text-xs text-zinc-600 font-mono max-w-sm">
             Check logs. Make sure database file is valid and Prisma generated models match.
           </p>
         </div>
         <button
           onClick={handleLogout}
-          className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs rounded-xl font-bold uppercase transition-all"
+          className="px-5 py-2.5 bg-white border-2 border-[#0A0A0A] shadow-[3px_3px_0px_#0A0A0A] hover:bg-[#FFF5F5] text-[#0A0A0A] text-xs font-bold uppercase transition-all cursor-pointer"
         >
           Reset Session
         </button>
@@ -394,7 +394,7 @@ function CareerOSAdmin() {
   }
 
   return (
-    <div className={`min-h-screen flex font-sans ${theme.bg} selection:bg-indigo-500/25 relative overflow-hidden transition-colors duration-200`}>
+    <div className={`admin-console-container min-h-screen flex font-sans ${theme.bg} selection:bg-[#E3000F]/20 relative overflow-hidden transition-colors duration-200`}>
       {/* Mobile Sidebar drawer backdrop */}
       {isSidebarOpen && (
         <div
