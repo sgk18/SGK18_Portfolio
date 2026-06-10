@@ -94,7 +94,7 @@ const queryClient = new QueryClient({
 export default function AdminPageWrapper() {
   return (
     <QueryClientProvider client={queryClient}>
-      <CareerOSAdmin />
+      <AtlasAdmin />
     </QueryClientProvider>
   );
 }
@@ -123,7 +123,7 @@ const GOAL_CATEGORIES = ["ANNUAL", "QUARTERLY", "MONTHLY", "WEEKLY"];
 const GOAL_STATUSES = ["NOT_STARTED", "ACTIVE", "COMPLETED", "ARCHIVED"];
 
 // ─── Primary Dashboard Component ──────────────────────────────────────────────
-function CareerOSAdmin() {
+function AtlasAdmin() {
   const [currentTime, setCurrentTime] = useState(0);
   useEffect(() => {
     const timer = setTimeout(() => setCurrentTime(Date.now()), 0);
@@ -160,10 +160,10 @@ function CareerOSAdmin() {
       const res = await verifyPasswordAction(pw);
       if (res.success) {
         setAuthed(true);
-        localStorage.setItem("careeros_pw", pw);
+        localStorage.setItem("atlas_pw", pw);
       } else {
         setAuthError(res.error || "Invalid Access Key");
-        localStorage.removeItem("careeros_pw");
+        localStorage.removeItem("atlas_pw");
       }
     } catch {
       setAuthError("Server verification error");
@@ -174,7 +174,7 @@ function CareerOSAdmin() {
 
   // Load password from localStorage
   useEffect(() => {
-    const saved = localStorage.getItem("careeros_pw");
+    const saved = localStorage.getItem("atlas_pw");
     if (saved) {
       setTimeout(() => {
         setPassword(saved);
@@ -189,7 +189,7 @@ function CareerOSAdmin() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("careeros_pw");
+    localStorage.removeItem("atlas_pw");
     setAuthed(false);
     setPassword("");
   };
@@ -321,7 +321,7 @@ function CareerOSAdmin() {
             <div className="w-12 h-12 mx-auto bg-[#E3000F]/10 border-2 border-[#0A0A0A] flex items-center justify-center">
               <Sparkles size={20} className="text-[#E3000F]" />
             </div>
-            <h1 className="text-2xl font-black font-heading text-[#0A0A0A] uppercase tracking-tight">CareerOS Console</h1>
+            <h1 className="text-2xl font-black font-heading text-[#0A0A0A] uppercase tracking-tight">Atlas Console</h1>
             <p className="text-xs text-zinc-500 font-mono">Restricted access portal</p>
           </div>
 
@@ -366,7 +366,7 @@ function CareerOSAdmin() {
     return (
       <div className="min-h-screen bg-[#FFF5F5] flex flex-col gap-4 items-center justify-center">
         <div className="w-8 h-8 border-4 border-[#0A0A0A] border-t-[#E3000F] animate-spin" />
-        <p className="text-xs text-[#0A0A0A] font-mono animate-pulse">Initializing Personal Career OS...</p>
+        <p className="text-xs text-[#0A0A0A] font-mono animate-pulse">Initializing Atlas...</p>
       </div>
     );
   }
@@ -410,14 +410,14 @@ function CareerOSAdmin() {
         {/* App Logo & Details */}
         <div className="p-6 border-b border-inherit flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="p-2 rounded-xl bg-indigo-500/15 border border-indigo-500/25 flex items-center justify-center">
-              <Sparkles size={16} className="text-indigo-400" />
+            <div className="p-2 bg-[#E3000F]/10 border-2 border-[#0A0A0A] flex items-center justify-center">
+              <Sparkles size={16} className="text-[#E3000F]" />
             </div>
             <div>
-              <span className="font-extrabold text-sm tracking-wide bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
-                CareerOS
+              <span className="font-black text-sm tracking-widest uppercase">
+                Atlas
               </span>
-              <p className="text-[9px] text-zinc-500 font-mono">v1.2.0-beta</p>
+              <p className="text-[9px] font-mono opacity-50">v1.2.0-beta</p>
             </div>
           </div>
           <div className="flex items-center gap-1.5">
@@ -471,7 +471,7 @@ function CareerOSAdmin() {
             onClick={handleLogout}
             className="w-full py-2.5 rounded-xl border border-rose-500/20 bg-rose-500/5 hover:bg-rose-500/10 text-rose-400 font-bold text-xs tracking-wide uppercase transition-all"
           >
-            Logout OS
+            Logout Atlas
           </button>
         </div>
       </aside>
@@ -492,7 +492,7 @@ function CareerOSAdmin() {
               <Search size={14} className="text-zinc-500 absolute left-3" />
               <input
                 type="text"
-                placeholder="Search OS... (Ctrl+K)"
+                placeholder="Search Atlas... (Ctrl+K)"
                 value={globalQuery}
                 onChange={(e) => setGlobalQuery(e.target.value)}
                 className={`w-full pl-9 pr-4 py-2 rounded-xl text-xs font-medium border focus:outline-none focus:border-indigo-500/50 transition-all ${theme.input}`}
@@ -941,8 +941,147 @@ function AnalyticsView({ store, theme, setActiveTab, password }: { store: any; t
   const eventsCount = store.events.length;
   const networkCount = store.contacts.length;
 
+  // Site visit analytics
+  const totalPageViews = store.totalPageViews || 0;
+  const totalVisitors = store.totalVisitors || 0;
+
+  // Fetch detailed analytics (referrers, page breakdown, recent visits, downloads)
+  const { data: analyticsDetail } = useQuery({
+    queryKey: ["analyticsDetail", password],
+    queryFn: async () => {
+      const res = await fetch("/api/admin/analytics", {
+        headers: { "x-admin-password": password },
+      });
+      if (!res.ok) return null;
+      return res.json();
+    },
+    enabled: !!password,
+    staleTime: 60_000,
+  });
+
+  const recentVisits: any[] = analyticsDetail?.recentVisits || [];
+  const referrers: Record<string, number> = analyticsDetail?.referrers || {};
+  const pageViewsBreakdown: Record<string, number> = analyticsDetail?.pageViews || {};
+  const totalDownloads: number = analyticsDetail?.totalDownloads || 0;
+
   return (
     <div className="space-y-8 animate-fadeIn">
+      {/* === Site Visit Analytics Banner === */}
+      <div className={`p-5 border-2 ${theme.border} ${theme.card.split(' shadow-')[0]} space-y-4`}>
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-sm font-black uppercase tracking-tight">Portfolio Site Analytics</h3>
+            <p className={`text-xs ${theme.textMuted} font-mono mt-0.5`}>Live visit tracking from suryachalam.vercel.app</p>
+          </div>
+          <span className={`flex items-center gap-1.5 text-[10px] font-bold font-mono uppercase border px-2 py-1 ${theme.green}`}>
+            <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" />
+            Live
+          </span>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {[
+            { label: "Total Page Views", value: totalPageViews, icon: TrendingUp },
+            { label: "Unique Visitors", value: totalVisitors, icon: Users },
+            { label: "Resume Downloads", value: totalDownloads, icon: FileText },
+            { label: "Form Submissions", value: networkCount, icon: Inbox },
+          ].map((m, i) => (
+            <div key={i} className={`p-4 border ${theme.border} ${theme.nestedBg} space-y-2`}>
+              <div className="flex items-center justify-between">
+                <span className={`text-[9px] font-bold uppercase tracking-widest font-mono ${theme.textMuted}`}>{m.label}</span>
+                <m.icon size={12} className="text-[#E3000F]" />
+              </div>
+              <p className="text-2xl font-black">{m.value.toLocaleString()}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Recent Visits & Top Referrers */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Recent Visits Table */}
+        <div className={`p-6 border ${theme.border} ${theme.card.split(' shadow-')[0]} space-y-4`}>
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-black uppercase tracking-tight">Recent Page Visits</h3>
+            <span className={`text-[9px] font-bold font-mono uppercase px-2 py-1 border ${theme.accent}`}>Last 10</span>
+          </div>
+          <div className={`divide-y ${theme.border} max-h-[240px] overflow-y-auto scrollbar-none`}>
+            {recentVisits.length === 0 ? (
+              <p className={`py-6 text-xs ${theme.textMuted} font-mono text-center`}>No visit data yet.</p>
+            ) : (
+              recentVisits.map((v: any, i: number) => (
+                <div key={i} className="py-2.5 flex items-start justify-between gap-3 text-xs">
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold truncate">{v.page || "/"}</p>
+                    <p className={`text-[10px] font-mono ${theme.textMuted} truncate`}>
+                      {v.referrer && v.referrer !== "direct" ? `via ${v.referrer}` : "Direct"}
+                    </p>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <p className={`text-[10px] font-mono ${theme.textMuted}`}>
+                      {new Date(v.timestamp).toLocaleString()}
+                    </p>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+
+        {/* Top Referrers */}
+        <div className={`p-6 border ${theme.border} ${theme.card.split(' shadow-')[0]} space-y-4`}>
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-black uppercase tracking-tight">Top Traffic Sources</h3>
+            <span className={`text-[9px] font-bold font-mono uppercase px-2 py-1 border ${theme.green}`}>Referrers</span>
+          </div>
+          {Object.keys(referrers).length === 0 ? (
+            <p className={`py-6 text-xs ${theme.textMuted} font-mono text-center`}>No referrer data yet.</p>
+          ) : (
+            <div className="space-y-2">
+              {Object.entries(referrers)
+                .sort(([, a], [, b]) => b - a)
+                .slice(0, 8)
+                .map(([ref, count], i) => {
+                  const maxCount = Math.max(...Object.values(referrers));
+                  const pct = Math.round((count / maxCount) * 100);
+                  return (
+                    <div key={i} className="space-y-1">
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs font-bold truncate max-w-[160px]">{ref || "direct"}</span>
+                        <span className={`text-[10px] font-mono font-bold ${theme.textMuted}`}>{count} hits</span>
+                      </div>
+                      <div className={`h-1.5 w-full border ${theme.border} overflow-hidden`}>
+                        <div
+                          className="h-full bg-[#E3000F] transition-all duration-500"
+                          style={{ width: `${pct}%` }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Per-Page Views Breakdown */}
+      <div className={`p-6 border ${theme.border} ${theme.card.split(' shadow-')[0]} space-y-4`}>
+        <h3 className="text-sm font-black uppercase tracking-tight">Page Views Breakdown</h3>
+        {Object.keys(pageViewsBreakdown).length === 0 ? (
+          <p className={`py-4 text-xs ${theme.textMuted} font-mono text-center`}>No visit data yet.</p>
+        ) : (
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
+            {Object.entries(pageViewsBreakdown)
+              .sort(([, a], [, b]) => b - a)
+              .map(([page, count], i) => (
+                <div key={i} className={`p-3 border ${theme.border} ${theme.nestedBg} space-y-1`}>
+                  <p className={`text-[9px] font-mono font-bold uppercase truncate ${theme.textMuted}`}>{page}</p>
+                  <p className="text-xl font-black">{count}</p>
+                </div>
+              ))}
+          </div>
+        )}
+      </div>
+
       {/* Metric Cards Banner Grid */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         {[
@@ -985,7 +1124,7 @@ function AnalyticsView({ store, theme, setActiveTab, password }: { store: any; t
           </div>
 
           {/* Simple Visual Representation representing distribution metrics */}
-          <div className="h-64 flex items-end justify-between gap-3 pt-6 border-b border-[#161623] px-4">
+          <div className={`h-64 flex items-end justify-between gap-3 pt-6 border-b ${theme.border} px-4`}>
             {OPPORTUNITY_STATUSES.map((status) => {
               const count = store.opportunities.filter((o: any) => o.status === status).length;
               const maxCount = Math.max(...OPPORTUNITY_STATUSES.map(s => store.opportunities.filter((o: any) => o.status === s).length), 1);
@@ -1042,34 +1181,34 @@ function AnalyticsView({ store, theme, setActiveTab, password }: { store: any; t
         </div>
       </div>
 
-      {/* Grid of logs & proactive deadlines watch */}
+      {/* Recent system logs & deadline watch */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Deadline Watch Widget */}
         <DeadlineWatchWidget store={store} theme={theme} password={password} />
 
-        {/* Recents logs list summary */}
-        <div className={`p-6 rounded-2xl border ${theme.card} space-y-4`}>
+        {/* Recent logs */}
+        <div className={`p-6 border ${theme.border} ${theme.card.split(' shadow-')[0]} space-y-4`}>
           <div className="flex justify-between items-center">
-            <h3 className="text-sm font-bold tracking-tight">Recent System Logs</h3>
-            <button onClick={() => setActiveTab("timeline")} className="text-xs font-bold text-indigo-400 hover:text-indigo-300">
+            <h3 className="text-sm font-black uppercase tracking-tight">Recent System Logs</h3>
+            <button onClick={() => setActiveTab("timeline")} className="text-xs font-bold text-[#E3000F] hover:underline">
               View All Logs →
             </button>
           </div>
-          <div className="divide-y divide-[#161623] max-h-[220px] overflow-y-auto scrollbar-none">
-            {store.activityLogs.slice(0, 5).map((log: any) => (
+          <div className={`divide-y ${theme.border} max-h-[220px] overflow-y-auto scrollbar-none`}>
+            {store.activityLogs.slice(0, 8).map((log: any) => (
               <div key={log.id} className="py-3 flex items-center justify-between text-xs font-medium">
                 <div className="flex items-center gap-2 overflow-hidden mr-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 shrink-0" />
-                  <span className="text-zinc-300 truncate">{log.action}</span>
-                  <span className="text-zinc-500 font-mono text-[10px] truncate hidden md:inline">
-                    {log.metadata && JSON.stringify(JSON.parse(log.metadata))}
-                  </span>
+                  <div className="w-1.5 h-1.5 bg-[#E3000F] shrink-0" />
+                  <span className="truncate font-bold">{log.action}</span>
                 </div>
-                <span className="text-zinc-500 text-[10px] font-mono shrink-0">
+                <span className={`${theme.textMuted} text-[10px] font-mono shrink-0`}>
                   {new Date(log.createdAt).toLocaleDateString()}
                 </span>
               </div>
             ))}
+            {store.activityLogs.length === 0 && (
+              <p className={`py-6 text-xs ${theme.textMuted} font-mono text-center`}>No system activity yet.</p>
+            )}
           </div>
         </div>
       </div>
@@ -1629,7 +1768,7 @@ function CRMView({ store, theme, password, onEditContact }: { store: any; theme:
               )}
             </div>
 
-            <footer className={`p-4 border-t ${theme.border} bg-zinc-900/10 shrink-0`}>
+            <footer className={`p-4 border-t ${theme.border} shrink-0`}>
               <div className="space-y-3">
                 <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
                   <Sparkles size={11} className="text-zinc-500 shrink-0" />
@@ -1648,22 +1787,22 @@ function CRMView({ store, theme, password, onEditContact }: { store: any; theme:
                   ))}
                 </div>
 
-                <div className={`bg-zinc-950/80 border ${theme.border} rounded-xl p-3 flex flex-col`}>
+                <div className={`border ${theme.border} p-3 flex flex-col`}>
                   <textarea
                     rows={2}
                     placeholder={`Reply to ${activeContact.name}...`}
                     value={replyText}
                     onChange={(e) => setReplyText(e.target.value)}
-                    className="bg-transparent text-zinc-200 placeholder-zinc-700 text-xs focus:outline-none resize-none scrollbar-none"
+                    className={`bg-transparent placeholder-opacity-50 text-xs focus:outline-none resize-none scrollbar-none ${theme.input.replace(/border-\S+/g, '').replace(/bg-\S+/g, '').trim()}`}
                   />
-                  <div className="flex justify-between items-center mt-3 pt-3 border-t border-zinc-800/60">
-                    <span className="text-[10px] text-zinc-500 font-mono">
-                      Via CareerOS Resend Integration
+                  <div className={`flex justify-between items-center mt-3 pt-3 border-t ${theme.border}`}>
+                    <span className={`text-[10px] ${theme.textMuted} font-mono`}>
+                      Via Atlas Resend Integration
                     </span>
                     <button
                       onClick={handleSendReply}
                       disabled={sendingReply || !replyText.trim()}
-                      className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-bold text-xs uppercase transition-all"
+                      className="flex items-center gap-1.5 px-4 py-2 bg-[#E3000F] border-2 border-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] hover:bg-[#FF1A1A] hover:shadow-[3px_3px_0px_#0A0A0A] disabled:opacity-50 text-white font-bold text-xs uppercase transition-all cursor-pointer"
                     >
                       <Send size={11} />
                       {sendingReply ? "Sending..." : "Send Reply"}

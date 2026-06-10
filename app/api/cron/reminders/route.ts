@@ -16,7 +16,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "RESEND_API_KEY is not configured" }, { status: 500 });
   }
 
-  const fromEmail = process.env.RESEND_FROM_EMAIL || "CareerOS <onboarding@resend.dev>";
+  const fromEmail = process.env.RESEND_FROM_EMAIL || "Atlas <onboarding@resend.dev>";
   const toEmail = process.env.RESEND_INBOUND_EMAIL || "suryachalam18@gmail.com";
 
   const url = new URL(req.url);
@@ -101,10 +101,10 @@ export async function GET(req: NextRequest) {
           await resend.emails.send({
             from: fromEmail,
             to: toEmail,
-            subject: `[CareerOS] ${reminder.title}`,
+            subject: `[Atlas] ${reminder.title}`,
             html: `
               <div style="font-family: sans-serif; padding: 20px; color: #1e293b; background-color: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0; max-width: 600px; margin: auto;">
-                <h2 style="color: #6366f1; margin-top: 0; font-size: 18px;">CareerOS Reminder</h2>
+                <h2 style="color: #6366f1; margin-top: 0; font-size: 18px;">Atlas Reminder</h2>
                 <h3 style="margin-bottom: 5px; font-size: 15px;">${reminder.title}</h3>
                 <p style="font-size: 14px; line-height: 1.5; color: #475569;">${reminder.message || "No details provided."}</p>
                 <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;" />

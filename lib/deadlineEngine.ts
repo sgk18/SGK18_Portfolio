@@ -94,7 +94,7 @@ export const DeadlineEngine = {
   // ─── MAIN DEADLINE & WINDOW AUDITING ───────────────────────────────────────
   async runAudit(password: string) {
     const apiKey = process.env.RESEND_API_KEY;
-    const fromEmail = process.env.RESEND_FROM_EMAIL || "CareerOS <onboarding@resend.dev>";
+    const fromEmail = process.env.RESEND_FROM_EMAIL || "Atlas <onboarding@resend.dev>";
     const toEmail = process.env.RESEND_INBOUND_EMAIL || "suryachalam18@gmail.com";
 
     const resend = apiKey ? new Resend(apiKey) : null;
@@ -142,7 +142,7 @@ export const DeadlineEngine = {
                 await resend.emails.send({
                   from: fromEmail,
                   to: toEmail,
-                  subject: `[CareerOS Warning] ${hack.name} Deadline in ${timeRemaining}!`,
+                  subject: `[Atlas Warning] ${hack.name} Deadline in ${timeRemaining}!`,
                   html: this.getEmailLayoutHtml(hack.name, `Deadline approaches in ${timeRemaining} (${deadline.toLocaleDateString()}). Prize pool: ${hack.prize || "General"}.`, priority, timeRemaining, `/admin?tab=hackathons`),
                 });
                 emailStatus = "SENT";
@@ -211,7 +211,7 @@ export const DeadlineEngine = {
                 await resend.emails.send({
                   from: fromEmail,
                   to: toEmail,
-                  subject: `[CareerOS Warning] Opportunity ${opp.title} @ ${opp.company} Closes in ${timeRemaining}!`,
+                  subject: `[Atlas Warning] Opportunity ${opp.title} @ ${opp.company} Closes in ${timeRemaining}!`,
                   html: this.getEmailLayoutHtml(`${opp.title} (${opp.company})`, `Application deadline closes in ${timeRemaining}. Source: ${opp.source || "General"}.`, priority, timeRemaining, `/admin?tab=opportunities`),
                 });
                 emailStatus = "SENT";
@@ -262,7 +262,7 @@ export const DeadlineEngine = {
                 await resend.emails.send({
                   from: fromEmail,
                   to: toEmail,
-                  subject: `[CareerOS Warning] Application Follow Up for ${app.role} @ ${app.company} in ${timeRemaining}!`,
+                  subject: `[Atlas Warning] Application Follow Up for ${app.role} @ ${app.company} in ${timeRemaining}!`,
                   html: this.getEmailLayoutHtml(`${app.role} @ ${app.company}`, `Follow-up interval is in ${timeRemaining}. Current application status: ${app.status}.`, priority, timeRemaining, `/admin?tab=applications`),
                 });
                 emailStatus = "SENT";
@@ -317,7 +317,7 @@ export const DeadlineEngine = {
                 await resend.emails.send({
                   from: fromEmail,
                   to: toEmail,
-                  subject: `[CareerOS Event] ${evt.title} Starts in ${timeRemaining}!`,
+                  subject: `[Atlas Event] ${evt.title} Starts in ${timeRemaining}!`,
                   html: this.getEmailLayoutHtml(evt.title, `Starts in ${timeRemaining} (${start.toLocaleString()}). Category: ${evt.category}. Location: ${evt.location || "Online"}.`, priority, timeRemaining, `/admin?tab=events`),
                 });
                 emailStatus = "SENT";
@@ -371,7 +371,7 @@ export const DeadlineEngine = {
                 await resend.emails.send({
                   from: fromEmail,
                   to: toEmail,
-                  subject: `[CareerOS Recruiter alert] Follow up with ${c.name} in ${timeRemaining}!`,
+                  subject: `[Atlas Recruiter alert] Follow up with ${c.name} in ${timeRemaining}!`,
                   html: this.getEmailLayoutHtml(`Follow up: ${c.name}`, `Schedule is set for ${timeRemaining} (${followUp.toLocaleDateString()}). Company: ${c.company || "General"}. Role: ${c.role || "N/A"}.`, priority, timeRemaining, `/admin?tab=networking`),
                 });
                 emailStatus = "SENT";
@@ -427,7 +427,7 @@ export const DeadlineEngine = {
                 await resend.emails.send({
                   from: fromEmail,
                   to: toEmail,
-                  subject: `[CareerOS Goal] "${g.title}" target closes in ${timeRemaining}!`,
+                  subject: `[Atlas Goal] "${g.title}" target closes in ${timeRemaining}!`,
                   html: this.getEmailLayoutHtml(g.title, `Goal achievement date is in ${timeRemaining} (${target.toLocaleDateString()}). Current progress is ${g.progress}%.`, priority, timeRemaining, `/admin?tab=goals`),
                 });
                 emailStatus = "SENT";
@@ -566,7 +566,7 @@ export const DeadlineEngine = {
 
     const htmlContent = `
       <div style="font-family: sans-serif; padding: 24px; color: #1e293b; background-color: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0; max-width: 600px; margin: auto;">
-        <h2 style="color: #6366f1; margin-top: 0; font-size: 20px;">CareerOS Daily Brief — ${localDateStr}</h2>
+        <h2 style="color: #6366f1; margin-top: 0; font-size: 20px;">Atlas Daily Brief — ${localDateStr}</h2>
         <p style="font-size: 14px; color: #475569;">Here is your proactive career digest for this morning.</p>
         
         <h3 style="color: #0f172a; border-bottom: 1px solid #e2e8f0; padding-bottom: 6px; font-size: 15px; margin-top: 24px;">Today's Core Priorities</h3>
@@ -580,14 +580,14 @@ export const DeadlineEngine = {
         </ul>
 
         <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 32px 0;" />
-        <a href="http://localhost:3000/admin" style="display: inline-block; background-color: #6366f1; color: white; padding: 10px 20px; border-radius: 8px; font-size: 12px; font-weight: bold; text-decoration: none;">Open CareerOS Dashboard</a>
+        <a href="http://localhost:3000/admin" style="display: inline-block; background-color: #6366f1; color: white; padding: 10px 20px; border-radius: 8px; font-size: 12px; font-weight: bold; text-decoration: none;">Open Atlas Dashboard</a>
       </div>
     `;
 
     await resend.emails.send({
       from: fromEmail,
       to: toEmail,
-      subject: `CareerOS Daily Brief — ${localDateStr}`,
+      subject: `Atlas Daily Brief — ${localDateStr}`,
       html: htmlContent,
     });
   },
@@ -616,7 +616,7 @@ export const DeadlineEngine = {
 
     const htmlContent = `
       <div style="font-family: sans-serif; padding: 24px; color: #1e293b; background-color: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0; max-width: 600px; margin: auto;">
-        <h2 style="color: #6366f1; margin-top: 0; font-size: 20px;">CareerOS Evening Summary — ${localDateStr}</h2>
+        <h2 style="color: #6366f1; margin-top: 0; font-size: 20px;">Atlas Evening Summary — ${localDateStr}</h2>
         <p style="font-size: 14px; color: #475569;">Reflecting on today's progress.</p>
         
         <h3 style="color: #0f172a; border-bottom: 1px solid #e2e8f0; padding-bottom: 6px; font-size: 15px; margin-top: 24px;">What Was Completed Today</h3>
@@ -625,14 +625,14 @@ export const DeadlineEngine = {
         </ul>
 
         <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 32px 0;" />
-        <a href="http://localhost:3000/admin" style="display: inline-block; background-color: #6366f1; color: white; padding: 10px 20px; border-radius: 8px; font-size: 12px; font-weight: bold; text-decoration: none;">Review CareerOS Console</a>
+        <a href="http://localhost:3000/admin" style="display: inline-block; background-color: #6366f1; color: white; padding: 10px 20px; border-radius: 8px; font-size: 12px; font-weight: bold; text-decoration: none;">Review Atlas Console</a>
       </div>
     `;
 
     await resend.emails.send({
       from: fromEmail,
       to: toEmail,
-      subject: `CareerOS Evening Summary — ${localDateStr}`,
+      subject: `Atlas Evening Summary — ${localDateStr}`,
       html: htmlContent,
     });
   },
@@ -643,7 +643,7 @@ export const DeadlineEngine = {
     return `
       <div style="font-family: sans-serif; max-width: 600px; padding: 24px; color: #1e293b; background-color: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0; margin: auto;">
         <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 20px;">
-          <h2 style="color: #6366f1; margin: 0; font-size: 18px;">CareerOS Warning Alert</h2>
+          <h2 style="color: #6366f1; margin: 0; font-size: 18px;">Atlas Warning Alert</h2>
           <span style="background-color: ${priorityColor}20; color: ${priorityColor}; border: 1px solid ${priorityColor}40; padding: 3px 8px; border-radius: 9999px; font-size: 10px; font-weight: bold; text-transform: uppercase;">
             ${priority} Priority
           </span>
@@ -653,7 +653,7 @@ export const DeadlineEngine = {
         <div style="background-color: #f1f5f9; padding: 12px 16px; border-radius: 8px; margin-bottom: 24px;">
           <p style="font-size: 12px; color: #475569; margin: 0;">Time Remaining: <strong>${timeRemaining}</strong></p>
         </div>
-        <a href="http://localhost:3000${actionPath}" style="display: inline-block; background-color: #6366f1; color: white; padding: 10px 20px; border-radius: 8px; font-size: 12px; font-weight: bold; text-decoration: none;">Open in CareerOS</a>
+        <a href="http://localhost:3000${actionPath}" style="display: inline-block; background-color: #6366f1; color: white; padding: 10px 20px; border-radius: 8px; font-size: 12px; font-weight: bold; text-decoration: none;">Open in Atlas</a>
       </div>
     `;
   },

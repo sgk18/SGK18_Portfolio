@@ -1,4 +1,4 @@
-# CareerOS — Portfolio, Recruiter CRM & Career Management Platform
+# Atlas — Portfolio, Recruiter CRM & Career Management Platform
 
 [![Next.js](https://img.shields.io/badge/Next.js-16.1.6-black?style=flat-square&logo=next.js)](https://nextjs.org/)
 [![React](https://img.shields.io/badge/React-19.2.4-blue?style=flat-square&logo=react)](https://react.dev/)
@@ -41,7 +41,7 @@ flowchart TD
 
     subgraph Presentation & API Router
         PortClient[Public Portfolio UI]
-        AdminPanel[Admin CareerOS Console]
+        AdminPanel[Admin Atlas Console]
         APIRoute[API Route Handlers]
         SrvAction[Server Actions]
     end
@@ -96,7 +96,7 @@ The frontend is built on the **Next.js 16 App Router** paradigm, taking advantag
 ### Backend Architecture
 The backend is structured to separate concern between API route endpoints and data models:
 * **API Layer**: Utilizes Next.js Serverless Route Handlers (`app/api/*`) for data ingestion (e.g. analytics tracking and inbound email webhook endpoints).
-* **Business Logic Layer**: Driven by Next.js Server Actions (`app/actions/careeros.ts`) for administrator state mutations (e.g. managing job applications, roadmaps, and scheduling follow-ups).
+* **Business Logic Layer**: Driven by Next.js Server Actions (`app/actions/Atlas.ts`) for administrator state mutations (e.g. managing job applications, roadmaps, and scheduling follow-ups).
 * **Data Access Layer (DAL)**: All queries to the SQLite/LibSQL database are consolidated inside [db.ts](file:///c:/projects/SGK18_Portfolio/lib/db.ts). This decouples HTTP/JSON serialization from ORM functions.
 * **Prisma Engine**: The Prisma client ([prisma.ts](file:///c:/projects/SGK18_Portfolio/lib/prisma.ts)) utilizes the `@prisma/adapter-libsql` adapter. This configures the project to use a local file database during development while supporting an edge-replicated database like Turso in production with zero code changes.
 
@@ -402,7 +402,7 @@ The GitHub panel displays live statistics without hitting API rate limits:
 ### Why Prisma ORM over Raw SQL
 * **Alternatives Evaluated**: Drizzle ORM, Raw Knex.js.
 * **Trade-off**: Drizzle is lighter, but Prisma provides automatic database clients, declarative schema migrations, and structured relationships.
-* **Benefit**: The type-safe Prisma client prevents SQL errors during build time, which keeps our database calls safe across CRM and CareerOS objects.
+* **Benefit**: The type-safe Prisma client prevents SQL errors during build time, which keeps our database calls safe across CRM and Atlas objects.
 
 ### Why SQLite with LibSQL Adapter over PostgreSQL (Initial Phase)
 * **Alternatives Evaluated**: PostgreSQL (Neon), MySQL (PlanetScale).
@@ -412,7 +412,7 @@ The GitHub panel displays live statistics without hitting API rate limits:
 ### Why Next.js 16 Server Actions over REST APIs for Dashboard Mutations
 * **Alternatives Evaluated**: Express API Gateway, Next.js Route Handlers.
 * **Trade-off**: Route handlers are easier to test with outside tools, but Server Actions eliminate boilerplate, validate inputs with Zod schemas, and trigger instant `useQuery` cache updates.
-* **Benefit**: Simplifies mutations inside the `CareerOSAdmin` console.
+* **Benefit**: Simplifies mutations inside the `AtlasAdmin` console.
 
 ### Why Resend over SendGrid or Amazon SES
 * **Alternatives Evaluated**: SendGrid, AWS SES.
@@ -510,8 +510,8 @@ As traffic grows, the platform's architecture can scale from a single user to ov
 c:\projects\SGK18_Portfolio\
 ├── app/                        # Next.js Application Core
 │   ├── actions/                # Next.js Server Actions
-│   │   └── careeros.ts         # CareerOS dashboard mutations & database triggers
-│   ├── admin/                  # Protected CareerOS Console UI
+│   │   └── Atlas.ts         # Atlas dashboard mutations & database triggers
+│   ├── admin/                  # Protected Atlas Console UI
 │   │   ├── crm/                # CRM redirect routing
 │   │   └── page.tsx            # Main tabbed workspace manager
 │   ├── api/                    # API Route Handlers
@@ -565,7 +565,7 @@ c:\projects\SGK18_Portfolio\
    ```env
    ADMIN_PASSWORD=your_dashboard_access_password
    RESEND_API_KEY=re_your_resend_api_token
-   RESEND_FROM_EMAIL=CareerOS <onboarding@resend.dev>
+   RESEND_FROM_EMAIL=Atlas <onboarding@resend.dev>
    RESEND_INBOUND_EMAIL=your_inbound_email@gmail.com
    CRON_SECRET=your_background_scheduler_cron_passkey
    WEBHOOK_SECRET=your_resend_inbound_webhook_token
