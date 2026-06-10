@@ -22,6 +22,7 @@ import {
   BarChart3,
   Search,
   Plus,
+  Menu,
   Moon,
   Sun,
   Laptop,
@@ -136,6 +137,7 @@ function CareerOSAdmin() {
 
   const [activeTab, setActiveTab] = useState("analytics");
   const [isDarkMode, setIsDarkMode] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   // Command palette and search states
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
@@ -275,33 +277,37 @@ function CareerOSAdmin() {
   const theme = useMemo(() => {
     if (isDarkMode) {
       return {
-        bg: "bg-[#07070a] text-zinc-100",
-        sidebar: "bg-[#09090d]/80 border-[#161623]",
-        card: "bg-[#0b0b0f] border-[#161623]",
-        input: "bg-[#0c0c14] border-[#1e1e2f] text-zinc-100 placeholder-zinc-700",
-        border: "border-[#161623]",
+        bg: "bg-[#09090b] text-zinc-100",
+        sidebar: "bg-[#0e0e11] border-zinc-800",
+        card: "bg-[#0e0e11] border-zinc-800 shadow-[2px_2px_0px_0px_#18181b]",
+        input: "bg-[#16161c] border-zinc-800 text-zinc-100 placeholder-zinc-600",
+        border: "border-zinc-800",
         accent: "text-indigo-400 bg-indigo-500/10 border-indigo-500/20",
         green: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
         red: "text-rose-400 bg-rose-500/10 border-rose-500/20",
         orange: "text-amber-400 bg-amber-500/10 border-amber-500/20",
-        hover: "hover:bg-[#12121e]",
-        selected: "bg-indigo-500/10 text-indigo-400 border-indigo-500/25",
-        textMuted: "text-zinc-500",
+        hover: "hover:bg-zinc-900/60",
+        selected: "bg-indigo-950/40 text-indigo-400 border-indigo-500/30 shadow-[1px_1px_0px_0px_#4f46e5]",
+        textMuted: "text-zinc-550",
+        nestedBg: "bg-zinc-900/40",
+        nestedCard: "bg-[#0e0e11] border border-zinc-800 shadow-[1px_1px_0px_0px_#18181b]",
       };
     } else {
       return {
-        bg: "bg-zinc-50 text-zinc-950",
-        sidebar: "bg-white border-zinc-200",
-        card: "bg-white border-zinc-200 shadow-sm",
-        input: "bg-zinc-100 border-zinc-300 text-zinc-950 placeholder-zinc-400",
-        border: "border-zinc-200",
-        accent: "text-indigo-600 bg-indigo-50 border-indigo-100",
-        green: "text-emerald-600 bg-emerald-50 border-emerald-100",
-        red: "text-rose-600 bg-rose-50 border-rose-100",
-        orange: "text-amber-600 bg-amber-50 border-amber-100",
+        bg: "bg-[#f4f4f5] text-zinc-950",
+        sidebar: "bg-white border-zinc-900",
+        card: "bg-white border-zinc-900 shadow-[3px_3px_0px_0px_#09090b]",
+        input: "bg-zinc-50 border-zinc-900 text-zinc-955 placeholder-zinc-400",
+        border: "border-zinc-900",
+        accent: "text-indigo-600 bg-indigo-50 border-indigo-900/20",
+        green: "text-emerald-600 bg-emerald-50 border-emerald-900/20",
+        red: "text-rose-600 bg-rose-50 border-rose-900/20",
+        orange: "text-amber-600 bg-amber-50 border-amber-900/20",
         hover: "hover:bg-zinc-100",
-        selected: "bg-indigo-50 text-indigo-700 border-indigo-200",
+        selected: "bg-indigo-50 text-indigo-700 border-indigo-900 shadow-[2px_2px_0px_0px_#09090b]",
         textMuted: "text-zinc-400",
+        nestedBg: "bg-zinc-200/50",
+        nestedCard: "bg-white border border-zinc-900 shadow-[2px_2px_0px_0px_#09090b]",
       };
     }
   }, [isDarkMode]);
@@ -389,8 +395,18 @@ function CareerOSAdmin() {
 
   return (
     <div className={`min-h-screen flex font-sans ${theme.bg} selection:bg-indigo-500/25 relative overflow-hidden transition-colors duration-200`}>
+      {/* Mobile Sidebar drawer backdrop */}
+      {isSidebarOpen && (
+        <div
+          onClick={() => setIsSidebarOpen(false)}
+          className="fixed inset-0 bg-[#07070a]/40 backdrop-blur-sm z-10 md:hidden"
+        />
+      )}
+
       {/* ─── SIDE NAVIGATION BAR ────────────────────────────────────────────────── */}
-      <aside className={`w-64 border-r ${theme.sidebar} flex flex-col shrink-0 z-20 backdrop-blur-md`}>
+      <aside className={`fixed inset-y-0 left-0 w-64 border-r ${theme.sidebar} flex flex-col shrink-0 z-20 backdrop-blur-md transition-transform duration-300 md:relative md:translate-x-0 ${
+        isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+      }`}>
         {/* App Logo & Details */}
         <div className="p-6 border-b border-inherit flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -417,7 +433,10 @@ function CareerOSAdmin() {
             return (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
+                onClick={() => {
+                  setActiveTab(tab.id);
+                  setIsSidebarOpen(false);
+                }}
                 className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all border border-transparent ${
                   isSelected ? theme.selected : `text-zinc-400 hover:text-zinc-200 ${theme.hover}`
                 }`}
@@ -460,16 +479,25 @@ function CareerOSAdmin() {
       {/* ─── CENTRAL WORKSPACE CANVAS ───────────────────────────────────────────── */}
       <main className="flex-1 flex flex-col min-w-0 overflow-y-auto relative">
         {/* Global Toolbar Header */}
-        <header className={`h-16 shrink-0 border-b ${theme.border} px-8 flex items-center justify-between sticky top-0 z-10 bg-inherit/90 backdrop-blur-md`}>
-          <div className="flex items-center gap-4 w-96 relative">
-            <Search size={14} className="text-zinc-500 absolute left-3" />
-            <input
-              type="text"
-              placeholder="Search contacts, roadmap, jobs... (Ctrl+K)"
-              value={globalQuery}
-              onChange={(e) => setGlobalQuery(e.target.value)}
-              className={`w-full pl-9 pr-4 py-2 rounded-xl text-xs font-medium border focus:outline-none focus:border-indigo-500/50 transition-all ${theme.input}`}
-            />
+        <header className={`h-16 shrink-0 border-b ${theme.border} px-4 md:px-8 flex items-center justify-between sticky top-0 z-10 bg-inherit/90 backdrop-blur-md`}>
+          <div className="flex items-center gap-3 w-full md:w-96 relative">
+            <button
+              onClick={() => setIsSidebarOpen(true)}
+              className="md:hidden p-2 -ml-1 rounded-lg hover:bg-zinc-800/20 text-zinc-405 flex items-center justify-center border border-transparent shrink-0"
+              title="Open Sidebar"
+            >
+              <Menu size={16} />
+            </button>
+            <div className="relative flex-1 flex items-center">
+              <Search size={14} className="text-zinc-500 absolute left-3" />
+              <input
+                type="text"
+                placeholder="Search OS... (Ctrl+K)"
+                value={globalQuery}
+                onChange={(e) => setGlobalQuery(e.target.value)}
+                className={`w-full pl-9 pr-4 py-2 rounded-xl text-xs font-medium border focus:outline-none focus:border-indigo-500/50 transition-all ${theme.input}`}
+              />
+            </div>
             {/* Global Search Popup Dropdown */}
             {globalQuery.trim() && (
               <div className={`absolute top-12 left-0 w-full rounded-xl border ${theme.card} shadow-xl p-4 space-y-4 max-h-96 overflow-y-auto z-50 bg-[#0b0b0f]`}>
@@ -1237,7 +1265,7 @@ function DeadlineWatchWidget({ store, theme, password }: { store: any; theme: an
           <h3 className="text-sm font-bold tracking-tight">Proactive Deadline Watch</h3>
           <p className="text-[10px] text-zinc-500 font-mono">Time-sensitive milestones intelligence</p>
         </div>
-        <div className="flex gap-1 bg-[#10101a] border border-[#1e1e2f] p-0.5 rounded-lg">
+        <div className={`flex gap-1 ${theme.nestedBg} border ${theme.border} p-0.5 rounded-lg`}>
           {[
             { id: "urgent", label: "7 Days", count: urgentItems.length },
             { id: "upcoming", label: "30 Days", count: upcomingItems.length },
@@ -1248,10 +1276,10 @@ function DeadlineWatchWidget({ store, theme, password }: { store: any; theme: an
               onClick={() => setActiveWatchTab(tab.id as any)}
               className={`px-2 py-1 rounded text-[9px] font-bold uppercase transition-all flex items-center gap-1 ${
                 activeWatchTab === tab.id
-                  ? "bg-indigo-600 text-white"
+                  ? "bg-indigo-600 text-white shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]"
                   : tab.highlight
                   ? "text-rose-400 hover:text-rose-300"
-                  : "text-zinc-500 hover:text-zinc-300"
+                  : "text-zinc-550 hover:text-zinc-300"
               }`}
             >
               <span>{tab.label}</span>
@@ -1273,7 +1301,7 @@ function DeadlineWatchWidget({ store, theme, password }: { store: any; theme: an
             <p className="text-[10px] text-zinc-650 font-mono py-8 text-center">No urgent deadlines in the next 7 days.</p>
           ) : (
             urgentItems.map(item => (
-              <div key={item.id} className="flex items-center justify-between p-2.5 bg-[#0c0c14] border border-rose-500/10 rounded-xl">
+              <div key={item.id} className={`flex items-center justify-between p-2.5 ${theme.nestedBg} border ${theme.border} rounded-xl`}>
                 <div className="min-w-0">
                   <p className="text-xs font-bold text-zinc-200 truncate pr-2">{item.title}</p>
                   <p className="text-[9px] text-zinc-500 font-mono mt-0.5">{item.type} · Due {item.date.toLocaleDateString()}</p>
@@ -1288,10 +1316,10 @@ function DeadlineWatchWidget({ store, theme, password }: { store: any; theme: an
 
         {activeWatchTab === "upcoming" && (
           upcomingItems.length === 0 ? (
-            <p className="text-[10px] text-zinc-650 font-mono py-8 text-center">No deadlines in the next 8-30 days.</p>
+            <p className="text-[10px] text-zinc-655 font-mono py-8 text-center">No deadlines in the next 8-30 days.</p>
           ) : (
             upcomingItems.map(item => (
-              <div key={item.id} className="flex items-center justify-between p-2.5 bg-[#0c0c14] border border-[#1e1e2f] rounded-xl">
+              <div key={item.id} className={`flex items-center justify-between p-2.5 ${theme.nestedBg} border ${theme.border} rounded-xl`}>
                 <div className="min-w-0">
                   <p className="text-xs font-bold text-zinc-200 truncate pr-2">{item.title}</p>
                   <p className="text-[9px] text-zinc-500 font-mono mt-0.5">{item.type} · Due {item.date.toLocaleDateString()}</p>
@@ -1309,7 +1337,7 @@ function DeadlineWatchWidget({ store, theme, password }: { store: any; theme: an
             <p className="text-[10px] text-zinc-650 font-mono py-8 text-center">No recently missed deadlines.</p>
           ) : (
             missedItems.map(item => (
-              <div key={item.id} className="flex items-center justify-between p-2.5 bg-[#0c0c14] border border-rose-500/20 rounded-xl">
+              <div key={item.id} className={`flex items-center justify-between p-2.5 ${theme.nestedBg} border border-rose-500/20 rounded-xl`}>
                 <div className="min-w-0 mr-2">
                   <p className="text-xs font-bold text-rose-300 truncate">{item.title}</p>
                   <p className="text-[9px] text-rose-500/60 font-mono mt-0.5">{item.type} · Missed {item.date.toLocaleDateString()}</p>
@@ -1335,12 +1363,32 @@ function CRMView({ store, theme, password, onEditContact }: { store: any; theme:
   const [replyText, setReplyText] = useState("");
   const [sendingReply, setSendingReply] = useState(false);
   const [savingNotes, setSavingNotes] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("ALL");
+  const [localNotes, setLocalNotes] = useState("");
 
   const queryClient = useQueryClient();
 
   const activeContact = useMemo(() => {
     return store.contacts.find((c: any) => c.id === activeContactId) || null;
   }, [store.contacts, activeContactId]);
+
+  useEffect(() => {
+    if (activeContact) {
+      setLocalNotes(activeContact.notes || "");
+    }
+  }, [activeContact]);
+
+  const filteredContacts = useMemo(() => {
+    return store.contacts.filter((c: any) => {
+      const matchesSearch =
+        c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (c.company && c.company.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (c.role && c.role.toLowerCase().includes(searchQuery.toLowerCase()));
+      const matchesStatus = statusFilter === "ALL" || c.status === statusFilter;
+      return matchesSearch && matchesStatus;
+    });
+  }, [store.contacts, searchQuery, statusFilter]);
 
   const handleSendReply = async () => {
     if (!activeContact || !replyText.trim()) return;
@@ -1379,41 +1427,117 @@ function CRMView({ store, theme, password, onEditContact }: { store: any; theme:
     }
   };
 
+  const handleSaveNotes = async () => {
+    if (!activeContact) return;
+    setSavingNotes(true);
+    try {
+      await updateContact(password, activeContact.id, {
+        ...activeContact,
+        notes: localNotes,
+        lastContact: activeContact.lastContact ? new Date(activeContact.lastContact).toISOString() : null,
+        nextFollowUp: activeContact.nextFollowUp ? new Date(activeContact.nextFollowUp).toISOString() : null,
+      });
+      queryClient.invalidateQueries({ queryKey: ["dashboardData"] });
+    } catch (err: any) {
+      alert(`Failed to save notes: ${err.message}`);
+    } finally {
+      setSavingNotes(false);
+    }
+  };
+
+  const handleStatusUpdate = async (newStatus: string) => {
+    if (!activeContact) return;
+    try {
+      await updateContact(password, activeContact.id, {
+        ...activeContact,
+        status: newStatus,
+        lastContact: activeContact.lastContact ? new Date(activeContact.lastContact).toISOString() : null,
+        nextFollowUp: activeContact.nextFollowUp ? new Date(activeContact.nextFollowUp).toISOString() : null,
+      });
+      queryClient.invalidateQueries({ queryKey: ["dashboardData"] });
+    } catch (err: any) {
+      alert(`Failed to update status: ${err.message}`);
+    }
+  };
+
+  const templates = [
+    "Thank you for reaching out! I would love to connect.",
+    "Here is a copy of my resume for your review.",
+    "I'm available for a call next Tuesday or Thursday afternoon. Let me know what works!",
+    "Thank you for the update. I look forward to the next steps.",
+  ];
+
   return (
-    <div className="h-[calc(100vh-140px)] flex border border-[#161623] rounded-2xl bg-[#0b0b0f] overflow-hidden animate-fadeIn">
-      {/* Sidebar List */}
-      <div className="w-80 border-r border-[#161623] flex flex-col bg-[#09090d]/30 divide-y divide-[#161623] shrink-0">
-        <div className="p-4">
-          <span className="text-[10px] font-bold text-zinc-500 font-mono uppercase tracking-widest">
-            Inbox Threads ({store.contacts.length})
-          </span>
+    <div className={`h-[calc(100vh-140px)] flex border ${theme.border} rounded-2xl ${theme.card.split(" shadow-")[0]} overflow-hidden animate-fadeIn`}>
+      {/* PANEL 1: INBOX LIST (320px) */}
+      <div className={`w-full md:w-80 border-r ${theme.border} flex flex-col bg-zinc-950/20 divide-y ${theme.border} shrink-0 ${
+        activeContactId ? "hidden md:flex" : ""
+      }`}>
+        <div className="p-4 space-y-3">
+          <div className="flex justify-between items-center">
+            <span className="text-[10px] font-bold text-zinc-550 font-mono uppercase tracking-widest">
+              Inbox Threads ({filteredContacts.length})
+            </span>
+          </div>
+          <div className="relative flex items-center">
+            <Search size={12} className="text-zinc-500 absolute left-2.5" />
+            <input
+              type="text"
+              placeholder="Search leads..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className={`w-full pl-8 pr-2.5 py-1.5 rounded-lg text-[11px] font-bold border focus:outline-none focus:border-indigo-500 transition-all ${theme.input}`}
+            />
+          </div>
+          <div className="flex gap-1 overflow-x-auto pb-1 scrollbar-none">
+            {["ALL", "NEW", "CONTACTED", "REPLIED", "INTERVIEW", "CLOSED"].map((status) => (
+              <button
+                key={status}
+                onClick={() => setStatusFilter(status)}
+                className={`px-2 py-0.5 rounded text-[8px] font-bold uppercase transition-all shrink-0 border ${
+                  statusFilter === status
+                    ? "bg-indigo-600 border-indigo-500 text-white"
+                    : `text-zinc-500 hover:text-zinc-350 border-transparent`
+                }`}
+              >
+                {status}
+              </button>
+            ))}
+          </div>
         </div>
-        <div className="flex-1 overflow-y-auto divide-y divide-[#131320]/60">
-          {store.contacts.length === 0 ? (
-            <p className="p-6 text-xs text-zinc-500 font-mono text-center">No messages in inbox.</p>
+
+        <div className="flex-1 overflow-y-auto divide-y divide-zinc-800/40 scrollbar-none">
+          {filteredContacts.length === 0 ? (
+            <p className="p-6 text-xs text-zinc-500 font-mono text-center">No matching recruiter leads.</p>
           ) : (
-            store.contacts.map((c: any) => {
-              const lastConv = c.conversations[0];
-              const lastMsg = lastConv?.messages[0];
+            filteredContacts.map((c: any) => {
+              const lastConv = c.conversations?.[0];
+              const lastMsg = lastConv?.messages?.[0];
               const isSelected = c.id === activeContactId;
+              const urgency = c.nextFollowUp && new Date(c.nextFollowUp) < new Date() ? "border-l-rose-500" : "border-l-transparent";
               return (
                 <div
                   key={c.id}
                   onClick={() => setActiveContactId(c.id)}
-                  className={`p-4 cursor-pointer text-left transition-all hover:bg-zinc-800/20 border-l-2 ${
-                    isSelected ? "bg-indigo-500/5 border-l-indigo-500" : "border-l-transparent"
+                  className={`p-4 cursor-pointer text-left transition-all hover:bg-zinc-800/10 border-l-2 ${
+                    isSelected ? "bg-indigo-500/5 border-l-indigo-500" : `border-l-transparent ${urgency}`
                   }`}
                 >
-                  <div className="flex justify-between items-center mb-1">
-                    <span className="font-bold text-xs truncate max-w-[150px]">{c.name}</span>
-                    <span className="text-[9px] text-zinc-500 font-mono">
+                  <div className="flex justify-between items-start mb-1">
+                    <span className="font-bold text-xs truncate max-w-[140px] text-zinc-200">{c.name}</span>
+                    <span className="text-[9px] text-zinc-500 font-mono shrink-0">
                       {lastConv ? new Date(lastConv.lastMessageAt).toLocaleDateString() : ""}
                     </span>
                   </div>
-                  <div className="text-[10px] text-zinc-400 font-semibold truncate">
-                    {c.company ? `@ ${c.company}` : "Recruiter"}
+                  <div className="text-[10px] text-zinc-400 font-semibold truncate flex items-center justify-between">
+                    <span>{c.company ? `@ ${c.company}` : "Recruiter"}</span>
+                    <span className={`px-1.5 py-0.2 rounded text-[8px] font-mono font-black border uppercase tracking-wider ${
+                      c.status === "INTERVIEW" ? theme.green : c.status === "CLOSED" ? theme.red : theme.accent
+                    }`}>
+                      {c.status}
+                    </span>
                   </div>
-                  <div className="text-[11px] text-zinc-500 truncate italic mt-1">
+                  <div className="text-[11px] text-zinc-550 truncate italic mt-1.5">
                     {lastMsg ? lastMsg.content : "No messages"}
                   </div>
                 </div>
@@ -1423,81 +1547,128 @@ function CRMView({ store, theme, password, onEditContact }: { store: any; theme:
         </div>
       </div>
 
-      {/* Main Conversation Window */}
-      <div className="flex-1 flex flex-col bg-[#08080c] overflow-hidden relative">
+      <div className={`flex-1 flex flex-col bg-zinc-950/45 overflow-hidden relative ${
+        !activeContactId ? "hidden md:flex" : ""
+      }`}>
         {activeContact ? (
           <>
-            {/* Header info */}
-            <header className="h-14 border-b border-[#161623] px-6 flex items-center justify-between bg-zinc-900/30">
-              <div>
-                <h3 className="font-bold text-xs">{activeContact.name}</h3>
-                <p className="text-[10px] text-zinc-500">
-                  {activeContact.email} {activeContact.company ? `· Recruiter at ${activeContact.company}` : ""}
-                </p>
+            <header className={`h-14 border-b ${theme.border} px-6 flex items-center justify-between bg-zinc-900/10 shrink-0`}>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setActiveContactId(null)}
+                  className="md:hidden p-1.5 rounded-lg border border-zinc-800 text-zinc-400 hover:text-zinc-200"
+                >
+                  <ChevronRight className="rotate-180" size={14} />
+                </button>
+                <div>
+                  <h3 className="font-bold text-xs text-zinc-200">{activeContact.name}</h3>
+                  <p className="text-[10px] text-zinc-500 font-mono">
+                    {activeContact.email} {activeContact.role ? `· ${activeContact.role}` : ""}
+                  </p>
+                </div>
               </div>
-              <button
-                onClick={() => onEditContact(activeContact)}
-                className="px-3 py-1.5 rounded-lg border border-[#161623] hover:bg-zinc-800/40 text-[10px] font-bold uppercase transition-all"
-              >
-                Profile Settings
-              </button>
+              <div className="flex items-center gap-2 lg:hidden">
+                <button
+                  onClick={() => onEditContact(activeContact)}
+                  className="px-3 py-1.5 rounded-lg border border-zinc-800 hover:bg-zinc-800/40 text-[10px] font-bold uppercase transition-all"
+                >
+                  Edit profile
+                </button>
+              </div>
             </header>
 
-            {/* Message timelines */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-6">
-              {activeContact.conversations.map((conv: any) => (
-                <div key={conv.id} className="space-y-4">
-                  <div className="flex items-center gap-3 my-4">
-                    <div className="h-px flex-1 bg-[#161623]" />
-                    <span className="text-[9px] font-mono font-bold text-zinc-600 uppercase tracking-widest bg-[#08080c] px-3">
-                      Thread: {conv.subject}
-                    </span>
-                    <div className="h-px flex-1 bg-[#161623]" />
-                  </div>
-
-                  {conv.messages.map((m: any) => {
-                    const isSurya = m.senderType === "SURYA";
-                    return (
-                      <div key={m.id} className={`flex ${isSurya ? "justify-end" : "justify-start"}`}>
-                        <div className="max-w-[70%] space-y-1">
-                          <div className={`px-4 py-3 rounded-2xl text-xs leading-relaxed ${
-                            isSurya
-                              ? "bg-indigo-500/10 border border-indigo-500/20 text-indigo-200 rounded-tr-none"
-                              : "bg-[#101017] border border-[#161623] text-zinc-200 rounded-tl-none"
-                          }`}>
-                            {m.content}
-                          </div>
-                          <p className={`text-[8px] font-mono text-zinc-500 text-right`}>
-                            {new Date(m.createdAt).toLocaleString()}
-                          </p>
-                        </div>
-                      </div>
-                    );
-                  })}
+            <div className="flex-1 overflow-y-auto p-6 space-y-6 scrollbar-none">
+              {activeContact.conversations.length === 0 ? (
+                <div className="h-full flex flex-col items-center justify-center text-center p-6 gap-2">
+                  <Inbox size={20} className="text-zinc-650" />
+                  <p className="text-xs text-zinc-555 font-mono">No conversation thread started yet.</p>
                 </div>
-              ))}
+              ) : (
+                activeContact.conversations.map((conv: any) => (
+                  <div key={conv.id} className="space-y-4">
+                    <div className="flex items-center gap-3 my-4">
+                      <div className={`h-px flex-1 ${theme.border}`} />
+                      <span className="text-[9px] font-mono font-bold text-zinc-500 uppercase tracking-widest px-3">
+                        Subject: {conv.subject}
+                      </span>
+                      <div className={`h-px flex-1 ${theme.border}`} />
+                    </div>
+
+                    {conv.messages.map((m: any) => {
+                      const isSurya = m.senderType === "SURYA";
+                      const senderInitial = isSurya ? "S" : activeContact.name.substring(0, 1).toUpperCase();
+                      return (
+                        <div key={m.id} className={`flex items-start gap-2.5 ${isSurya ? "justify-end" : "justify-start"}`}>
+                          {!isSurya && (
+                            <div className="w-7 h-7 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center font-bold text-xs text-zinc-355 shrink-0 shadow-[1px_1px_0px_0px_#18181b]">
+                              {senderInitial}
+                            </div>
+                          )}
+                          <div className="max-w-[70%] space-y-1">
+                            <div className={`px-4 py-3 rounded-2xl text-xs leading-relaxed ${
+                              isSurya
+                                ? "bg-indigo-500/10 border border-indigo-500/20 text-indigo-200 rounded-tr-none"
+                                : "bg-[#0e0e11] border border-zinc-800 text-zinc-200 rounded-tl-none shadow-[2px_2px_0px_0px_#18181b]"
+                            }`}>
+                              {m.content}
+                            </div>
+                            <p className="text-[8px] font-mono text-zinc-500 text-right px-1">
+                              {new Date(m.createdAt).toLocaleString()}
+                            </p>
+                          </div>
+                          {isSurya && (
+                            <div className="w-7 h-7 rounded-lg bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center font-bold text-xs text-indigo-400 shrink-0 shadow-[1px_1px_0px_0px_#4f46e5]">
+                              {senderInitial}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                ))
+              )}
             </div>
 
-            {/* Footer Form reply */}
-            <footer className="p-4 border-t border-[#161623] bg-zinc-900/10">
-              <div className="bg-[#0b0b11] border border-[#171727] rounded-xl p-3 flex flex-col">
-                <textarea
-                  rows={2}
-                  placeholder={`Reply to ${activeContact.name}...`}
-                  value={replyText}
-                  onChange={(e) => setReplyText(e.target.value)}
-                  className="bg-transparent text-zinc-200 placeholder-zinc-700 text-xs focus:outline-none resize-none"
-                />
-                <div className="flex justify-between items-center mt-3 pt-3 border-t border-[#161623]">
-                  <span className="text-[10px] text-zinc-500 font-mono">Direct Resend sync</span>
-                  <button
-                    onClick={handleSendReply}
-                    disabled={sendingReply || !replyText.trim()}
-                    className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-bold text-xs uppercase transition-all"
-                  >
-                    <Send size={11} />
-                    {sendingReply ? "Sending..." : "Send Reply"}
-                  </button>
+            <footer className={`p-4 border-t ${theme.border} bg-zinc-900/10 shrink-0`}>
+              <div className="space-y-3">
+                <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+                  <Sparkles size={11} className="text-zinc-500 shrink-0" />
+                  <span className="text-[9px] font-bold text-zinc-500 font-mono uppercase tracking-wider shrink-0 mr-1.5">
+                    Templates:
+                  </span>
+                  {templates.map((tpl, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setReplyText((prev) => (prev ? prev + "\n" + tpl : tpl))}
+                      className="px-2 py-0.5 rounded bg-zinc-800/40 hover:bg-zinc-800 text-zinc-400 border border-zinc-800 text-[9px] font-semibold truncate max-w-[150px] transition-all cursor-pointer"
+                      title={tpl}
+                    >
+                      {tpl}
+                    </button>
+                  ))}
+                </div>
+
+                <div className={`bg-zinc-950/80 border ${theme.border} rounded-xl p-3 flex flex-col`}>
+                  <textarea
+                    rows={2}
+                    placeholder={`Reply to ${activeContact.name}...`}
+                    value={replyText}
+                    onChange={(e) => setReplyText(e.target.value)}
+                    className="bg-transparent text-zinc-200 placeholder-zinc-700 text-xs focus:outline-none resize-none scrollbar-none"
+                  />
+                  <div className="flex justify-between items-center mt-3 pt-3 border-t border-zinc-800/60">
+                    <span className="text-[10px] text-zinc-500 font-mono">
+                      Via CareerOS Resend Integration
+                    </span>
+                    <button
+                      onClick={handleSendReply}
+                      disabled={sendingReply || !replyText.trim()}
+                      className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-bold text-xs uppercase transition-all"
+                    >
+                      <Send size={11} />
+                      {sendingReply ? "Sending..." : "Send Reply"}
+                    </button>
+                  </div>
                 </div>
               </div>
             </footer>
@@ -1511,6 +1682,103 @@ function CRMView({ store, theme, password, onEditContact }: { store: any; theme:
                 Choose a recruiter contact thread from the list on the left to read messages and reply.
               </p>
             </div>
+          </div>
+        )}
+      </div>
+
+      {/* PANEL 3: CONTACT METADATA DRAWER (280px) */}
+      <div className={`hidden lg:flex flex-col w-72 border-l ${theme.border} bg-zinc-950/20 divide-y ${theme.border} shrink-0`}>
+        {activeContact ? (
+          <div className="flex-1 flex flex-col divide-y divide-zinc-800/40 overflow-y-auto scrollbar-none">
+            <div className="p-5 text-center space-y-3">
+              <div className="w-12 h-12 mx-auto rounded-xl bg-indigo-500/10 border border-indigo-500/25 flex items-center justify-center font-bold text-lg text-indigo-400">
+                {activeContact.name.substring(0, 1).toUpperCase()}
+              </div>
+              <div>
+                <h4 className="font-bold text-xs text-zinc-200">{activeContact.name}</h4>
+                <p className="text-[10px] text-zinc-400 font-semibold mt-0.5">{activeContact.role || "Recruiter"} {activeContact.company ? `@ ${activeContact.company}` : ""}</p>
+              </div>
+              <div className="flex justify-center gap-2">
+                <button
+                  onClick={() => onEditContact(activeContact)}
+                  className="px-2.5 py-1 rounded-lg border border-zinc-800 hover:bg-zinc-800/40 text-[9px] font-bold uppercase tracking-wider transition-all"
+                >
+                  Edit Profile
+                </button>
+                {activeContact.linkedin && (
+                  <a
+                    href={activeContact.linkedin}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-1 rounded-lg border border-zinc-800 hover:bg-zinc-800/40 text-zinc-400 hover:text-zinc-200 transition-all flex items-center justify-center"
+                    title="LinkedIn Profile"
+                  >
+                    <ExternalLink size={10} />
+                  </a>
+                )}
+              </div>
+            </div>
+
+            <div className="p-5 space-y-4">
+              <div className="space-y-1">
+                <span className="text-[9px] font-bold text-zinc-500 font-mono uppercase tracking-wider">Status</span>
+                <select
+                  value={activeContact.status}
+                  onChange={(e) => handleStatusUpdate(e.target.value)}
+                  className={`w-full p-2 rounded-lg text-xs border ${theme.input}`}
+                >
+                  <option value="NEW">NEW</option>
+                  <option value="CONTACTED">CONTACTED</option>
+                  <option value="REPLIED">REPLIED</option>
+                  <option value="NETWORKING">NETWORKING</option>
+                  <option value="INTERVIEW">INTERVIEW</option>
+                  <option value="CLOSED">CLOSED</option>
+                </select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div className="space-y-1">
+                  <span className="text-[8px] font-bold text-zinc-500 font-mono uppercase tracking-wider">Last Contact</span>
+                  <p className="text-[10px] font-mono text-zinc-400 border border-zinc-800 p-2 rounded-lg bg-[#0e0e11]">
+                    {activeContact.lastContact ? new Date(activeContact.lastContact).toLocaleDateString() : "Never"}
+                  </p>
+                </div>
+                <div className="space-y-1">
+                  <span className="text-[8px] font-bold text-zinc-500 font-mono uppercase tracking-wider">Follow Up</span>
+                  <p className={`text-[10px] font-mono border p-2 rounded-lg bg-[#0e0e11] ${
+                    activeContact.nextFollowUp && new Date(activeContact.nextFollowUp) < new Date()
+                      ? "border-rose-500/30 text-rose-400 font-bold"
+                      : "border-zinc-800 text-zinc-400"
+                  }`}>
+                    {activeContact.nextFollowUp ? new Date(activeContact.nextFollowUp).toLocaleDateString() : "None"}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-5 flex-1 flex flex-col min-h-[200px] space-y-3">
+              <div className="flex justify-between items-center">
+                <span className="text-[9px] font-bold text-zinc-500 font-mono uppercase tracking-wider">Private Notes</span>
+                <button
+                  onClick={handleSaveNotes}
+                  disabled={savingNotes}
+                  className="flex items-center gap-1 text-[9px] font-bold font-mono text-indigo-400 hover:text-indigo-300 uppercase tracking-wider"
+                >
+                  <Save size={10} />
+                  {savingNotes ? "Saving..." : "Save"}
+                </button>
+              </div>
+              <textarea
+                value={localNotes}
+                onChange={(e) => setLocalNotes(e.target.value)}
+                placeholder="Write private notes on recruiter feedback..."
+                className="flex-1 w-full p-2.5 rounded-lg text-xs bg-[#16161c] border border-zinc-800 text-zinc-200 placeholder-zinc-600 focus:outline-none resize-none scrollbar-none font-mono"
+              />
+            </div>
+          </div>
+        ) : (
+          <div className="flex-1 flex items-center justify-center p-6 text-center text-zinc-500 font-mono text-[10px]">
+            Select recruiter
           </div>
         )}
       </div>
@@ -1559,8 +1827,8 @@ function OpportunitiesView({ store, theme, password, onAddOpportunity, onEditOpp
           const list = store.opportunities.filter((o: any) => o.status === status);
           return (
             <div key={status} className={`p-4 rounded-2xl border ${theme.card} space-y-4`}>
-              <div className="flex justify-between items-center border-b border-[#161623] pb-2">
-                <span className="text-[10px] font-bold text-zinc-400 font-mono uppercase tracking-widest">
+              <div className={`flex justify-between items-center border-b-2 ${theme.border} pb-2`}>
+                <span className="text-[10px] font-bold text-zinc-450 font-mono uppercase tracking-widest">
                   {status}
                 </span>
                 <span className="text-[10px] bg-zinc-800 text-zinc-300 font-mono font-bold px-2 py-0.5 rounded-full">
@@ -1575,9 +1843,9 @@ function OpportunitiesView({ store, theme, password, onAddOpportunity, onEditOpp
                     const isExpired = opp.status === "EXPIRED" || (opp.deadline && new Date(opp.deadline) < new Date());
                     const borderClass = isExpired
                       ? "border-rose-500/35 hover:border-rose-500/60"
-                      : "border-[#1e1e2f] hover:border-indigo-500/30";
+                      : `${theme.border} hover:border-indigo-500/30`;
                     return (
-                      <div key={opp.id} className={`p-3 bg-[#0c0c14] border rounded-xl space-y-2 relative group transition-all ${borderClass}`}>
+                      <div key={opp.id} className={`p-3 ${theme.nestedBg} border rounded-xl space-y-2 relative group transition-all ${borderClass}`}>
                         <div>
                           <div className="flex justify-between items-start gap-1">
                             <h4 className="text-xs font-bold text-zinc-200">{opp.title}</h4>
@@ -1595,16 +1863,16 @@ function OpportunitiesView({ store, theme, password, onAddOpportunity, onEditOpp
                           </p>
                         )}
                         <div className="flex justify-between items-center text-[9px] pt-1">
-                          <span className="px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-400 font-bold uppercase tracking-wider scale-90 -translate-x-1">
+                          <span className="px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-300 font-bold uppercase tracking-wider scale-90 -translate-x-1">
                             {opp.type}
                           </span>
                           <PriorityBadge priority={opp.priority} />
                         </div>
-                        <div className="flex justify-end gap-2 pt-2 border-t border-[#131320]/60 opacity-0 group-hover:opacity-100 transition-all">
+                        <div className="flex justify-end gap-2 pt-2 border-t-2 border-inherit opacity-0 group-hover:opacity-100 transition-all">
                         <select
                           value={opp.status}
                           onChange={(e) => handleStatusChange(opp.id, e.target.value)}
-                          className="bg-zinc-850 border border-zinc-700 rounded text-[9px] px-1 focus:outline-none"
+                          className="bg-zinc-800 border border-zinc-700 text-zinc-300 rounded text-[9px] px-1 focus:outline-none"
                         >
                           {OPPORTUNITY_STATUSES.map(st => (
                             <option key={st} value={st}>{st}</option>
@@ -1642,13 +1910,13 @@ function HackathonsView({ store, theme, password, onAddHackathon, onEditHackatho
           <p className="text-xs text-zinc-500 font-mono">Participations, projects submission dates, and rankings</p>
         </div>
         <div className="flex items-center gap-4">
-          <div className="flex items-center gap-1 bg-[#10101a] border border-[#1e1e2f] p-0.5 rounded-lg">
+          <div className={`flex items-center gap-1 ${theme.nestedBg} border ${theme.border} p-0.5 rounded-lg`}>
             {(["kanban", "table", "calendar"] as const).map((view) => (
               <button
                 key={view}
                 onClick={() => setSubView(view)}
                 className={`px-3 py-1.5 rounded-md text-[10px] font-bold uppercase transition-all ${
-                  subView === view ? "bg-indigo-600 text-white" : "text-zinc-400 hover:text-zinc-200"
+                  subView === view ? "bg-indigo-600 text-white shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]" : "text-zinc-400 hover:text-zinc-200"
                 }`}
               >
                 {view}
@@ -1657,7 +1925,7 @@ function HackathonsView({ store, theme, password, onAddHackathon, onEditHackatho
           </div>
           <button
             onClick={onAddHackathon}
-            className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs uppercase tracking-wide transition-all"
+            className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-505 text-white font-bold text-xs uppercase tracking-wide transition-all"
           >
             <Plus size={12} /> Add Hackathon
           </button>
@@ -1670,26 +1938,26 @@ function HackathonsView({ store, theme, password, onAddHackathon, onEditHackatho
             const list = store.hackathons.filter((h: any) => h.status === status);
             return (
               <div key={status} className={`p-4 rounded-2xl border ${theme.card} space-y-4`}>
-                <div className="flex justify-between items-center border-b border-[#161623] pb-2">
-                  <span className="text-[10px] font-bold text-zinc-400 font-mono uppercase tracking-widest">
+                <div className={`flex justify-between items-center border-b-2 ${theme.border} pb-2`}>
+                  <span className="text-[10px] font-bold text-zinc-450 font-mono uppercase tracking-widest">
                     {status}
                   </span>
                   <span className="text-[10px] bg-zinc-800 text-zinc-300 font-mono font-bold px-2 py-0.5 rounded-full">
                     {list.length}
                   </span>
                 </div>
-                <div className="space-y-3 max-h-96 overflow-y-auto scrollbar-none">
+                <div className="space-y-3.5 max-h-96 overflow-y-auto scrollbar-none">
                   {list.length === 0 ? (
-                    <p className="text-[10px] text-zinc-650 font-mono py-4 text-center">Empty</p>
+                    <p className="text-[10px] text-zinc-650 font-mono py-4 text-center">Empty column</p>
                   ) : (
                     list.map((hack: any) => {
                       const isExpired = hack.status === "EXPIRED" || (hack.deadline && new Date(hack.deadline) < new Date());
                       const priority = getUrgencyPriority(hack.deadline);
                       const borderClass = isExpired
                         ? "border-rose-500/35 hover:border-rose-500/60"
-                        : "border-[#1e1e2f] hover:border-indigo-500/30";
+                        : `${theme.border} hover:border-indigo-500/30`;
                       return (
-                        <div key={hack.id} className={`p-3 bg-[#0c0c14] border rounded-xl space-y-2 relative group transition-all ${borderClass}`}>
+                        <div key={hack.id} className={`p-3 ${theme.nestedBg} border rounded-xl space-y-2 relative group transition-all ${borderClass}`}>
                           <div>
                             <div className="flex justify-between items-start gap-1">
                               <h4 className="text-xs font-bold text-zinc-200">{hack.name}</h4>
@@ -1707,12 +1975,11 @@ function HackathonsView({ store, theme, password, onAddHackathon, onEditHackatho
                             </p>
                           )}
                           <div className="flex justify-between items-center text-[9px] pt-1">
-                            <span className="text-zinc-500 text-[8px] font-mono uppercase tracking-wider font-bold">
+                            <span className="text-zinc-550 text-[8px] font-mono uppercase tracking-wider font-bold">
                               Submissions
                             </span>
                             <PriorityBadge priority={priority} />
                           </div>
-                          <div className="flex justify-end gap-2 pt-2 border-t border-[#131320]/60 opacity-0 group-hover:opacity-100 transition-all">
                           <button onClick={() => onEditHackathon(hack)} className="text-indigo-400 hover:text-indigo-300 text-[10px]">
                             Edit
                           </button>
@@ -2494,20 +2761,20 @@ function CommandPaletteOverlay({ theme, onClose, onTriggerAction }: { theme: any
   }, [query]);
 
   return (
-    <div className="fixed inset-0 bg-[#07070a]/60 backdrop-blur-sm flex items-start justify-center pt-24 z-50 animate-fadeIn" onClick={onClose}>
-      <div className="w-full max-w-xl border border-[#161623] rounded-2xl bg-[#0b0b0f] shadow-2xl overflow-hidden flex flex-col" onClick={(e) => e.stopPropagation()}>
-        <div className="p-4 border-b border-[#161623] relative">
-          <Search size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500" />
+    <div className="fixed inset-0 bg-zinc-950/65 backdrop-blur-sm flex items-start justify-center pt-24 z-50 animate-fadeIn" onClick={onClose}>
+      <div className={`w-full max-w-xl border-2 ${theme.border} rounded-xl bg-[#0e0e11] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] overflow-hidden flex flex-col`} onClick={(e) => e.stopPropagation()}>
+        <div className={`p-4 border-b-2 ${theme.border} relative flex items-center bg-zinc-900/10`}>
+          <Search size={16} className="absolute left-4 text-zinc-400" />
           <input
             ref={inputRef}
             type="text"
             placeholder="Type a command or search action..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="w-full bg-transparent pl-8 focus:outline-none text-xs text-zinc-100 placeholder-zinc-700"
+            className="w-full bg-transparent pl-8 focus:outline-none text-xs text-zinc-100 placeholder-zinc-500 font-bold font-mono"
           />
         </div>
-        <div className="p-2 max-h-80 overflow-y-auto divide-y divide-[#131320]/30">
+        <div className="p-2 max-h-80 overflow-y-auto divide-y divide-zinc-800/40">
           {commands.length === 0 ? (
             <p className="text-xs text-zinc-500 font-mono py-6 text-center">No commands match.</p>
           ) : (
@@ -2515,7 +2782,7 @@ function CommandPaletteOverlay({ theme, onClose, onTriggerAction }: { theme: any
               <button
                 key={cmd.id}
                 onClick={() => onTriggerAction(cmd.id)}
-                className="w-full text-left p-3 rounded-lg hover:bg-zinc-800/40 transition-all flex flex-col gap-0.5"
+                className={`w-full text-left p-3 rounded-lg transition-all flex flex-col gap-0.5 ${theme.hover}`}
               >
                 <span className="text-xs font-bold text-zinc-200">{cmd.label}</span>
                 <span className="text-[10px] text-zinc-500 font-medium">{cmd.desc}</span>
@@ -2523,7 +2790,7 @@ function CommandPaletteOverlay({ theme, onClose, onTriggerAction }: { theme: any
             ))
           )}
         </div>
-        <div className="p-3.5 border-t border-[#161623] bg-zinc-900/30 flex justify-between items-center text-[9px] text-zinc-500 font-mono">
+        <div className={`p-3 border-t-2 ${theme.border} bg-zinc-900/20 flex justify-between items-center text-[9px] text-zinc-500 font-mono`}>
           <span>↑↓ to navigate · enter to select</span>
           <span>esc to close</span>
         </div>
@@ -2623,9 +2890,9 @@ function ModalPanel({ type, theme, password, item, onClose, onSuccess }: { type:
   };
 
   return (
-    <div className="fixed inset-0 bg-[#07070a]/60 backdrop-blur-sm flex items-center justify-center p-6 z-50 animate-fadeIn" onClick={onClose}>
-      <div className="w-full max-w-md border border-[#161623] rounded-2xl bg-[#0b0b0f] shadow-2xl overflow-hidden flex flex-col" onClick={(e) => e.stopPropagation()}>
-        <header className="px-6 py-4 border-b border-[#161623] flex justify-between items-center bg-zinc-900/10">
+    <div className="fixed inset-0 bg-zinc-955/65 backdrop-blur-sm flex items-center justify-center p-6 z-50 animate-fadeIn" onClick={onClose}>
+      <div className={`w-full max-w-md border-2 ${theme.border} rounded-xl bg-[#0e0e11] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] overflow-hidden flex flex-col`} onClick={(e) => e.stopPropagation()}>
+        <header className={`px-6 py-4 border-b-2 ${theme.border} flex justify-between items-center bg-zinc-900/10`}>
           <h3 className="text-xs font-bold font-mono uppercase tracking-widest text-zinc-300">
             {item ? "Configure" : "Define"} {type}
           </h3>
@@ -2924,8 +3191,8 @@ function ModalPanel({ type, theme, password, item, onClose, onSuccess }: { type:
             </div>
           )}
 
-          <footer className="pt-4 flex justify-end gap-3 border-t border-[#161623]">
-            <button type="button" onClick={onClose} className="px-4 py-2.5 rounded-xl border border-[#161623] hover:bg-zinc-950 text-zinc-400 hover:text-zinc-200 text-xs font-bold uppercase transition-all">
+          <footer className={`pt-4 flex justify-end gap-3 border-t-2 ${theme.border}`}>
+            <button type="button" onClick={onClose} className={`px-4 py-2.5 rounded-xl border-2 ${theme.border} ${theme.hover} text-zinc-400 hover:text-zinc-200 text-xs font-bold uppercase transition-all`}>
               Cancel
             </button>
             <button type="submit" disabled={loading} className="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs uppercase transition-all">

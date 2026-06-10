@@ -187,8 +187,6 @@ export async function verifyPasswordAction(pw: string) {
 }
 
 
-// ─── UNIFIED DASHBOARD DATA ACTION ───────────────────────────────────────────
-
 export async function getDashboardData(pw: string) {
   checkAuth(pw);
 
@@ -203,7 +201,9 @@ export async function getDashboardData(pw: string) {
     notes,
     reminders,
     activityLogs,
-    dashboardAlerts
+    dashboardAlerts,
+    totalPageViews,
+    uniqueIpHashes
   ] = await Promise.all([
     prisma.opportunity.findMany({ orderBy: { createdAt: "desc" } }),
     prisma.hackathon.findMany({ orderBy: { createdAt: "desc" } }),
@@ -224,7 +224,11 @@ export async function getDashboardData(pw: string) {
     prisma.reminder.findMany({ orderBy: { reminderDate: "asc" } }),
     prisma.activityLog.findMany({ orderBy: { createdAt: "desc" }, take: 50 }),
     prisma.dashboardAlert.findMany({ where: { dismissed: false }, orderBy: { createdAt: "desc" } }),
+    prisma.visit.count(),
+    prisma.visit.findMany({ select: { ipHash: true } }),
   ]);
+
+  const totalVisitors = new Set(uniqueIpHashes.map(v => v.ipHash)).size;
 
   return {
     opportunities,
@@ -233,6 +237,8 @@ export async function getDashboardData(pw: string) {
     events,
     roadmaps,
     goals,
+    totalPageViews,
+    totalVisitors,
     contacts: contacts.map(c => ({
       ...c,
       createdAt: c.createdAt.toISOString(),
