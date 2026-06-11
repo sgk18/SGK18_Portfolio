@@ -20,166 +20,227 @@ export interface CaseStudy {
 export const caseStudies: Record<string, CaseStudy> = {
   'atlas-portfolio': {
     id: 'atlas-portfolio',
-    title: 'Atlas — Personal Portfolio & Career OS',
-    tagline: 'This site — a full-stack Next.js portfolio with a 12-module career management admin dashboard',
+    title: 'Atlas — Portfolio, Recruiter CRM & Career Management Platform',
+    tagline: 'Production-grade career OS — WebGL portfolio + 12-module admin console, two-way CRM, automated deadline engine & privacy-first analytics',
     period: 'May 2026 – Present',
     role: 'Solo Engineer & Designer',
     problem:
-      'Standard portfolio sites show static project cards. There was no system to actively manage the job search: no CRM for recruiter conversations, no pipeline for opportunities, no deadline alerts, and no analytics on who was visiting the site. Everything was tracked manually in scattered notes.',
+      'Standard portfolio sites show static project cards with no active career management. There was no unified system for recruiter relationship management, application pipelines, deadline alerts, or engagement analytics. Everything was tracked manually across scattered notes and spreadsheets with zero visibility into who was visiting the portfolio or responding to outreach.',
     motivation:
-      'Build the portfolio itself as a production-grade engineering showcase — one that demonstrates database design, full-stack architecture, background jobs, transactional email, and a polished admin dashboard all in a single deployable system.',
+      'Build the portfolio itself as a production-grade engineering showcase — demonstrating database design, full-stack architecture, background automation, transactional email threading, and a polished admin dashboard all within a single deployable system. The goal was to combine a client-facing developer presence with a recruiter lead-capture funnel that converts cold contacts into threaded conversations and dynamic pipeline trackers.',
     solution:
-      'A Next.js 16 portfolio with a password-protected admin console (Atlas) containing 12 career management modules: Recruiter CRM with email reply via Resend, Opportunity pipeline, Job Application tracker, Hackathon logger, Events calendar, Learning Roadmap, Goal tracker, Networking directory, Notes system, Reminder engine, Activity timeline, and Site analytics (page views, unique visitors, referrers). The database runs on Turso (LibSQL) via Prisma with a @libsql/client adapter for edge-compatible queries on Vercel.',
+      'A Next.js 16 App Router portfolio with a password-protected admin console (Atlas) containing 12 career management modules: Recruiter CRM with two-way email threading via Resend inbound webhooks, Opportunity pipeline, Job Application tracker, Hackathon logger, Events calendar, Learning Roadmap, Goal tracker, Networking directory, Notes system, automated Reminder engine, Activity timeline, and Site analytics (page views, unique visitors, referrers, resume downloads). The database runs on Turso (LibSQL) via Prisma with a @libsql/client adapter for edge-compatible queries on Vercel serverless functions.',
     architecture: `graph TD
-  subgraph Portfolio Site
-    A[Next.js 16 App Router] --> B[Landing Page Components]
-    A --> C[/admin — Atlas Console]
+  subgraph Client Layer
+    Visitor[Public Visitor]
+    Recruiter[Recruiter / Hiring Lead]
+    Admin[Administrator]
   end
 
-  subgraph Admin Console
-    C --> D[TanStack Query Cache]
-    D --> E[Server Actions — careeros.ts]
-    E --> F[(Turso LibSQL via Prisma)]
+  subgraph Presentation and API Router
+    PortClient[Public Portfolio UI]
+    AdminPanel[Admin Atlas Console]
+    APIRoute[API Route Handlers]
+    SrvAction[Server Actions]
   end
 
-  subgraph Automation
-    G[/api/cron/reminders — Vercel Cron] --> F
-    G --> H[Resend Email API]
-    I[/api/cron/digest — Daily Brief] --> F
-    I --> H
+  subgraph Data and Services Layer
+    DBService[Data Access Layer: lib/db.ts]
+    Prisma[Prisma Client / LibSQL Adapter]
+    SQLite[(SQLite / Turso DB)]
+    Deadline[lib/deadlineEngine.ts]
   end
 
-  subgraph Analytics
-    J[VisitTracker Component] --> K[/api/analytics/visit]
-    K --> F
-    L[Atlas Analytics Tab] --> M[/api/admin/analytics]
-    M --> F
-  end`,
+  subgraph Integrations
+    Resend[Resend Email API]
+    InboundWebhook[Inbound Email Webhook]
+    GitHubAPI[GitHub Developer API]
+  end
+
+  Visitor -->|Interacts / Views| PortClient
+  Recruiter -->|Submits Form / Emails| PortClient
+  Admin -->|Authenticates and Manages| AdminPanel
+  PortClient -->|Telemetry API Pings| APIRoute
+  AdminPanel -->|Invokes Mutations| SrvAction
+  InboundWebhook -->|Receives Replies| APIRoute
+  APIRoute -->|Reads / Writes| DBService
+  SrvAction -->|Performs Writes| DBService
+  DBService -->|ORM Queries| Prisma
+  Prisma --> SQLite
+  APIRoute -->|Outbound Transactional Email| Resend
+  Resend -->|Delivers Email| Recruiter
+  Recruiter -->|Replies| InboundWebhook
+  Deadline -->|Periodic Audits| SQLite
+  Deadline -->|Send Warnings / Digests| Resend
+  APIRoute -->|Query and Cache Repos| GitHubAPI`,
     databaseDesign: `erDiagram
-  Contact {
-    string id PK
-    string name
-    string email
-    string status
-    string notes
-    datetime lastContact
-    datetime nextFollowUp
+  CONTACTS ||--o{ CONVERSATIONS : "has"
+  CONVERSATIONS ||--o{ MESSAGES : "contains"
+  CONTACTS ||--o{ REMINDERS : "notifies"
+  HACKATHONS ||--o{ REMINDERS : "schedules"
+  APPLICATIONS ||--o{ REMINDERS : "schedules"
+  GOALS ||--o{ REMINDERS : "schedules"
+
+  CONTACTS {
+    String id PK
+    String name
+    String email UK
+    String status "NEW|CONTACTED|REPLIED|NETWORKING|CLOSED"
+    String source "PORTAL|INBOUND_EMAIL"
+    String notes
+    DateTime lastContact
+    DateTime nextFollowUp
   }
-  Conversation {
-    string id PK
-    string contactId FK
-    string subject
-    datetime lastMessageAt
+  CONVERSATIONS {
+    String id PK
+    String contactId FK
+    String subject
+    DateTime lastMessageAt
   }
-  Message {
-    string id PK
-    string conversationId FK
-    string senderType
-    string content
+  MESSAGES {
+    String id PK
+    String conversationId FK
+    String senderType "CONTACT|SURYA"
+    String content
+    String emailMessageId UK
   }
-  Opportunity {
-    string id PK
-    string title
-    string company
-    string status
-    string type
-    datetime deadline
+  OPPORTUNITIES {
+    String id PK
+    String title
+    String company
+    String type "INTERNSHIP|JOB|FREELANCE|STARTUP"
+    String status "DISCOVERED|APPLIED|INTERVIEW|OFFER|REJECTED"
+    String priority "HIGH|MEDIUM|LOW"
+    DateTime deadline
   }
-  Application {
-    string id PK
-    string role
-    string company
-    string status
-    datetime appliedDate
+  APPLICATIONS {
+    String id PK
+    String company
+    String role
+    DateTime appliedDate
+    DateTime nextFollowUp
+    String status "SAVED|APPLIED|OA|INTERVIEW|OFFER|REJECTED"
   }
-  Visit {
-    string id PK
-    string page
-    string ipHash
-    string referrer
-    datetime createdAt
+  REMINDERS {
+    String id PK
+    String title
+    DateTime reminderDate
+    String type "EMAIL|DASHBOARD|BOTH"
+    Boolean completed
+    String targetType
+    String targetId
   }
-  Reminder {
-    string id PK
-    string title
-    datetime reminderDate
-    boolean completed
-    boolean emailSent
+  NOTIFICATION_LOGS {
+    String id PK
+    String entityType
+    String entityId
+    String notificationType UK
+    DateTime sentAt
+    String status "SENT|FAILED"
   }
-  Contact ||--o{ Conversation : has
-  Conversation ||--o{ Message : contains`,
+  DASHBOARD_ALERTS {
+    String id PK
+    String title
+    String urgency "CRITICAL|HIGH|MEDIUM|LOW"
+    Boolean read
+    Boolean dismissed
+  }
+  VISITS {
+    String id PK
+    String page
+    String ipHash
+    String referrer
+    DateTime createdAt
+  }`,
     technologiesUsed: [
       {
         name: 'Next.js 16 (App Router)',
-        why: 'Server Components for zero-JS landing page sections, Server Actions for all admin mutations, and API Routes for analytics tracking. Turbopack for fast local development.',
+        why: 'Server Components for zero-JS landing page sections (About, Experience, Skills). Server Actions for all admin mutations — eliminates REST boilerplate and triggers instant TanStack Query cache invalidation. Turbopack for fast local development.',
       },
       {
         name: 'Prisma + Turso (LibSQL)',
-        why: 'Turso is a distributed SQLite-on-the-edge database. Prisma provides type-safe schema and migrations. The @libsql/client adapter makes Prisma compatible with Turso\'s HTTP API, enabling edge-compatible queries on Vercel serverless functions.',
+        why: 'Turso is a distributed SQLite-on-the-edge database. The @prisma/adapter-libsql package makes Prisma compatible with Turso\'s HTTP API, enabling edge-compatible queries on Vercel serverless functions. Falls back to local dev.db with zero code changes.',
       },
       {
         name: 'TanStack Query (React Query)',
-        why: 'All admin dashboard data is fetched via useQuery with a single "dashboardData" query key. Mutations use queryClient.invalidateQueries() to refetch stale data, giving optimistic UI updates without manual state management.',
+        why: 'All admin dashboard data is fetched via a single "dashboardData" query key. Mutations call queryClient.invalidateQueries() to trigger background refetch, giving optimistic UI updates across all 12 modules without page reloads.',
       },
       {
-        name: 'Resend',
-        why: 'Transactional email for the CRM reply system (replies to recruiters), daily digest briefs, and deadline warning alerts. The from-email uses a custom domain for deliverability.',
+        name: 'Resend (Email & Inbound Webhooks)',
+        why: 'Handles both outbound transactional email (CRM replies, daily digests, deadline alerts) and inbound reply threading via webhook. The inbound webhook parses the In-Reply-To SMTP header to link recruiter replies to the correct conversation thread automatically.',
       },
       {
         name: 'Vercel Cron Jobs',
-        why: 'Runs deadline scans, daily brief emails, and evening summaries on a schedule without a separate job queue or worker process. Configured via vercel.json cron expressions.',
+        why: 'Runs deadline scans, daily brief emails at 8:00 AM IST, and evening summaries at 8:00 PM IST on a schedule — no separate worker process or job queue needed. Configured via vercel.json cron expressions with a CRON_SECRET header for protection.',
       },
       {
-        name: 'Framer Motion',
-        why: 'Page scroll animations via useInView, staggered card entrances, and the Command Palette overlay animation. ScrollReveal wrapper keeps animation logic separate from content components.',
+        name: 'Three.js (WebGL Hyperspeed)',
+        why: 'The 3D hyperspeed background is initialized lazily and runs in a lightweight WebGL canvas using requestAnimationFrame loops. Reduces CPU usage by only running when the canvas is in the viewport.',
+      },
+      {
+        name: 'Framer Motion + GSAP',
+        why: 'Scroll-triggered entry animations via Framer Motion useInView. GSAP choreographs structural reveals and the Command Palette overlay animation. ScrollReveal wrapper isolates animation logic from content components.',
       },
       {
         name: 'Neo-Brutalist Design System',
-        why: 'Custom CSS design language with thick borders, no border-radius, red/black palette, and offset shadow utility (shadow-[4px_4px_0px_#0A0A0A]). The admin console has a light/dark mode toggle preserving the brutalist aesthetic in both themes.',
+        why: 'Custom CSS design language with thick borders, zero border-radius, red/black palette (#E3000F accent), and offset shadow utility (shadow-[4px_4px_0px_#0A0A0A]). The admin console preserves the brutalist aesthetic in both light and dark mode toggle states.',
       },
     ],
     technicalChallenges: [
       {
-        challenge: 'Making Prisma work with Turso (LibSQL) on Vercel edge',
+        challenge: 'Two-way email threading with In-Reply-To SMTP header matching',
         resolution:
-          'Turso uses the libsql:// protocol which is not supported by standard Prisma drivers. Solved by using the @prisma/adapter-libsql package with the @libsql/client HTTP client. The prisma.config.ts sets the adapter conditionally — falling back to a local SQLite file for development and using the Turso URL + auth token in production.',
+          'When Atlas sends an outbound reply to a recruiter, Resend returns a unique SMTP Message-ID which is stored in Message.emailMessageId. When the recruiter replies, Resend\'s inbound webhook fires a POST to /api/webhook/email. The handler extracts the In-Reply-To header, queries Message where emailMessageId matches, and routes the reply to the correct Conversation. If no match is found, it falls back to email address lookup on the latest conversation.',
       },
       {
-        challenge: 'Admin dashboard data freshness without full-page reloads',
+        challenge: 'Making Prisma work with Turso (LibSQL) on Vercel serverless',
         resolution:
-          'Used a single TanStack Query key ("dashboardData") that fetches all 12 modules in one Server Action call. Every mutation (create, update, delete) calls queryClient.invalidateQueries({ queryKey: ["dashboardData"] }), which triggers a background refetch of only the stale data, keeping the UI in sync without page reloads.',
+          'Turso uses the libsql:// protocol which is incompatible with standard Prisma drivers. Solved with @prisma/adapter-libsql + @libsql/client HTTP client. prisma.config.ts detects TURSO_DATABASE_URL in the environment and switches adapters — local SQLite for development, Turso edge DB for production — with zero code changes in the application layer.',
       },
       {
-        challenge: 'Automated deadline alerts without a persistent worker',
+        challenge: 'Preventing duplicate cron-triggered deadline emails',
         resolution:
-          'The deadline engine runs as a Vercel Cron-triggered API route (/api/cron/reminders). It queries all items with upcoming deadlines, computes urgency (CRITICAL < 24h, HIGH < 72h, MEDIUM < 7 days), and sends Resend emails. A deadlineEngine.ts module handles the scoring logic and HTML email templates, keeping the cron handler thin.',
+          'The notification_logs table maintains a composite unique index on [entityType, entityId, notificationType]. Before sending any email, the deadline engine queries this index. If a matching record exists, the email is skipped. This makes the cron job fully idempotent — even if it fires multiple times within a window, each notification is dispatched exactly once.',
       },
       {
-        challenge: 'Privacy-preserving site analytics without a third-party tracker',
+        challenge: 'Privacy-preserving analytics without cookies or third-party scripts',
         resolution:
-          'Built a custom visit tracking system that stores a SHA-256 hash of the visitor\'s IP (not the IP itself) in the Visit table. Unique visitor count is computed as the count of distinct ipHash values. Referrer domains are extracted server-side from the Referer header. Zero cookies, zero third-party scripts.',
+          'Built a custom visit tracking system: the visitor\'s remote IP is extracted server-side, salted, and hashed via SHA-256 to generate an anonymous ipHash stored in the Visit table. Unique visitor count is computed as COUNT(DISTINCT ipHash). Referrer domains are extracted from the Referer header server-side. Zero cookies, zero client fingerprinting, zero third-party analytics scripts.',
+      },
+      {
+        challenge: 'GitHub API rate limiting on the stats panel',
+        resolution:
+          'Implemented a custom in-memory cache with a 30-minute TTL in the /api/github route. If the GitHub API returns an error or rate limit response, the handler falls back to the last known stale cache value, ensuring zero downtime for visitors. Language percentages are aggregated across the top 20 repos by summing raw byte counts per language.',
+      },
+      {
+        challenge: 'Automated deadline expiry without a persistent worker process',
+        resolution:
+          'The deadline engine (deadlineEngine.ts) runs as a Vercel Cron-triggered API route. It classifies urgency dynamically: CRITICAL (<24h), HIGH (<72h), MEDIUM (<7 days). Items that pass their deadline without resolution are automatically transitioned to EXPIRED status, logged in activity_logs, and generate a CRITICAL dashboard alert. Local timezone alignment (UTC+05:30 IST) is computed at runtime using offset arithmetic.',
       },
     ],
     lessonsLearned: [
-      'Turso\'s distributed SQLite is fast for read-heavy workloads but write operations go through a primary replica — for a portfolio with occasional writes, this is ideal.',
-      'TanStack Query\'s single-key invalidation pattern works well for admin dashboards where data is holistic (all modules reload together), but could cause overfetching on larger datasets — in that case, per-module query keys would be better.',
-      'Vercel Cron is simpler than a dedicated job queue for low-frequency background tasks, but has a 60-second execution limit — long-running email batches need to be chunked.',
-      'Building the portfolio itself as an engineering project is more impressive than describing past projects — it\'s live, inspectable, and demonstrates taste in both engineering and design.',
+      'Turso\'s distributed SQLite is ideal for read-heavy portfolio workloads — writes go through a primary replica with ~50ms added latency, which is imperceptible for an admin dashboard used by one person.',
+      'TanStack Query\'s single-key invalidation works well when all modules load holistically. For larger datasets, per-module query keys with selective invalidation would reduce overfetching significantly.',
+      'Vercel Cron has a 60-second execution limit per invocation — long-running deadline scans across hundreds of entities need to be chunked into batches per cron trigger.',
+      'SMTP header-based email threading (In-Reply-To) is far more reliable than email subject line matching. Storing the Resend Message-ID immediately after send is the correct architectural decision.',
+      'Building the portfolio itself as a production engineering project is more impressive than describing past projects — it\'s live, inspectable, and demonstrates both engineering judgment and design taste.',
+      'Idempotent background jobs are non-negotiable — the composite unique index on notification_logs saved from double-email bugs during cron testing multiple times.',
     ],
     futureImprovements: [
-      'Add AI-powered recruiter reply drafting using the OpenAI API inside the CRM reply box.',
-      'Replace the custom analytics tracker with a page-level heatmap using canvas overlays.',
-      'Add a public /changelog page that reads from the ActivityLog table to show project updates.',
-      'Implement WebSocket-based live visitor count in the admin analytics tab using Turso\'s real-time subscriptions.',
+      'AI-powered recruiter reply drafting using OpenAI API inside the CRM reply textarea.',
+      'Calendar integration: sync application follow-up reminders with Google Calendar / Outlook via OAuth.',
+      'AI Resume Parser: automatically match recruiter job descriptions against career goals and rank opportunities.',
+      'Public /changelog page that reads from the ActivityLog table to surface project updates.',
+      'WebSocket-based live visitor count in the admin analytics tab using Turso real-time subscriptions.',
+      'Phase 2 scalability: migrate analytics writes to Redis (Upstash) and move deadline emails to QStash event scheduler for high-volume runs.',
     ],
     links: [
       { label: 'GitHub', url: 'https://github.com/sgk18/SGK18_Portfolio' },
       { label: 'Live Site', url: 'https://suryachalam.vercel.app' },
       { label: 'Admin Console', url: 'https://suryachalam.vercel.app/admin' },
     ],
-    tags: ['Next.js 16', 'TypeScript', 'Prisma', 'Turso', 'LibSQL', 'Resend', 'TanStack Query', 'Framer Motion', 'Vercel Cron'],
+    tags: ['Next.js 16', 'TypeScript', 'Prisma', 'Turso', 'LibSQL', 'Resend', 'TanStack Query', 'Three.js', 'Framer Motion', 'GSAP', 'Vercel Cron', 'WebGL'],
   },
-
 
   'socio-website': {
     id: 'socio-website',
