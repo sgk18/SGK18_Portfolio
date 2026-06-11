@@ -26,6 +26,20 @@ type Project = {
 
 const projects: Project[] = [
   {
+    id: "atlas-portfolio",
+    title: "Atlas — Personal Portfolio & Career OS",
+    description:
+      "This site. A full-stack Next.js 16 portfolio with a 12-module career management dashboard (Atlas Console) — recruiter CRM with email threads, opportunity pipeline, job application tracker, hackathon logger, live site analytics, goal tracker, and an automated deadline reminder engine with Resend email delivery.",
+    image: "/atlas.png",
+    imageFit: "cover",
+    tags: ["Next.js 16", "TypeScript", "Prisma", "Turso (LibSQL)", "Resend", "TanStack Query", "Framer Motion"],
+    github: "https://github.com/sgk18/SGK18_Portfolio",
+    live: "https://suryachalam.vercel.app",
+    featured: true,
+    hasCaseStudy: true,
+  },
+
+  {
     id: "socio-website",
     title: "SOCIO — Official Website",
     description:

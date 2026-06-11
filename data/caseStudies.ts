@@ -18,6 +18,169 @@ export interface CaseStudy {
 }
 
 export const caseStudies: Record<string, CaseStudy> = {
+  'atlas-portfolio': {
+    id: 'atlas-portfolio',
+    title: 'Atlas — Personal Portfolio & Career OS',
+    tagline: 'This site — a full-stack Next.js portfolio with a 12-module career management admin dashboard',
+    period: 'May 2026 – Present',
+    role: 'Solo Engineer & Designer',
+    problem:
+      'Standard portfolio sites show static project cards. There was no system to actively manage the job search: no CRM for recruiter conversations, no pipeline for opportunities, no deadline alerts, and no analytics on who was visiting the site. Everything was tracked manually in scattered notes.',
+    motivation:
+      'Build the portfolio itself as a production-grade engineering showcase — one that demonstrates database design, full-stack architecture, background jobs, transactional email, and a polished admin dashboard all in a single deployable system.',
+    solution:
+      'A Next.js 16 portfolio with a password-protected admin console (Atlas) containing 12 career management modules: Recruiter CRM with email reply via Resend, Opportunity pipeline, Job Application tracker, Hackathon logger, Events calendar, Learning Roadmap, Goal tracker, Networking directory, Notes system, Reminder engine, Activity timeline, and Site analytics (page views, unique visitors, referrers). The database runs on Turso (LibSQL) via Prisma with a @libsql/client adapter for edge-compatible queries on Vercel.',
+    architecture: `graph TD
+  subgraph Portfolio Site
+    A[Next.js 16 App Router] --> B[Landing Page Components]
+    A --> C[/admin — Atlas Console]
+  end
+
+  subgraph Admin Console
+    C --> D[TanStack Query Cache]
+    D --> E[Server Actions — careeros.ts]
+    E --> F[(Turso LibSQL via Prisma)]
+  end
+
+  subgraph Automation
+    G[/api/cron/reminders — Vercel Cron] --> F
+    G --> H[Resend Email API]
+    I[/api/cron/digest — Daily Brief] --> F
+    I --> H
+  end
+
+  subgraph Analytics
+    J[VisitTracker Component] --> K[/api/analytics/visit]
+    K --> F
+    L[Atlas Analytics Tab] --> M[/api/admin/analytics]
+    M --> F
+  end`,
+    databaseDesign: `erDiagram
+  Contact {
+    string id PK
+    string name
+    string email
+    string status
+    string notes
+    datetime lastContact
+    datetime nextFollowUp
+  }
+  Conversation {
+    string id PK
+    string contactId FK
+    string subject
+    datetime lastMessageAt
+  }
+  Message {
+    string id PK
+    string conversationId FK
+    string senderType
+    string content
+  }
+  Opportunity {
+    string id PK
+    string title
+    string company
+    string status
+    string type
+    datetime deadline
+  }
+  Application {
+    string id PK
+    string role
+    string company
+    string status
+    datetime appliedDate
+  }
+  Visit {
+    string id PK
+    string page
+    string ipHash
+    string referrer
+    datetime createdAt
+  }
+  Reminder {
+    string id PK
+    string title
+    datetime reminderDate
+    boolean completed
+    boolean emailSent
+  }
+  Contact ||--o{ Conversation : has
+  Conversation ||--o{ Message : contains`,
+    technologiesUsed: [
+      {
+        name: 'Next.js 16 (App Router)',
+        why: 'Server Components for zero-JS landing page sections, Server Actions for all admin mutations, and API Routes for analytics tracking. Turbopack for fast local development.',
+      },
+      {
+        name: 'Prisma + Turso (LibSQL)',
+        why: 'Turso is a distributed SQLite-on-the-edge database. Prisma provides type-safe schema and migrations. The @libsql/client adapter makes Prisma compatible with Turso\'s HTTP API, enabling edge-compatible queries on Vercel serverless functions.',
+      },
+      {
+        name: 'TanStack Query (React Query)',
+        why: 'All admin dashboard data is fetched via useQuery with a single "dashboardData" query key. Mutations use queryClient.invalidateQueries() to refetch stale data, giving optimistic UI updates without manual state management.',
+      },
+      {
+        name: 'Resend',
+        why: 'Transactional email for the CRM reply system (replies to recruiters), daily digest briefs, and deadline warning alerts. The from-email uses a custom domain for deliverability.',
+      },
+      {
+        name: 'Vercel Cron Jobs',
+        why: 'Runs deadline scans, daily brief emails, and evening summaries on a schedule without a separate job queue or worker process. Configured via vercel.json cron expressions.',
+      },
+      {
+        name: 'Framer Motion',
+        why: 'Page scroll animations via useInView, staggered card entrances, and the Command Palette overlay animation. ScrollReveal wrapper keeps animation logic separate from content components.',
+      },
+      {
+        name: 'Neo-Brutalist Design System',
+        why: 'Custom CSS design language with thick borders, no border-radius, red/black palette, and offset shadow utility (shadow-[4px_4px_0px_#0A0A0A]). The admin console has a light/dark mode toggle preserving the brutalist aesthetic in both themes.',
+      },
+    ],
+    technicalChallenges: [
+      {
+        challenge: 'Making Prisma work with Turso (LibSQL) on Vercel edge',
+        resolution:
+          'Turso uses the libsql:// protocol which is not supported by standard Prisma drivers. Solved by using the @prisma/adapter-libsql package with the @libsql/client HTTP client. The prisma.config.ts sets the adapter conditionally — falling back to a local SQLite file for development and using the Turso URL + auth token in production.',
+      },
+      {
+        challenge: 'Admin dashboard data freshness without full-page reloads',
+        resolution:
+          'Used a single TanStack Query key ("dashboardData") that fetches all 12 modules in one Server Action call. Every mutation (create, update, delete) calls queryClient.invalidateQueries({ queryKey: ["dashboardData"] }), which triggers a background refetch of only the stale data, keeping the UI in sync without page reloads.',
+      },
+      {
+        challenge: 'Automated deadline alerts without a persistent worker',
+        resolution:
+          'The deadline engine runs as a Vercel Cron-triggered API route (/api/cron/reminders). It queries all items with upcoming deadlines, computes urgency (CRITICAL < 24h, HIGH < 72h, MEDIUM < 7 days), and sends Resend emails. A deadlineEngine.ts module handles the scoring logic and HTML email templates, keeping the cron handler thin.',
+      },
+      {
+        challenge: 'Privacy-preserving site analytics without a third-party tracker',
+        resolution:
+          'Built a custom visit tracking system that stores a SHA-256 hash of the visitor\'s IP (not the IP itself) in the Visit table. Unique visitor count is computed as the count of distinct ipHash values. Referrer domains are extracted server-side from the Referer header. Zero cookies, zero third-party scripts.',
+      },
+    ],
+    lessonsLearned: [
+      'Turso\'s distributed SQLite is fast for read-heavy workloads but write operations go through a primary replica — for a portfolio with occasional writes, this is ideal.',
+      'TanStack Query\'s single-key invalidation pattern works well for admin dashboards where data is holistic (all modules reload together), but could cause overfetching on larger datasets — in that case, per-module query keys would be better.',
+      'Vercel Cron is simpler than a dedicated job queue for low-frequency background tasks, but has a 60-second execution limit — long-running email batches need to be chunked.',
+      'Building the portfolio itself as an engineering project is more impressive than describing past projects — it\'s live, inspectable, and demonstrates taste in both engineering and design.',
+    ],
+    futureImprovements: [
+      'Add AI-powered recruiter reply drafting using the OpenAI API inside the CRM reply box.',
+      'Replace the custom analytics tracker with a page-level heatmap using canvas overlays.',
+      'Add a public /changelog page that reads from the ActivityLog table to show project updates.',
+      'Implement WebSocket-based live visitor count in the admin analytics tab using Turso\'s real-time subscriptions.',
+    ],
+    links: [
+      { label: 'GitHub', url: 'https://github.com/sgk18/SGK18_Portfolio' },
+      { label: 'Live Site', url: 'https://suryachalam.vercel.app' },
+      { label: 'Admin Console', url: 'https://suryachalam.vercel.app/admin' },
+    ],
+    tags: ['Next.js 16', 'TypeScript', 'Prisma', 'Turso', 'LibSQL', 'Resend', 'TanStack Query', 'Framer Motion', 'Vercel Cron'],
+  },
+
+
   'socio-website': {
     id: 'socio-website',
     title: 'SOCIO — Official Website',
