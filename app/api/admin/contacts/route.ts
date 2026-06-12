@@ -1,5 +1,5 @@
-import { db } from '@/lib/db';
-import { prisma } from '@/lib/prisma';
+import { db } from '@/lib/db/db';
+import { prisma } from '@/lib/db/prisma';
 import { NextRequest } from 'next/server';
 
 function isAuthenticated(req: NextRequest): boolean | Response {

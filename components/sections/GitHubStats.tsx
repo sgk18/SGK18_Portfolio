@@ -16,7 +16,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import type { GitHubData } from "@/app/api/github/route";
-import ScrollReveal from "./ScrollReveal";
+import ScrollReveal from "../ui/ScrollReveal";
 
 // ─── Language colour map ─────────────────────────────────────────────────────
 const LANG_COLORS: Record<string, string> = {

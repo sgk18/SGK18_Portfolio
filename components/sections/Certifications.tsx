@@ -1,7 +1,7 @@
 "use client";
 
 import { Award, Database, GitFork, Code, Terminal, Cpu } from "lucide-react";
-import ScrollReveal from "./ScrollReveal";
+import ScrollReveal from "../ui/ScrollReveal";
 
 const certifications = [
   {

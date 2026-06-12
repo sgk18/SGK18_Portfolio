@@ -1,6 +1,6 @@
 "use server";
 
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/db/prisma";
 import { z } from "zod";
 
 // Helper to authenticate actions
@@ -1016,7 +1016,7 @@ export async function dismissAlertAction(pw: string, id: string) {
 // Action to manually trigger a proactive audit run
 export async function runAuditAction(pw: string) {
   checkAuth(pw);
-  const { DeadlineEngine } = await import("@/lib/deadlineEngine");
+  const { DeadlineEngine } = await import("@/lib/engine/deadlineEngine");
   await DeadlineEngine.runAudit(pw);
   await DeadlineEngine.processExpiredItems();
   return { success: true };

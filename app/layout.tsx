@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Space_Grotesk, JetBrains_Mono } from "next/font/google";
-import LenisProvider from "@/components/LenisProvider";
+import LenisProvider from "@/components/providers/LenisProvider";
 import "./globals.css";
 
 const spaceGrotesk = Space_Grotesk({

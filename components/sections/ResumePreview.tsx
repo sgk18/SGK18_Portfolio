@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useInView } from "framer-motion";
 import { Download, Eye, ExternalLink, FileText, Globe, Info } from "lucide-react";
-import ScrollReveal from "./ScrollReveal";
+import ScrollReveal from "../ui/ScrollReveal";
 
 export default function ResumePreview() {
   const ref = useRef(null);

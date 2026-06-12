@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
 import { Resend } from 'resend';
-import { db } from '@/lib/db';
-import { prisma } from '@/lib/prisma';
+import { db } from '@/lib/db/db';
+import { prisma } from '@/lib/db/prisma';
 
 // Helper to extract clean email address from "Name <email@domain.com>" or "email@domain.com"
 function extractEmail(fromHeader: string): string | null {

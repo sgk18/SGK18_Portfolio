@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Code2, Menu, X } from "lucide-react";
-import { smoothScrollTo } from "@/lib/smoothScroll";
+import { smoothScrollTo } from "@/lib/utils/smoothScroll";
 
 const navItems = [
   { label: "About", href: "#about" },

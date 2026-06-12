@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { User, MapPin, Coffee, Trophy } from "lucide-react";
-import ScrollReveal from "./ScrollReveal";
+import ScrollReveal from "../ui/ScrollReveal";
 
 const stats = [
   { label: "Year Coding", value: "1+" },

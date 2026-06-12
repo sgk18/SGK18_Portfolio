@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/db/prisma";
 import { Resend } from "resend";
-import { DeadlineEngine } from "@/lib/deadlineEngine";
+import { DeadlineEngine } from "@/lib/engine/deadlineEngine";
 
 export async function GET(req: NextRequest) {
   // Authorization secret

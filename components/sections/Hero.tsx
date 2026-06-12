@@ -5,10 +5,10 @@ import { motion } from "framer-motion";
 import { Github, Linkedin, Mail, Download, ArrowRight } from "lucide-react";
 import dynamic from "next/dynamic";
 
-const Hyperspeed = dynamic(() => import("./Hyperspeed"), {
+const Hyperspeed = dynamic(() => import("../ui/Hyperspeed"), {
   ssr: false,
 });
-import { smoothScrollTo } from "@/lib/smoothScroll";
+import { smoothScrollTo } from "@/lib/utils/smoothScroll";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },

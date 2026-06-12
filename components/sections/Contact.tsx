@@ -4,7 +4,7 @@ import { useState, useRef, FormEvent } from "react";
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { Send, Mail, Phone, Github, Linkedin, CheckCircle, AlertCircle } from "lucide-react";
-import ScrollReveal from "./ScrollReveal";
+import ScrollReveal from "../ui/ScrollReveal";
 
 type FormState = {
   name: string;

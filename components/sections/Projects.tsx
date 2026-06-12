@@ -6,9 +6,9 @@ import { useInView } from "framer-motion";
 import { useRef } from "react";
 import Image from "next/image";
 import { Github, ExternalLink, BookOpen } from "lucide-react";
-import CaseStudyModal from "./CaseStudyModal";
+import CaseStudyModal from "../ui/CaseStudyModal";
 import { caseStudies, CaseStudy } from "@/data/caseStudies";
-import ScrollReveal from "./ScrollReveal";
+import ScrollReveal from "../ui/ScrollReveal";
 
 type Project = {
   id: string;
@@ -123,16 +123,6 @@ const projects: Project[] = [
     image: "https://placehold.co/600x340/09090e/3b82f6?text=Aegis+Web",
     tags: ["React", "TypeScript", "Supabase", "Tailwind CSS"],
     github: "https://github.com/sgk18/aegis-web",
-    live: "#",
-  },
-  {
-    id: "notenova-backend",
-    title: "NoteNova Backend",
-    description:
-      "Backend infrastructure for NoteNova — scalable REST APIs and institutional-scale PostgreSQL with Express.",
-    image: "https://placehold.co/600x340/09090e/10b981?text=NoteNova+Backend",
-    tags: ["Node.js", "Express", "PostgreSQL", "REST API"],
-    github: "https://github.com/sgk18/NoteNova_Backend",
     live: "#",
   },
   {

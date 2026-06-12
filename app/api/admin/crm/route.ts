@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { db } from '@/lib/db';
+import { db } from '@/lib/db/db';
 
 function isAuthenticated(req: NextRequest): boolean {
   const adminPassword = process.env.ADMIN_PASSWORD;

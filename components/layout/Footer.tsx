@@ -1,7 +1,7 @@
 "use client";
 
 import { Github, Linkedin, Code2, Heart } from "lucide-react";
-import { smoothScrollTo } from "@/lib/smoothScroll";
+import { smoothScrollTo } from "@/lib/utils/smoothScroll";
 
 const socials = [
   { href: "https://github.com/sgk18", icon: <Github size={18} />, label: "GitHub" },

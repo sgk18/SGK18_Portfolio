@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
 import { Resend } from 'resend';
-import { db } from '@/lib/db';
-import { prisma } from '@/lib/prisma';
+import { db } from '@/lib/db/db';
+import { prisma } from '@/lib/db/prisma';
 
 function isAuthenticated(req: NextRequest): boolean {
   const adminPassword = process.env.ADMIN_PASSWORD;

@@ -6,7 +6,7 @@ import {
   Server,
   Wrench,
 } from "lucide-react";
-import ScrollReveal from "./ScrollReveal";
+import ScrollReveal from "../ui/ScrollReveal";
 
 type Skill = { name: string };
 type Category = {

@@ -1,4 +1,4 @@
-import { prisma } from "./prisma";
+import { prisma } from "../db/prisma";
 import { Resend } from "resend";
 
 // Priority calculation helper

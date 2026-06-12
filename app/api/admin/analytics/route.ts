@@ -1,4 +1,4 @@
-import { db } from '@/lib/db';
+import { db } from '@/lib/db/db';
 import { NextRequest } from 'next/server';
 
 function isAuthenticated(req: NextRequest): boolean {

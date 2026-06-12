@@ -1,4 +1,4 @@
-import { db } from '@/lib/db';
+import { db } from '@/lib/db/db';
 import fs from 'fs';
 import path from 'path';
 

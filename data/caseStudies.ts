@@ -452,81 +452,206 @@ export const caseStudies: Record<string, CaseStudy> = {
 
   'notenova': {
     id: 'notenova',
-    title: 'NoteNova',
-    tagline: 'Multi-user academic resource sharing platform with real-time DM and AI tools',
+    title: 'NoteNova — Academic Resource Sharing Platform',
+    tagline: 'Full-stack monorepo: resource library, AI study tools, SRS flashcards, mock exams, real-time DM, bounty board, and Android app — for students, by students.',
     period: '2025',
-    role: 'Full Stack Developer',
+    role: 'Full Stack Developer (Solo)',
     problem:
-      'University students had no structured platform to share notes, collaborate on academic resources, or access AI-powered study tools. Resources were fragmented across WhatsApp, Google Drive, and email chains with no organization or discoverability.',
+      'College students had no unified, searchable, socially-aware platform for academic resources. Notes lived in personal WhatsApp chats, question papers were buried in Google Drive folders, and knowledge was siloed within departments and batches. There was no incentive system to reward contributors or a way to surface high-quality material automatically.',
     motivation:
-      'Build a production-grade multi-user platform from scratch to understand the architecture of social platforms: auth, real-time messaging, feed systems, and AI integration.',
+      'Build a production-grade multi-user platform from scratch that combines a social resource library, a gamified contribution economy (Nova Points), and AI-powered study tools — while exploring real-time messaging architecture, spaced repetition algorithms, and LLM integration in a single monorepo.',
     solution:
-      'A Next.js full-stack application backed by Supabase (PostgreSQL) with real-time Direct Messaging via Supabase Realtime, AI-powered note summarization and Q&A, secure JWT authentication, and a scalable resource upload and tagging system.',
+      'A Next.js monorepo running two concurrent servers: the main App Router application on port 3000 (24+ REST API routes, JWT auth, Cloudinary + UploadThing file storage, Groq + Bytez AI integration) and a standalone Socket.io microservice on port 3001 (real-time DM with read receipts, typing indicators, online presence, and doubt chat rooms). MongoDB via Mongoose stores 11 collections. An Android app is shipped via Capacitor wrapping the Vercel deployment.',
     architecture: `graph TD
-  A[Next.js Frontend] --> B[Next.js API Routes]
-  B --> C[(Supabase PostgreSQL)]
-  B --> D[Supabase Realtime]
-  D --> A
-  B --> E[OpenAI / AI Integration]
-  C --> F[Supabase Storage]`,
+  subgraph Client
+    Browser[Next.js App Router + React 19]
+    Android[Capacitor Android APK]
+  end
+
+  subgraph Servers
+    Next[Next.js App - Port 3000]
+    Socket[Socket.io Server - Port 3001]
+  end
+
+  subgraph Data
+    MongoDB[(MongoDB - 11 Collections)]
+  end
+
+  subgraph AI
+    Groq[Groq - Llama 3.1-8b]
+    Bytez[Bytez SDK - LLM + TTS + OCR]
+    UT[UploadThing CDN]
+  end
+
+  Browser -->|HTTP REST| Next
+  Android -->|HTTPS| Next
+  Browser -->|WebSocket| Socket
+  Next --> MongoDB
+  Socket --> MongoDB
+  Next --> Groq
+  Next --> Bytez
+  Next --> UT`,
     databaseDesign: `erDiagram
   USER {
-    uuid id PK
-    string email
-    string display_name
-    timestamp created_at
+    ObjectId _id PK
+    String name
+    String email UK
+    String password
+    String college
+    String department
+    String semester
+    Number points
+    String role
+    Date createdAt
   }
   RESOURCE {
-    uuid id PK
-    uuid author_id FK
-    string title
-    string[] tags
-    string storage_path
-    timestamp created_at
+    ObjectId _id PK
+    String title
+    String resourceType
+    String subject
+    String department
+    String semester
+    String fileUrl
+    Boolean isPublic
+    Number downloads
+    Number avgRating
+    Object smartNotes
+    ObjectId uploadedBy FK
+    Date createdAt
+  }
+  BOUNTY {
+    ObjectId _id PK
+    String title
+    String rewardType
+    Number rewardAmount
+    String status
+    ObjectId postedBy FK
+    ObjectId solvedBy FK
+    Date expiresAt
+  }
+  CONVERSATION {
+    ObjectId _id PK
+    ObjectId[] participants FK
+    Object lastMessage
+    Date updatedAt
   }
   MESSAGE {
-    uuid id PK
-    uuid sender_id FK
-    uuid receiver_id FK
-    string content
-    timestamp sent_at
+    ObjectId _id PK
+    ObjectId conversationId FK
+    ObjectId sender FK
+    String text
+    ObjectId[] readBy FK
+    Date createdAt
+  }
+  FLASHCARDPROGRESS {
+    ObjectId _id PK
+    ObjectId userId FK
+    ObjectId resourceId FK
+    CardState[] cards
+    Object stats
+    Date updatedAt
   }
   USER ||--o{ RESOURCE : uploads
-  USER ||--o{ MESSAGE : sends`,
+  USER ||--o{ BOUNTY : posts
+  USER }o--o{ CONVERSATION : participates
+  CONVERSATION ||--o{ MESSAGE : contains
+  USER ||--o{ FLASHCARDPROGRESS : tracks
+  RESOURCE ||--o{ FLASHCARDPROGRESS : has`,
     technologiesUsed: [
       {
-        name: 'Next.js',
-        why: 'Unified frontend and API in a single deployable unit. Server Actions simplified data mutations without building a separate REST API.',
+        name: 'Next.js 16 + React 19 (App Router)',
+        why: 'Unified frontend and 24+ REST API routes in a single deployable monorepo. App Router file-based routing for all 14 page routes. Dynamic [id] segments for resource and user profiles.',
       },
       {
-        name: 'Supabase Realtime',
-        why: 'PostgreSQL-backed websocket subscriptions for Direct Messaging with no additional infrastructure (Redis pub/sub, socket.io servers).',
+        name: 'MongoDB + Mongoose 9',
+        why: 'Document model maps naturally to heterogeneous resource metadata (different fields per resource type). Mongoose ODM provides schema validation, virtuals, and index definitions. 11 collections with compound indexes for notification and SRS queries.',
       },
       {
-        name: 'PostgreSQL Row-Level Security',
-        why: 'Messages are only readable by the sender and receiver at the database layer, independent of API logic.',
+        name: 'Socket.io 4 + Express 5 (server.js)',
+        why: 'Standalone real-time microservice decoupled from the Next.js process. In-memory Map<userId, Set<socketId>> tracks online presence across multiple browser tabs. Persists DM messages directly to MongoDB via Mongoose schemas defined inline.',
+      },
+      {
+        name: 'Groq API (Llama 3.1-8b-instant)',
+        why: 'Sub-second inference for Ask Nova (academic Q&A) and Smart Notes generation. Llama 3.1-8b returns strict JSON for the Smart Notes object (summary, flashcards, MCQs, mind map, exam questions) in a single call with regex fallback parsing.',
+      },
+      {
+        name: 'Bytez SDK (Meta-Llama-3-8B + TTS + BLIP-2)',
+        why: 'Three separate Bytez model endpoints: Llama 3-8B for study material and mock exam generation, facebook/mms-tts-eng for text-to-speech audio overview, and kkatiz/THAI-BLIP-2 for image-to-text OCR. Allows AI-powered processing of uploaded image-based notes.',
+      },
+      {
+        name: 'UploadThing',
+        why: 'CDN file hosting for PDFs and images with server-side webhook verification. Eliminates self-managed S3 infrastructure while providing signed URLs and file type enforcement.',
+      },
+      {
+        name: 'Capacitor 8 (Android)',
+        why: 'Wraps the production Vercel deployment into a native Android APK. Device access (camera, status bar) via Capacitor plugins without writing native code, enabling a single codebase to target web and Android.',
+      },
+      {
+        name: 'JWT + bcryptjs (Auth)',
+        why: 'Stateless 7-day JWT tokens signed with HS256. bcrypt cost factor 10 for password hashing. authenticate() middleware extracts and verifies the Bearer token on every protected route, returning null on failure rather than throwing — allowing graceful degradation for optional-auth routes.',
+      },
+      {
+        name: 'Three.js + @react-three/fiber',
+        why: 'Custom WebGL particle field on the hero section. Theme-aware particle color changes (blue/violet/grey) based on the active CSS theme. Loaded lazily via next/dynamic with ssr: false to prevent SSR canvas conflicts.',
+      },
+      {
+        name: 'Tailwind CSS v4 + shadcn/ui',
+        why: 'Utility-first CSS with CSS custom properties for three switchable themes (Ion dark blue, Galaxy violet, White minimal). shadcn/ui provides accessible Radix-based primitives styled to match each theme.',
       },
     ],
     technicalChallenges: [
       {
-        challenge: 'Real-time DM with read receipts at scale',
+        challenge: 'Multi-tab online presence tracking in the Socket.io DM system',
         resolution:
-          'Used Supabase Realtime channel subscriptions filtered by (sender_id, receiver_id) pairs. Read receipts are UPDATE operations on the messages table, which trigger Realtime events on the receiver\'s subscription.',
+          'Tracked online users with Map<userId, Set<socketId>> rather than Map<userId, socketId>. When a user opens a second tab, a new socket is added to their Set. Disconnect only broadcasts "offline" when the Set becomes empty after removing the disconnected socket — preventing false offline events when users switch browser tabs.',
+      },
+      {
+        challenge: 'Smart Notes JSON parsing with LLM hallucination handling',
+        resolution:
+          'Groq Llama 3.1 is prompted with strict JSON schema instructions and a temperature of 0. The response is first attempted with JSON.parse(). On failure, a regex extracts the first {...} block from the raw string. If regex also fails, the API falls back to the resource\'s existing stored smartNotes (if cached) or returns a structured error — preventing 500s from surfacing to the UI.',
+      },
+      {
+        challenge: 'Idempotent resource download counting with point rewards',
+        resolution:
+          'The GET /api/resources endpoint accepts a ?download=<resourceId> param. On match, it uses MongoDB $inc to atomically increment downloads and the uploader\'s points (+2) in a single findByIdAndUpdate call. This prevents race conditions between concurrent download requests and ensures the point reward is atomic with the counter increment.',
+      },
+      {
+        challenge: 'Spaced repetition scheduling across four learning buckets',
+        resolution:
+          'Each flashcard stores bucket (new/learning/review/mastered), correctStreak, lastReviewed, and nextReview. On each answer, the API computes the next review time: 0ms for new, 1min for learning, 10min for review, 1440min for mastered. A compound unique index on {userId, resourceId} ensures one progress document per user per resource. The SRS UI only shows cards where nextReview <= now.',
+      },
+      {
+        challenge: 'Mock exam generation with AI fallback to cached Smart Notes',
+        resolution:
+          'The Bytez Llama 3-8B model is prompted to return a 20-question JSON array (12 MCQ + 4 T/F + 4 Short Answer). If the AI response fails JSON parsing, the endpoint constructs the exam deterministically from resource.smartNotes: MCQs fill question slots first, then flashcards are converted to T/F questions, then examQuestions fill short-answer slots — ensuring the exam endpoint never returns a 500 even on total AI failure.',
+      },
+      {
+        challenge: 'Trending score computation without a dedicated analytics store',
+        resolution:
+          'The GET /api/resources?sort=trending endpoint uses a MongoDB aggregation pipeline that adds a computed trendingScore field: { $add: [ { $multiply: ["$downloads", 2] }, { $multiply: ["$avgRating", 5] } ] }. This runs entirely in-database with no separate analytics write path, sorts by the computed field, and projects it out of the response to keep the payload clean.',
       },
     ],
     lessonsLearned: [
-      'Supabase Realtime is powerful but has connection limits per project. For large-scale DM systems, consider sharding across channels or using a dedicated pub/sub layer.',
-      'AI integration is most useful when it reduces user friction (one-click summarize) rather than adding UI complexity.',
+      'Running two concurrent processes (Next.js + Socket.io) in development requires npm-run-all or concurrently — documenting this upfront in the README prevents significant contributor confusion.',
+      'Mongoose singleton connection caching (global.mongoose) is essential in Next.js serverless environments. Without it, cold starts create new connections on every invocation and exhaust the MongoDB Atlas connection pool within minutes under moderate load.',
+      'The SRS algorithm must be designed before the data model — the bucket transitions and review intervals are business logic that dictate required index structures (compound {userId, resourceId} + sparse {nextReview}).',
+      'Groq\'s Llama 3.1-8b-instant is genuinely fast enough for real-time UX (sub-2s for Smart Notes) but requires a robust fallback chain for when it returns malformed JSON — production AI endpoints must never assume valid structured output.',
+      'Per-user point balances should use atomic $inc operations, not read-modify-write patterns — the download endpoint originally used find() → modify → save(), which lost point updates under concurrent downloads.',
+      'The Bytez SDK\'s TTS model returns base64-encoded audio. Streaming the base64 string directly to the AudioPlayer avoids creating blob URLs and simplifies cleanup, but the browser decodes it synchronously on long texts — chunking the text before TTS calls is necessary for documents over 2000 characters.',
     ],
     futureImprovements: [
-      'Add vector embeddings for semantic resource search using pgvector.',
-      'Implement study group rooms with shared real-time document editing via Yjs.',
+      'Vector embeddings for semantic resource search using MongoDB Atlas Vector Search or pgvector.',
+      'Study group rooms with shared real-time document annotation via Yjs CRDT.',
+      'AI Resume Parser: match uploaded question papers against subject syllabi to surface the most relevant resources automatically.',
+      'Rate limiting per-IP on AI endpoints (Ask Nova, Smart Notes) using Redis/Upstash to prevent abuse without blocking legitimate users.',
+      'Replace client-side localStorage auth with HttpOnly cookie + CSRF token pattern for improved XSS resilience.',
+      'Migrate the Socket.io server to a managed WebSocket provider (Ably / Pusher) to eliminate the two-process dev setup and simplify Vercel deployment.',
     ],
     links: [
       { label: 'GitHub', url: 'https://github.com/sgk18/NoteNova' },
-      { label: 'Live', url: 'https://note-nova-khaki.vercel.app' },
+      { label: 'Live Demo', url: 'https://note-nova-khaki.vercel.app' },
     ],
-    tags: ['Next.js', 'TypeScript', 'Supabase', 'PostgreSQL', 'AI', 'Realtime'],
+    tags: ['Next.js 16', 'React 19', 'MongoDB', 'Mongoose', 'Socket.io', 'Express 5', 'Groq', 'Llama 3.1', 'Bytez', 'UploadThing', 'Capacitor', 'JWT', 'Three.js', 'Tailwind CSS v4', 'SRS', 'AI'],
   },
 
   'facultyapp': {

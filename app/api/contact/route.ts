@@ -1,8 +1,8 @@
 import crypto from 'crypto';
 import { NextRequest } from 'next/server';
 import { Resend } from 'resend';
-import { db } from '@/lib/db';
-import { prisma } from '@/lib/prisma';
+import { db } from '@/lib/db/db';
+import { prisma } from '@/lib/db/prisma';
 
 // In-memory rate limiter
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>();

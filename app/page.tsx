@@ -1,16 +1,17 @@
-import Navbar from "@/components/Navbar";
-import Hero from "@/components/Hero";
-import About from "@/components/About";
-import Skills from "@/components/Skills";
-import Experience from "@/components/Experience";
-import Projects from "@/components/Projects";
-import GitHubStats from "@/components/GitHubStats";
-import Certifications from "@/components/Certifications";
-import Philosophy from "@/components/Philosophy";
-import ResumePreview from "@/components/ResumePreview";
-import Contact from "@/components/Contact";
-import Footer from "@/components/Footer";
-import VisitTracker from "@/components/VisitTracker";
+import Navbar from "@/components/layout/Navbar";
+import Hero from "@/components/sections/Hero";
+import About from "@/components/sections/About";
+import Skills from "@/components/sections/Skills";
+import Experience from "@/components/sections/Experience";
+import VolunteerLeadership from "@/components/sections/VolunteerLeadership";
+import Projects from "@/components/sections/Projects";
+import GitHubStats from "@/components/sections/GitHubStats";
+import Certifications from "@/components/sections/Certifications";
+import Philosophy from "@/components/sections/Philosophy";
+import ResumePreview from "@/components/sections/ResumePreview";
+import Contact from "@/components/sections/Contact";
+import Footer from "@/components/layout/Footer";
+import VisitTracker from "@/components/providers/VisitTracker";
 
 export default function Home() {
   return (
@@ -21,6 +22,7 @@ export default function Home() {
       <About />
       <Skills />
       <Experience />
+      <VolunteerLeadership />
       <Projects />
       <GitHubStats />
       <Certifications />
@@ -31,4 +33,3 @@ export default function Home() {
     </main>
   );
 }
-
