@@ -9,7 +9,6 @@
 A production-grade, centralized career management platform designed to consolidate professional branding, recruiter relationship management, application pipelines, and real-time proactive tracking. This system combines an immersive client-facing WebGL portfolio with a secure, telemetry-driven administrator console, an integrated two-way email CRM, and an automated background deadline auditing daemon.
 
 ---
-
 ## Why This Project Stands Out
 
 | Area | Highlights |
