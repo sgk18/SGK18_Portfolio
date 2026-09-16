@@ -13,6 +13,28 @@ type Job = {
 
 const jobs: Job[] = [
   {
+    title: "Vertical Head – DevZen",
+    company: "Labyrinth – CS Club at CHRIST (Deemed to be University)",
+    location: "Bengaluru, Karnataka, India",
+    dates: "Jul 2026 – Present",
+    type: "Full-time",
+    achievements: [
+      "Lead the planning and execution of technical initiatives that foster innovation, collaboration, and hands-on learning.",
+      "Coordinate workshops, coding competitions, hackathons, and developer-focused events while managing a team to deliver high-impact student experiences.",
+      "Build community, shape strategic plans, develop industry collaborations, and create opportunities for members to strengthen their technical and leadership skills.",
+    ],
+  },
+  {
+    title: "Marketing and Registration Subhead, Interface",
+    company: "Christ University, Bangalore",
+    location: "On-site",
+    dates: "Jul 2026 – Aug 2026",
+    type: "Leadership",
+    achievements: [
+      "Led marketing and registration activities for Interface, supporting event outreach and attendee coordination.",
+    ],
+  },
+  {
     title: "Product Engineering Intern",
     company: "SOCIO — Campus Event Platform (CHRIST Incubation and Consultancy Foundation)",
     location: "Bengaluru, India",
@@ -102,4 +124,3 @@ export default function Experience() {
     </section>
   );
 }
-

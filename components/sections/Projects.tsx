@@ -72,7 +72,9 @@ const projects: Project[] = [
     title: "FacultyApp",
     description:
       "Institutional workflow platform — Flutter + Riverpod mobile app and Next.js web portal with Prisma/Supabase, JWT auth, Google OAuth, Calendar API integrations, FCM, and role-based access.",
-    image: "https://placehold.co/600x340/09090e/10b981?text=FacultyApp+Flutter",
+    image: "/Faculty.ico",
+    imageFit: "contain",
+    imageBg: "bg-white",
     tags: ["Flutter", "Riverpod", "Next.js", "Supabase", "Prisma", "Google APIs"],
     github: "https://github.com/sgk18/Facultyapp",
     live: "https://github.com/sgk18/Facultyapp",
