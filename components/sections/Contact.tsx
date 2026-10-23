@@ -175,19 +175,39 @@ export default function Contact() {
             {/* Right: form */}
             <div className="contact-form">
               {status === "success" ? (
-                <div className="border-2 border-[#0A0A0A] bg-white p-10 flex flex-col items-center text-center gap-4 shadow-[5px_5px_0px_#0A0A0A] rounded-none">
-                  <div className="w-16 h-16 border-2 border-[#0A0A0A] bg-[#FFF5F5] text-emerald-600 flex items-center justify-center shadow-[3px_3px_0px_#0A0A0A] rounded-none">
-                    <CheckCircle size={28} />
+                <div className="border-2 border-[#0A0A0A] bg-white p-8 sm:p-10 flex flex-col items-center text-center gap-4 shadow-[6px_6px_0px_#0A0A0A] rounded-none animate-in fade-in duration-200">
+                  {/* 2D Sprite Animated Mail Delivery */}
+                  <div className="relative p-3 border-2 border-[#0A0A0A] bg-[#FFF5F5] shadow-[4px_4px_0px_#0A0A0A] flex items-center justify-center">
+                    <img
+                      src="/sprites/message_sent.gif"
+                      alt="Message Dispatched"
+                      width={80}
+                      height={80}
+                      className="w-20 h-20 [image-rendering:pixelated] select-none"
+                    />
+                    <span className="absolute -top-2.5 -right-2.5 bg-[#10B981] text-white border-2 border-[#0A0A0A] font-mono text-[10px] font-black px-1.5 py-0.5 shadow-[2px_2px_0px_#0A0A0A]">
+                      SENT · OK
+                    </span>
                   </div>
-                  <h3 className="text-xl font-black uppercase text-[#0A0A0A]">Message received!</h3>
+
+                  <div>
+                    <h3 className="text-2xl font-black uppercase tracking-tight text-[#0A0A0A]">
+                      Transmission Dispatched!
+                    </h3>
+                    <p className="font-mono text-xs text-[#E3000F] font-bold mt-1">
+                      CONNECTION REQUEST RECEIVED
+                    </p>
+                  </div>
+
                   <p className="text-[#3a3a3a] text-sm font-medium max-w-sm leading-relaxed">
-                    I&apos;ll get back to you as soon as possible. You should receive a confirmation email shortly.
+                    Thank you for reaching out! Your message is safely in my inbox, and a confirmation email has been routed to you. I&apos;ll reply shortly.
                   </p>
+
                   <button
                     onClick={() => setStatus("idle")}
-                    className="text-[#E3000F] text-xs font-black uppercase tracking-wider hover:underline mt-2 cursor-pointer"
+                    className="flex items-center gap-2 px-4 py-2 bg-white text-[#0A0A0A] border-2 border-[#0A0A0A] font-mono text-xs font-bold uppercase shadow-[3px_3px_0px_#0A0A0A] hover:bg-[#FFF5F5] hover:text-[#E3000F] hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[5px_5px_0px_#0A0A0A] transition-all cursor-pointer mt-2"
                   >
-                    Send another message →
+                    <span>← Send Another Message</span>
                   </button>
                 </div>
               ) : (
