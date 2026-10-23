@@ -7,6 +7,7 @@ import {
   Wrench,
 } from "lucide-react";
 import ScrollReveal from "../ui/ScrollReveal";
+import RetroSkillSprites from "../ui/RetroSkillSprites";
 
 type Skill = { name: string };
 type Category = {
@@ -83,6 +84,9 @@ export default function Skills() {
             <span className="w-4 h-4 bg-[#E3000F] border-2 border-[#0A0A0A] inline-block" />
             <h2 className="font-black text-3xl md:text-4xl uppercase tracking-tight text-[#0A0A0A]">TECH STACK</h2>
           </div>
+
+          {/* Retro 2D Sprites Vault (Aseprite Assets) */}
+          <RetroSkillSprites />
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {categories.map((cat) => (
