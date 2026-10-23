@@ -15,6 +15,18 @@ const activities: Activity[] = [
   /* ── Leadership ──────────────────────────────────── */
   {
     category: "Leadership",
+    title: "Vertical Head — DevZen",
+    org: "Labyrinth — CS Club at CHRIST (Deemed to be University)",
+    date: "Jul 2026 – Present",
+    points: [
+      "Lead the planning and execution of technical initiatives that foster innovation, collaboration, and hands-on learning across the student developer community.",
+      "Coordinate workshops, coding competitions, hackathons, and developer-focused events while managing a team to deliver high-impact experiences.",
+      "Drive community building, strategic planning, and industry collaborations to create opportunities for members to enhance their technical and leadership skills.",
+      "Spearhead peer mentoring and hands-on developer tracks across modern engineering stacks.",
+    ],
+  },
+  {
+    category: "Leadership",
     title: "Guest Speaker & Workshop Facilitator",
     org: "CHRIST University — Junior Student Orientation Session",
     date: "Jun 2026",

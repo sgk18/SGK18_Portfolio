@@ -17,7 +17,7 @@ const jobs: Job[] = [
     company: "Labyrinth – CS Club at CHRIST (Deemed to be University)",
     location: "Bengaluru, Karnataka, India",
     dates: "Jul 2026 – Present",
-    type: "Full-time",
+    type: "Leadership",
     achievements: [
       "Lead the planning and execution of technical initiatives that foster innovation, collaboration, and hands-on learning.",
       "Coordinate workshops, coding competitions, hackathons, and developer-focused events while managing a team to deliver high-impact student experiences.",
