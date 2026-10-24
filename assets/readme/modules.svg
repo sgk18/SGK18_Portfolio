@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 240" width="100%" height="auto" style="background: transparent; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Courier New', monospace;">
+  <g transform="translate(10, 10)">
+    <rect x="6" y="6" width="868" height="218" fill="#0A0A0A" />
+    <rect x="0" y="0" width="868" height="218" fill="#FFFFFF" stroke="#0A0A0A" stroke-width="2.5" />
+    
+    <!-- Header -->
+    <rect x="0" y="0" width="868" height="34" fill="#0A0A0A" />
+    <text x="20" y="22" font-size="11" font-weight="900" fill="#FFFFFF" letter-spacing="1.5">ATLAS CONSOLE // 12 INTEGRATED CAREER OS MODULES</text>
+    <text x="850" y="22" font-size="10" font-weight="800" fill="#E3000F" text-anchor="end">AUTHENTICATED ADMIN SUITE</text>
+
+    <!-- Grid of 12 Modules (4 cols x 3 rows) -->
+    <!-- Col 1 -->
+    <g transform="translate(20, 52)">
+      <text x="0" y="16" font-size="12" font-weight="900" fill="#E3000F">01. Recruiter CRM</text>
+      <text x="0" y="32" font-size="9.5" font-weight="600" fill="#555555">Two-way email threading</text>
+
+      <text x="0" y="66" font-size="12" font-weight="900" fill="#E3000F">02. Opportunity Pipeline</text>
+      <text x="0" y="82" font-size="9.5" font-weight="600" fill="#555555">Role-gated stages &amp; priorities</text>
+
+      <text x="0" y="116" font-size="12" font-weight="900" fill="#E3000F">03. Application Tracker</text>
+      <text x="0" y="132" font-size="9.5" font-weight="600" fill="#555555">OA, rounds &amp; follow-up triggers</text>
+    </g>
+
+    <!-- Col 2 -->
+    <g transform="translate(235, 52)">
+      <text x="0" y="16" font-size="12" font-weight="900" fill="#0A0A0A">04. Hackathon Logger</text>
+      <text x="0" y="32" font-size="9.5" font-weight="600" fill="#555555">Rosters, prizes &amp; milestones</text>
+
+      <text x="0" y="66" font-size="12" font-weight="900" fill="#0A0A0A">05. Events Calendar</text>
+      <text x="0" y="82" font-size="9.5" font-weight="600" fill="#555555">Conclaves, meetups &amp; fests</text>
+
+      <text x="0" y="116" font-size="12" font-weight="900" fill="#0A0A0A">06. Learning Roadmap</text>
+      <text x="0" y="132" font-size="9.5" font-weight="600" fill="#555555">Curriculum % completion</text>
+    </g>
+
+    <!-- Col 3 -->
+    <g transform="translate(450, 52)">
+      <text x="0" y="16" font-size="12" font-weight="900" fill="#0A0A0A">07. Goal Tracker</text>
+      <text x="0" y="32" font-size="9.5" font-weight="600" fill="#555555">Quarterly &amp; annual targets</text>
+
+      <text x="0" y="66" font-size="12" font-weight="900" fill="#0A0A0A">08. Network Directory</text>
+      <text x="0" y="82" font-size="9.5" font-weight="600" fill="#555555">Contacts, recruiters &amp; leads</text>
+
+      <text x="0" y="116" font-size="12" font-weight="900" fill="#0A0A0A">09. Engineering Notes</text>
+      <text x="0" y="132" font-size="9.5" font-weight="600" fill="#555555">Tagged system documentation</text>
+    </g>
+
+    <!-- Col 4 -->
+    <g transform="translate(665, 52)">
+      <text x="0" y="16" font-size="12" font-weight="900" fill="#E3000F">10. Deadline Daemon</text>
+      <text x="0" y="32" font-size="9.5" font-weight="600" fill="#555555">Automated warning engine</text>
+
+      <text x="0" y="66" font-size="12" font-weight="900" fill="#E3000F">11. Activity Timeline</text>
+      <text x="0" y="82" font-size="9.5" font-weight="600" fill="#555555">Immutable audit change log</text>
+
+      <text x="0" y="116" font-size="12" font-weight="900" fill="#E3000F">12. Telemetry Analytics</text>
+      <text x="0" y="132" font-size="9.5" font-weight="600" fill="#555555">SHA-256 privacy visitor stats</text>
+    </g>
+
+  </g>
+</svg>
