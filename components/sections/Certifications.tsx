@@ -1,6 +1,6 @@
 "use client";
 
-import { Award, Database, GitFork, Code, Terminal, Cpu } from "lucide-react";
+import { Award, Database, GitFork, Code, Terminal, Cpu, GitCommit } from "lucide-react";
 import ScrollReveal from "../ui/ScrollReveal";
 
 const certifications = [
@@ -9,6 +9,12 @@ const certifications = [
     issuer: "Oracle University",
     details: "Credential ID: 328494602OCI25DCFA · Valid through May 2028",
     iconName: "database"
+  },
+  {
+    name: "Certificate of Participation in First Commit",
+    issuer: "WeMakeDevs",
+    details: "Credential ID: J8KH4-2TG34 · Issued Sep 2026 · AWS",
+    iconName: "commit"
   },
   {
     name: "Graph Theory",
@@ -49,6 +55,7 @@ function getIcon(name: string) {
     case "code": return <Code className="text-[#0A0A0A] w-6 h-6" />;
     case "terminal": return <Terminal className="text-[#0A0A0A] w-6 h-6" />;
     case "brain": return <Cpu className="text-[#0A0A0A] w-6 h-6" />;
+    case "commit": return <GitCommit className="text-[#0A0A0A] w-6 h-6" />;
     default: return <Award className="text-[#0A0A0A] w-6 h-6" />;
   }
 }

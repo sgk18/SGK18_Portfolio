@@ -917,6 +917,96 @@ def draw_vercel():
 
     return make_sprite(d)
 
+# ── 32. Neo4j ───────────────────────────────────────────────
+def draw_neo4j():
+    d = {}
+    c_blue = hex_to_rgba("#018BFF")
+    c_cyan = hex_to_rgba("#00D4FF")
+    c_line = hex_to_rgba("#5C9CE6")
+    c_white = (255, 255, 255, 255)
+
+    # Graph edges
+    for t in [(7, 6), (8, 7), (8, 8), (9, 9)]:
+        d[t] = c_line
+    for t in [(6, 13), (7, 12), (8, 12), (9, 11)]:
+        d[t] = c_line
+    for t in [(11, 10), (12, 10), (13, 9), (14, 9)]:
+        d[t] = c_line
+    for y in range(7, 13):
+        d[(5, y)] = c_line
+
+    # Nodes
+    for x in range(5, 8):
+        for y in range(4, 7):
+            d[(x, y)] = c_blue
+    d[(6, 5)] = c_white
+    d[(5, 4)] = c_cyan
+
+    for x in range(4, 7):
+        for y in range(13, 16):
+            d[(x, y)] = c_blue
+    d[(5, 14)] = c_white
+    d[(4, 13)] = c_cyan
+
+    for x in range(9, 12):
+        for y in range(9, 12):
+            d[(x, y)] = c_cyan
+    d[(10, 10)] = c_white
+
+    for x in range(14, 17):
+        for y in range(8, 11):
+            d[(x, y)] = c_blue
+    d[(15, 9)] = c_white
+    d[(14, 8)] = c_cyan
+
+    return make_sprite(d)
+
+# ── 33. AWS ─────────────────────────────────────────────────
+def draw_aws():
+    d = {}
+    c_dark = hex_to_rgba("#232F3E")
+    c_orange = hex_to_rgba("#FF9900")
+    c_white = (255, 255, 255, 255)
+    c_border = hex_to_rgba("#141E28")
+
+    # Dark chip background (2, 2) to (17, 17)
+    for y in range(2, 18):
+        for x in range(2, 18):
+            if x in (2, 17) or y in (2, 17):
+                d[(x, y)] = c_border
+            else:
+                d[(x, y)] = c_dark
+
+    # 'A': x=4..6, y=5..9
+    d[(5, 5)] = c_white
+    d[(4, 6)] = c_white; d[(6, 6)] = c_white
+    d[(4, 7)] = c_white; d[(5, 7)] = c_white; d[(6, 7)] = c_white
+    d[(4, 8)] = c_white; d[(6, 8)] = c_white
+    d[(4, 9)] = c_white; d[(6, 9)] = c_white
+
+    # 'W': x=8..11, y=5..9
+    d[(8, 5)] = c_white; d[(11, 5)] = c_white
+    d[(8, 6)] = c_white; d[(11, 6)] = c_white
+    d[(8, 7)] = c_white; d[(11, 7)] = c_white
+    d[(8, 8)] = c_white; d[(9, 8)] = c_white; d[(10, 8)] = c_white; d[(11, 8)] = c_white
+    d[(8, 9)] = c_white; d[(11, 9)] = c_white
+
+    # 'S': x=13..15, y=5..9
+    d[(14, 5)] = c_white; d[(15, 5)] = c_white
+    d[(13, 6)] = c_white
+    d[(14, 7)] = c_white
+    d[(15, 8)] = c_white
+    d[(13, 9)] = c_white; d[(14, 9)] = c_white
+
+    # Smile curve
+    for x in range(7, 12):
+        d[(x, 14)] = c_orange
+    d[(4, 12)] = c_orange; d[(5, 13)] = c_orange; d[(6, 13)] = c_orange
+    d[(12, 13)] = c_orange; d[(13, 13)] = c_orange; d[(14, 12)] = c_orange
+    d[(15, 11)] = c_orange; d[(15, 12)] = c_orange; d[(14, 11)] = c_orange; d[(15, 13)] = c_orange
+
+    return make_sprite(d)
+
 # Map all skills
 SKILL_GENERATORS = {
     "typescript": draw_typescript,
@@ -942,7 +1032,9 @@ SKILL_GENERATORS = {
     "valkey": draw_valkey,
     "mysqlheatwave": draw_mysqlheatwave,
     "docker": draw_docker,
+    "neo4j": draw_neo4j,
     "oci": draw_oci,
+    "aws": draw_aws,
     "cicd": draw_cicd,
     "fcm": draw_fcm,
     "onesignal": draw_onesignal,

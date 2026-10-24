@@ -27,6 +27,15 @@ const activities: Activity[] = [
   },
   {
     category: "Leadership",
+    title: "Marketing and Registration Subhead — Interface",
+    org: "Christ University, Bangalore",
+    date: "Jul 2026 – Aug 2026",
+    points: [
+      "Led marketing and registration activities for Interface, supporting event outreach and attendee coordination.",
+    ],
+  },
+  {
+    category: "Leadership",
     title: "Guest Speaker & Workshop Facilitator",
     org: "CHRIST University — Junior Student Orientation Session",
     date: "Jun 2026",

@@ -59,12 +59,14 @@ const categories: Category[] = [
       { name: "Valkey", sprite: "/sprites/skills/valkey.png" },
       { name: "MySQL HeatWave", sprite: "/sprites/skills/mysqlheatwave.png" },
       { name: "Docker", sprite: "/sprites/skills/docker.png" },
+      { name: "Neo4j", sprite: "/sprites/skills/neo4j.png" },
     ],
   },
   {
     title: "Integrations & Tools",
     icon: <Wrench size={16} />,
     skills: [
+      { name: "AWS", sprite: "/sprites/skills/aws.png" },
       { name: "OCI", sprite: "/sprites/skills/oci.png" },
       { name: "CI/CD", sprite: "/sprites/skills/cicd.png" },
       { name: "FCM", sprite: "/sprites/skills/fcm.png" },
@@ -78,6 +80,8 @@ const categories: Category[] = [
 ];
 
 export default function Skills() {
+  const totalSkills = categories.reduce((acc, cat) => acc + cat.skills.length, 0);
+
   return (
     <section id="skills" className="section-padding bg-white border-b-2 border-[#0A0A0A]">
       <ScrollReveal>
@@ -89,7 +93,7 @@ export default function Skills() {
               <h2 className="font-black text-3xl md:text-4xl uppercase tracking-tight text-[#0A0A0A]">TECH STACK</h2>
             </div>
             <span className="border-2 border-[#0A0A0A] bg-[#FFF5F5] text-[#0A0A0A] px-2.5 py-1 font-mono text-xs font-bold shadow-[2px_2px_0px_#0A0A0A] rounded-none">
-              2D SPRITES EQUIPPED · 31 SKILLS
+              2D SPRITES EQUIPPED · {totalSkills} SKILLS
             </span>
           </div>
 
