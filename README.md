@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/readme/hero.svg" alt="Atlas Career OS Hero" width="100%" />
+  <img src="assets/readme/hero-header.svg" alt="Atlas Career OS Hero" width="100%" />
 </p>
 
 <p align="center">
