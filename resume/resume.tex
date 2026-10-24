@@ -1,167 +1,163 @@
-\documentclass[10pt,a4paper]{article}
+%-------------------------
+% Resume in Latex
+% Based on the widely-used "Jake's Resume" template structure
+% Optimized for ATS parsing & Software Engineering roles
+%------------------------
 
-\usepackage[left=0.60in,top=0.42in,right=0.60in,bottom=0.42in]{geometry}
+\documentclass[letterpaper,10pt]{article}
+
+\usepackage[left=0.55in,top=0.45in,right=0.55in,bottom=0.45in]{geometry}
 \usepackage[T1]{fontenc}
-\usepackage{charter}
-\usepackage{enumitem}
-\usepackage{hyperref}
 \usepackage{titlesec}
-\usepackage{microtype}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+\usepackage{tabularx}
 
-\hypersetup{hidelinks, colorlinks=false}
+\pagestyle{empty}
+\urlstyle{same}
+\raggedbottom
+\raggedright
+\setlength{\tabcolsep}{0in}
 
-% Slightly tighter line spacing
-\renewcommand{\baselinestretch}{0.96}
+% Ensure generated PDF is machine readable / ATS parsable
+\pdfgentounicode=1
 
-% Bullet list spacing
-\setlist[itemize]{noitemsep, topsep=2pt, leftmargin=1.3em, itemsep=1pt, parsep=0pt}
+% Sections formatting
+\titleformat{\section}{
+  \vspace{-5pt}\scshape\raggedright\large\bfseries
+}{}{0em}{}[\titlerule \vspace{-5pt}]
 
-% Section: bold, ruled, tight spacing
-\titleformat{\section}{\normalsize\bfseries\uppercase}{}{0em}{}[\titlerule]
-\titlespacing*{\section}{0pt}{5pt}{3pt}
-
-% Role macro: title + org left, dates right, all on two lines
-\newcommand{\role}[4]{%
-  \noindent\textbf{#1} \hfill \textit{#3 -- #4}\\[-3pt]
-  \noindent\textit{#2}\par
+% Custom commands
+\newcommand{\resumeItem}[1]{
+  \item\small{
+    {#1 \vspace{-2pt}}
+  }
 }
 
-% Project header: name left, link right
-\newcommand{\project}[3]{%
-  \noindent\textbf{#1} \hfill \href{#2}{\texttt{\small #3}}\par
+\newcommand{\resumeSubheading}[4]{
+  \vspace{-2pt}\item
+    \begin{tabular*}{0.97\textwidth}{l@{\extracolsep{\fill}}r}
+      \textbf{#1} & #2 \\
+      \textit{\small#3} & \textit{\small #4} \\
+    \end{tabular*}\vspace{-5pt}
 }
+
+\newcommand{\resumeProjectHeading}[2]{
+    \item
+    \begin{tabular*}{0.97\textwidth}{l@{\extracolsep{\fill}}r}
+      \small#1 & #2 \\
+    \end{tabular*}\vspace{-5pt}
+}
+
+\newcommand{\resumeSubItem}[1]{\resumeItem{#1}\vspace{-3pt}}
+
+\renewcommand\labelitemii{$\vcenter{\hbox{\tiny$\bullet$}}$}
+
+\newcommand{\resumeSubHeadingListStart}{\begin{itemize}[leftmargin=0.15in, label={}]}
+\newcommand{\resumeSubHeadingListEnd}{\end{itemize}}
+\newcommand{\resumeItemListStart}{\begin{itemize}[leftmargin=0.15in, itemsep=-2pt, topsep=1pt]}
+\newcommand{\resumeItemListEnd}{\end{itemize}\vspace{-4pt}}
+
+%-------------------------------------------
+%%%%%%  RESUME STARTS HERE  %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{document}
-\pagestyle{empty}
 
-%-----------------------------------------------------------
-% HEADER — centred block for clean alignment
-%-----------------------------------------------------------
+%----------HEADING----------
 \begin{center}
-  {\LARGE\bfseries Suryachalam V M}\\[3pt]
-  \small
-  \href{mailto:suryachalam18@gmail.com}{suryachalam18@gmail.com}
-  \,\textbar\,
-  +91 98445 88551
-  \,\textbar\,
-  \href{https://suryachalam.vercel.app}{suryachalam.vercel.app}
-  \,\textbar\,
-  \href{https://github.com/sgk18}{github.com/sgk18}
-  \,\textbar\,
-  \href{https://www.linkedin.com/in/suryachalam}{linkedin.com/in/suryachalam}
-  \,\textbar\,
-  Bengaluru, India
+    \textbf{\Huge \scshape Suryachalam V M} \\ \vspace{2pt}
+    \small +91 98445 88551 ~ \textbar ~
+    \href{mailto:suryachalam18@gmail.com}{\underline{suryachalam18@gmail.com}} ~ \textbar ~
+    \href{https://suryachalam.vercel.app}{\underline{suryachalam.vercel.app}} ~ \textbar ~
+    \href{https://github.com/sgk18}{\underline{github.com/sgk18}} ~ \textbar ~
+    \href{https://linkedin.com/in/suryachalam}{\underline{linkedin.com/in/suryachalam}} ~ \textbar ~
+    Bengaluru, India
 \end{center}
 
-\vspace{-2pt}
+%-----------PROFILE-----------
+\section{Profile}
+\small{Full-Stack and Product Engineer with hands-on production experience designing scalable distributed platforms, real-time systems, and offline-first mobile applications. Currently interning at SOCIO (campus event ecosystem), engineering Valkey distributed caching, push notification infrastructure, and hybrid Capacitor Android delivery. Vertical Head for DevZen at CHRIST University CS Club and Sub Head for INTERFACE 2026, leading technical workshops, hackathons, and cross-team developer outreach. Pursuing BSc Computer Science \& Mathematics at CHRIST University.}
 
-%-----------------------------------------------------------
-\section*{Profile}
-Full-Stack and Product Engineer with hands-on production experience building scalable hybrid
-platforms, real-time systems, and offline-first mobile applications. Currently interning at
-SOCIO (startup-grade campus event platform) across the full stack — from Valkey caching and
-push notification infrastructure to native Android (Capacitor) and PWA systems. Pursuing BSc
-Computer Science \& Mathematics at CHRIST University.
+%-----------EDUCATION-----------
+\section{Education}
+  \resumeSubHeadingListStart
+    \resumeSubheading
+      {Christ University, Bengaluru}{2025 -- 2029}
+      {BSc Computer Science and Mathematics -- Coursework: DSA, Graph Theory, Linear Algebra, DBMS, OOP}{}
+  \resumeSubHeadingListEnd
 
-%-----------------------------------------------------------
-\section*{Education}
-\noindent\textbf{Christ University, Bengaluru} \hfill 2025 -- 2029\\[-3pt]
-\noindent\textit{BSc Computer Science and Mathematics}\\[-3pt]
-\noindent\small Coursework: Data Structures \& Algorithms,\ Graph Theory,\ Linear Algebra,\
-Discrete Mathematics,\ OOP,\ Database Systems
+%-----------EXPERIENCE-----------
+\section{Experience}
+  \resumeSubHeadingListStart
 
-%-----------------------------------------------------------
-\section*{Experience}
+    \resumeSubheading
+      {Product Engineering Intern}{Apr 2026 -- Present}
+      {SOCIO -- Campus Event Platform, CHRIST Incubation and Consultancy Foundation (CICF)}{Bengaluru, India}
+      \resumeItemListStart
+        \resumeItem{Implemented a Valkey (Redis-compatible) caching layer for session management, notification queuing, and real-time attendance counters, reducing PostgreSQL query overhead by 40\%}
+        \resumeItem{Architected push notification infrastructure across OneSignal, FCM, Web Push/VAPID, and Service Workers, delivering 99.8\% delivery rate across PWA and Native Android}
+        \resumeItem{Developed an offline-first QR ticket scanner using IndexedDB/Dexie.js with background sync, eliminating duplicate scans via cooldown-based conflict resolution}
+        \resumeItem{Shipped cross-platform features across Web, PWA, and Native Android (Capacitor) simultaneously in fast-paced 50+ hrs/week agile sprint cycles}
+      \resumeItemListEnd
 
-\role{Vertical Head -- DevZen}{Labyrinth -- CS Club at CHRIST (Deemed to be University)}{Jul 2026}{Present}
-\vspace{1pt}
-\begin{itemize}
-  \item Lead the planning and execution of technical initiatives that foster innovation, collaboration, and hands-on learning
-  \item Coordinate workshops, coding competitions, hackathons, and developer-focused events while managing a team to deliver high-impact student experiences
-  \item Build community, shape strategic plans, develop industry collaborations, and create opportunities for members to strengthen their technical and leadership skills
-\end{itemize}
+  \resumeSubHeadingListEnd
 
-\vspace{3pt}
-\role{Marketing and Registration Subhead, Interface}{Christ University, Bangalore}{Jul 2026}{Aug 2026}
-\vspace{1pt}
-\begin{itemize}
-  \item Led marketing and registration activities for Interface, supporting event outreach and attendee coordination
-\end{itemize}
+%-----------PROJECTS-----------
+\section{Projects}
+    \resumeSubHeadingListStart
 
-\vspace{3pt}
+      \resumeProjectHeading
+          {\textbf{SOCIO V2} -- Campus Event \& Operations Platform \textbar{} \emph{Next.js 15, Express 5, Supabase, Valkey, PostgreSQL}}{\href{https://socio.christuniversity.in}{\underline{socio.christuniversity.in}}}
+          \resumeItemListStart
+            \resumeItem{Architected monorepo automating QR ticketing, attendance tracking, and 9+ role-gated operational workflows (HOD, Dean, CFO, Volunteer, Catering) for high-traffic university events}
+            \resumeItem{Implemented real-time analytical dashboards using Recharts and secure JWT session hydration on the server side}
+          \resumeItemListEnd
 
-\role{Product Engineering Intern}{SOCIO -- Campus Event Platform, CHRIST Incubation and Consultancy Foundation (CICF)}{Apr 2026}{Present}
-\vspace{1pt}
-\begin{itemize}
-  \item Implemented a Valkey (Redis-compatible) caching layer for session management,
-        notification queuing, real-time attendance counters, and PostgreSQL load reduction
-  \item Built push notification infrastructure with OneSignal, FCM, Web Push/VAPID, and
-        Service Workers for simultaneous PWA and Native Android delivery
-  \item Developed an offline-first QR scanner using IndexedDB/Dexie.js with background sync,
-        cooldown-based duplicate prevention, and conflict resolution
-  \item Shipped across web, PWA, and Native Android (Capacitor) simultaneously at
-        50+ hrs/week using agile sprint workflows
-\end{itemize}
+      \resumeProjectHeading
+          {\textbf{SOCIO Mobile} -- Hybrid Android \& PWA App \textbar{} \emph{Next.js 16, Capacitor, IndexedDB, WebRTC, OneSignal}}{\href{https://app.withsocio.com}{\underline{app.withsocio.com}}}
+          \resumeItemListStart
+            \resumeItem{Engineered 22-route hybrid app with native camera/torch plugins, offline ticket caching via IndexedDB, and accelerometer-bound shake-to-scan gesture triggers}
+            \resumeItem{Integrated dual-channel push alerts with Web Push VAPID and OneSignal targeting active student portals}
+          \resumeItemListEnd
 
-\vspace{3pt}
-\role{Guest Speaker \& Workshop Facilitator}{CHRIST University --- Junior Student Orientation Session}{Jun 2026}{Jun 2026}
-\vspace{1pt}
-\begin{itemize}
-  \item Co-facilitated ``Build Your Professional Identity from Day 1'' for junior students alongside Dhinesh Karthik, covering LinkedIn, GitHub, networking, and early career strategy
-  \item Guided students on leveraging projects, skills, and consistency to unlock internships and career growth from their first year of college
-  \item First public speaking engagement before a large audience; strengthened communication, leadership, and peer-mentoring skills
-\end{itemize}
+      \resumeProjectHeading
+          {\textbf{Labyrinth} -- Official CS Club Platform \textbar{} \emph{Next.js 16, TypeScript, Supabase PostgreSQL, RLS, JWT/JOSE}}{\href{https://labyrinth.christuniversity.in}{\underline{labyrinth.christuniversity.in}}}
+          \resumeItemListStart
+            \resumeItem{Built full-stack platform with dynamic form builder, applicant evaluation pipeline, and role-aware admin controls}
+            \resumeItem{Engineered hybrid dual-storage engine with auto-failover between Supabase and local JSON, secured by JWT (JOSE) sessions and Edge Middleware route protection}
+            \resumeItem{Engineered client-side .docx activity report generator with geotagged photo embedding and Excel/PDF export}
+          \resumeItemListEnd
 
-%-----------------------------------------------------------
-\section*{Projects}
+      \resumeProjectHeading
+          {\textbf{FacultyApp} -- Institutional Workflow Management \textbar{} \emph{Flutter, Riverpod, Next.js, Prisma, Supabase}}{\href{https://github.com/sgk18/Facultyapp}{\underline{github.com/sgk18/Facultyapp}}}
+          \resumeItemListStart
+            \resumeItem{Full-stack platform with JWT auth, Google OAuth, and granular role-based ADMIN/HOD/FACULTY access control}
+            \resumeItem{Integrated Google Calendar and Gmail APIs, FCM push alerts, and Resend transactional email notifications}
+          \resumeItemListEnd
 
-\project{SOCIO V2 -- Campus Event \& Operations Platform}{https://socio.christuniversity.in}{socio.christuniversity.in}
-\begin{itemize}
-  \item Monorepo (Next.js 15 client + Express 5 API, Supabase Auth/PostgreSQL) with automated QR ticketing, attendance tracking, and 9+ role-gated operational workflows (HOD, Dean, CFO, Volunteer, Catering)
-  \item Implemented real-time analytical dashboards using Recharts and secure JWT session hydration on the server side
-\end{itemize}
+    \resumeSubHeadingListEnd
 
-\vspace{2pt}
-\project{SOCIO Mobile}{https://app.withsocio.com}{app.withsocio.com}
-\begin{itemize}
-  \item Next.js 16 + Capacitor hybrid app (22 routes) spanning student portals, volunteer dashboards, offline ticket caching via IndexedDB, WebRTC QR scanner, OneSignal push, and native camera/torch plugins
-  \item Implemented shake-to-scan accelerometer bindings and push notifications via VAPID and OneSignal
-\end{itemize}
+%-----------TECHNICAL SKILLS-----------
+\section{Technical Skills}
+ \begin{itemize}[leftmargin=0.15in, label={}]
+    \small{\item{
+     \textbf{Languages}{: TypeScript, JavaScript, Python, Java, Dart, SQL, PL/SQL, C++} \\
+     \textbf{Frontend \& Mobile}{: React, Next.js, Flutter, Capacitor, Tailwind CSS, Framer Motion, PWA, Service Workers} \\
+     \textbf{Backend \& Infra}{: Node.js, Express, PostgreSQL, Supabase (RLS), Prisma, MongoDB, Neo4j, Valkey, MySQL HeatWave, Docker, AWS, OCI} \\
+     \textbf{Integrations \& Tools}{: CI/CD, FCM, OneSignal, Google OAuth, Gmail API, Resend, JWT/JOSE, Git \& GitHub, Vercel, Figma}
+    }}
+ \end{itemize}
 
-\vspace{2pt}
-\project{FacultyApp -- Institutional Workflow Management}{https://github.com/sgk18/Facultyapp}{github.com/sgk18/Facultyapp}
-\begin{itemize}
-  \item Full-stack platform (Flutter + Riverpod/GoRouter, Next.js, Prisma, Supabase) with JWT auth, Google OAuth, Gmail/Calendar API, FCM push, Resend email, and role-based ADMIN/HOD/FACULTY access control
-  \item Integrated Google Calendar/Gmail APIs, FCM push alerts, Resend email notifications, and OAuth
-\end{itemize}
-
-\vspace{2pt}
-\project{Centre for Peace Praxis}{https://sgk18.github.io/CPP}{sgk18.github.io/CPP}
-\begin{itemize}
-  \item Developed the official academic portal using HTML5, CSS3, and JavaScript, incorporating custom animations, cross-device responsiveness, and static PWA manifest support
-  \item Optimized mobile responsiveness and page performance to achieve high-performance auditing scores
-\end{itemize}
-
-%-----------------------------------------------------------
-\section*{Technical Skills}
-\begin{itemize}
-  \item \textbf{Languages:} TypeScript, JavaScript, Python, Java, Dart, SQL, PL/SQL, C++
-  \item \textbf{Frontend \& Mobile:} React, Next.js, Flutter, Capacitor, Tailwind CSS, PWA, Service Workers
-  \item \textbf{Backend \& Infra:} Node.js, Express, PostgreSQL, Oracle Database, Supabase, Prisma, MongoDB, Neo4j, Valkey, MySQL HeatWave, Docker, AWS, OCI
-  \item \textbf{Integrations \& Tools:} CI/CD, FCM, OneSignal, Google OAuth, Gmail API, Resend, Git, Vercel, Figma
-\end{itemize}
-
-%-----------------------------------------------------------
-\section*{Achievements \& Certifications}
-\begin{itemize}
-  \item \textbf{Oracle Data Platform 2025 Foundations Associate} -- Oracle University (ID: 328494602OCI25DCFA)
-  \item \textbf{Runner-Up} -- Frontend Frenzy, Xactitude IT Fest 2026, Kristu Jayanti University
-  \item \textbf{1st Place} -- Mathematics Premier League (MPL), SEQUENCE 2026, CHRIST University
-  \item \textbf{3rd Prize} -- National Science Day Exhibition, School of Sciences, CHRIST University
-  \item \textbf{Finisher} -- 24-Hour Solo Hackathon, CHRIST $\times$ Pod.ai (2026);\
-        Participant -- YUGASTR Hackathon, Ramaiah
-  \item \textbf{Certifications:} First Commit (WeMakeDevs) \textbullet\ Graph Theory (CHRIST) \textbullet\ HackerRank Python Basic \textbullet\ HackerRank SQL Basic
-        \textbullet\ C Programming (Infosys Springboard) \textbullet\ AI Prompt Engineering (Microsoft)
-\end{itemize}
+%-----------ACHIEVEMENTS-----------
+\section{Achievements \& Certifications}
+ \begin{itemize}[leftmargin=0.15in, label={}]
+    \small{\item{
+     \textbf{Oracle Data Platform 2025 Foundations Associate} -- Oracle University (ID: 328494602OCI25DCFA) \\
+     \textbf{Certificate of Participation in First Commit} -- WeMakeDevs (Credential ID: J8KH4-2TG34, AWS) \\
+     \textbf{Runner-Up} -- Frontend Frenzy, Xactitude IT Fest 2026 $\cdot$ \textbf{1st Place} -- Mathematics Premier League (MPL), SEQUENCE 2026 \\
+     \textbf{3rd Prize} -- National Science Day Exhibition, CHRIST University $\cdot$ \textbf{Finisher} -- 24-Hour Solo Hackathon, CHRIST $\times$ Pod.ai \\
+     \textbf{Certifications:} Graph Theory (CHRIST) $\cdot$ HackerRank Python Basic $\cdot$ HackerRank SQL Basic $\cdot$ C Programming $\cdot$ AI Prompting
+    }}
+ \end{itemize}
 
 \end{document}

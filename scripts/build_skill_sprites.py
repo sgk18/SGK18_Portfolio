@@ -1007,6 +1007,126 @@ def draw_aws():
 
     return make_sprite(d)
 
+# ── 34. Supabase ────────────────────────────────────────────
+def draw_supabase():
+    d = {}
+    c_green = hex_to_rgba("#3ECF8E")
+    c_dark = hex_to_rgba("#1F8A5B")
+    c_light = hex_to_rgba("#6EE7B7")
+    c_white = (255, 255, 255, 255)
+
+    for x in range(9, 14): d[(x, 3)] = c_light
+    for x in range(8, 14): d[(x, 4)] = c_green
+    for x in range(7, 13): d[(x, 5)] = c_green
+    for x in range(6, 12): d[(x, 6)] = c_green
+    for x in range(5, 11): d[(x, 7)] = c_green
+    for x in range(4, 10): d[(x, 8)] = c_green
+    for x in range(3, 16): d[(x, 9)] = c_dark
+
+    for x in range(9, 16): d[(x, 10)] = c_green
+    for x in range(8, 15): d[(x, 11)] = c_green
+    for x in range(8, 14): d[(x, 12)] = c_green
+    for x in range(7, 13): d[(x, 13)] = c_green
+    for x in range(7, 11): d[(x, 14)] = c_green
+    for x in range(6, 9):  d[(x, 15)] = c_dark
+    d[(6, 16)] = c_dark
+
+    d[(10, 4)] = c_white
+    d[(9, 5)] = c_white
+    return make_sprite(d)
+
+# ── 35. Prisma ──────────────────────────────────────────────
+def draw_prisma():
+    d = {}
+    c_dark = hex_to_rgba("#1A202C")
+    c_teal = hex_to_rgba("#16A394")
+    c_cyan = hex_to_rgba("#2DD4BF")
+    c_blue = hex_to_rgba("#0EA5E9")
+    c_white = (255, 255, 255, 255)
+
+    for y in range(4, 16):
+        w = int((y - 4) * 0.55)
+        for x in range(10 - w, 11):
+            d[(x, y)] = c_teal if x > 10 - w else c_blue
+
+    for y in range(4, 16):
+        w = int((y - 4) * 0.45)
+        for x in range(11, 11 + w + 1):
+            d[(x, y)] = c_cyan
+
+    d[(10, 4)] = c_white
+    d[(11, 5)] = c_white
+    d[(10, 16)] = c_dark
+    d[(9, 16)] = c_dark
+    return make_sprite(d)
+
+# ── 36. Framer Motion ───────────────────────────────────────
+def draw_framermotion():
+    d = {}
+    c_pink = hex_to_rgba("#FF0055")
+    c_purple = hex_to_rgba("#7928CA")
+    c_blue = hex_to_rgba("#0070F3")
+    c_white = (255, 255, 255, 255)
+
+    for y in range(4, 9):
+        for x in range(10, 16 - (y - 4)):
+            d[(x, y)] = c_blue
+
+    for y in range(8, 13):
+        for x in range(4 + (y - 8), 10):
+            d[(x, y)] = c_purple
+
+    for y in range(12, 17):
+        for x in range(4, 10 - (y - 12)):
+            d[(x, y)] = c_pink
+
+    d[(10, 8)] = c_white
+    return make_sprite(d)
+
+# ── 37. Figma ───────────────────────────────────────────────
+def draw_figma():
+    d = {}
+    c_red = hex_to_rgba("#F24E1E")
+    c_orange = hex_to_rgba("#FF7262")
+    c_purple = hex_to_rgba("#A259FF")
+    c_blue = hex_to_rgba("#1ABCFE")
+    c_green = hex_to_rgba("#0ACF83")
+
+    for y in range(4, 8):
+        for x in range(5, 10): d[(x, y)] = c_red
+    for y in range(4, 8):
+        for x in range(10, 15): d[(x, y)] = c_orange
+    for y in range(8, 12):
+        for x in range(5, 10): d[(x, y)] = c_purple
+    for y in range(8, 12):
+        for x in range(10, 15): d[(x, y)] = c_blue
+    for y in range(12, 16):
+        for x in range(5, 10): d[(x, y)] = c_green
+
+    return make_sprite(d)
+
+# ── 38. JWT ─────────────────────────────────────────────────
+def draw_jwt():
+    d = {}
+    c_pink = hex_to_rgba("#FB015B")
+    c_purple = hex_to_rgba("#D63AFF")
+    c_cyan = hex_to_rgba("#00B9F1")
+    c_dark = hex_to_rgba("#000000")
+    c_white = (255, 255, 255, 255)
+
+    for y in range(4, 16):
+        for x in range(3, 17):
+            d[(x, y)] = c_dark
+
+    for y in range(6, 14):
+        for x in range(5, 8):   d[(x, y)] = c_pink
+        for x in range(9, 12):  d[(x, y)] = c_purple
+        for x in range(13, 16): d[(x, y)] = c_cyan
+
+    d[(8, 10)] = c_white
+    d[(12, 10)] = c_white
+    return make_sprite(d)
+
 # Map all skills
 SKILL_GENERATORS = {
     "typescript": draw_typescript,
@@ -1022,11 +1142,14 @@ SKILL_GENERATORS = {
     "flutter": draw_flutter,
     "capacitor": draw_capacitor,
     "tailwindcss": draw_tailwindcss,
+    "framermotion": draw_framermotion,
     "pwa": draw_pwa,
     "serviceworkers": draw_serviceworkers,
     "nodejs": draw_nodejs,
     "express": draw_express,
     "postgresql": draw_postgresql,
+    "supabase": draw_supabase,
+    "prisma": draw_prisma,
     "oracledb": draw_oracledb,
     "mongodb": draw_mongodb,
     "valkey": draw_valkey,
@@ -1040,8 +1163,10 @@ SKILL_GENERATORS = {
     "onesignal": draw_onesignal,
     "googleoauth": draw_googleoauth,
     "resend": draw_resend,
+    "jwt": draw_jwt,
     "gitgithub": draw_gitgithub,
     "vercel": draw_vercel,
+    "figma": draw_figma,
 }
 
 def main():

@@ -82,6 +82,18 @@ const projects: Project[] = [
     hasCaseStudy: true,
   },
   {
+    id: "labyrinth-portal",
+    title: "Labyrinth — Official CS Club Platform",
+    description:
+      "Full-stack student developer club platform (Next.js 16, Supabase PostgreSQL with RLS) with dynamic form builder, applicant evaluation pipeline, auto-failover dual-storage engine, JWT (JOSE) session security, and client-side .docx report generator.",
+    image: "/labyrinth.jpg",
+    imageFit: "cover",
+    tags: ["Next.js 16", "TypeScript", "Supabase", "PostgreSQL", "RLS", "JWT/JOSE"],
+    github: "https://github.com/sgk18/labyrinth",
+    live: "https://labyrinth.christuniversity.in",
+    featured: true,
+  },
+  {
     id: "notenova",
     title: "NoteNova",
     description:
