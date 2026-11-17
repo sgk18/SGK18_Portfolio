@@ -4,28 +4,27 @@ import { useMemo } from "react";
 import { motion } from "framer-motion";
 import { Github, Linkedin, Mail, Download, ArrowRight } from "lucide-react";
 import dynamic from "next/dynamic";
+import { smoothScrollTo } from "@/lib/utils/smoothScroll";
 
 const Hyperspeed = dynamic(() => import("../ui/Hyperspeed"), {
   ssr: false,
 });
-import { smoothScrollTo } from "@/lib/utils/smoothScroll";
 
 const fadeUp = {
-  hidden: { opacity: 0, y: 24 },
+  hidden: { opacity: 0, y: 18 },
   show: (i: number) => ({
     opacity: 1,
     y: 0,
     transition: {
-      delay: i * 0.1,
-      duration: 0.6,
+      delay: i * 0.08,
+      duration: 0.45,
       ease: [0.22, 1, 0.36, 1] as [number, number, number, number],
     },
   }),
 };
 
-
 const hyperspeedOptions = {
-  distortion: 'turbulentDistortion',
+  distortion: "turbulentDistortion",
   length: 400,
   roadWidth: 10,
   islandWidth: 2,
@@ -66,28 +65,28 @@ const focusAreas = [
   "Database Architecture",
   "Push Infrastructure",
   "Product Engineering",
-];
+] as const;
 
 const socials = [
   {
     label: "GitHub",
     href: "https://github.com/sgk18",
-    icon: <Github size={16} />,
+    icon: <Github size={15} aria-hidden="true" />,
     id: "hero-github-link",
   },
   {
     label: "LinkedIn",
     href: "https://linkedin.com/in/suryachalam",
-    icon: <Linkedin size={16} />,
+    icon: <Linkedin size={15} aria-hidden="true" />,
     id: "hero-linkedin-link",
   },
   {
     label: "Email",
     href: "mailto:suryachalam18@gmail.com",
-    icon: <Mail size={16} />,
+    icon: <Mail size={15} aria-hidden="true" />,
     id: "hero-email-link",
   },
-];
+] as const;
 
 export default function Hero() {
   const effectOptions = useMemo(() => hyperspeedOptions, []);
@@ -95,15 +94,27 @@ export default function Hero() {
   return (
     <section
       id="hero"
-      className="relative min-h-screen flex flex-col items-center justify-center px-6 overflow-hidden bg-white border-b-2 border-[#0A0A0A] pt-16"
+      className="relative min-h-[calc(100vh-4rem)] flex flex-col items-center justify-center px-6 py-20 overflow-hidden bg-white border-b-2 border-[#0A0A0A] mt-16"
     >
       {/* Hyperspeed WebGL background */}
-      <div className="absolute inset-0">
+      <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
         <Hyperspeed effectOptions={effectOptions} />
       </div>
 
-      {/* Light overlay for readability in Neobrutalism light mode */}
-      <div className="absolute inset-0 bg-white/75 pointer-events-none" />
+      {/* Crisp light veil + subtle architectural grid for razor-sharp contrast */}
+      <div
+        className="absolute inset-0 bg-white/85 pointer-events-none"
+        aria-hidden="true"
+      />
+      <div
+        className="absolute inset-0 pointer-events-none opacity-45"
+        style={{
+          backgroundImage:
+            "linear-gradient(to right, rgba(10,10,10,0.06) 1px, transparent 1px), linear-gradient(to bottom, rgba(10,10,10,0.06) 1px, transparent 1px)",
+          backgroundSize: "64px 64px",
+        }}
+        aria-hidden="true"
+      />
 
       <div className="relative z-10 max-w-4xl mx-auto text-center">
         {/* Status badge */}
@@ -112,7 +123,7 @@ export default function Hero() {
           initial="hidden"
           animate="show"
           custom={0}
-          className="inline-flex items-center gap-2.5 px-3 py-1 border-2 border-[#0A0A0A] bg-[#FFF5F5] font-mono text-xs font-bold text-[#0A0A0A] shadow-[3px_3px_0px_#0A0A0A] mb-10 rounded-none"
+          className="inline-flex items-center gap-2.5 px-3.5 py-1.5 border-2 border-[#0A0A0A] bg-white font-mono text-xs font-bold uppercase tracking-wider text-[#0A0A0A] shadow-[3px_3px_0px_#0A0A0A] mb-8 rounded-none"
         >
           <span className="w-2.5 h-2.5 bg-emerald-500 border border-[#0A0A0A] shrink-0" />
           Product Engineering Intern @ SOCIO · Bengaluru, India
@@ -124,7 +135,7 @@ export default function Hero() {
           initial="hidden"
           animate="show"
           custom={1}
-          className="text-4xl sm:text-5xl md:text-7xl font-black uppercase tracking-tighter text-[#0A0A0A] mb-5 leading-[1.08]"
+          className="text-4xl sm:text-6xl md:text-7xl font-black uppercase tracking-tighter text-[#0A0A0A] mb-4 leading-[1.02]"
         >
           Suryachalam <span className="text-[#E3000F] whitespace-nowrap">V M</span>
         </motion.h1>
@@ -135,9 +146,9 @@ export default function Hero() {
           initial="hidden"
           animate="show"
           custom={2}
-          className="text-lg md:text-xl font-bold uppercase tracking-wide text-[#E3000F] mb-5"
+          className="text-base sm:text-xl md:text-2xl font-black uppercase tracking-tight text-[#0A0A0A] mb-6"
         >
-          Product Engineer · Full-Stack · Systems Builder
+          Full-Stack &amp; Product Engineer <span className="text-[#E3000F]">·</span> Systems Builder
         </motion.p>
 
         {/* Impact statement */}
@@ -146,14 +157,15 @@ export default function Hero() {
           initial="hidden"
           animate="show"
           custom={3}
-          className="text-base md:text-lg text-[#0A0A0A] font-medium max-w-2xl mx-auto leading-relaxed mb-10"
+          className="text-base md:text-lg text-[#262626] font-medium max-w-2xl mx-auto leading-relaxed mb-8"
         >
-          I build production systems — not tutorial projects. Offline-first mobile, caching layers,
-          push infrastructure, and role-based platforms that hold up under load.
-          Currently shipping real features for real users at{" "}
-          <span className="font-bold underline decoration-[#E3000F] decoration-2">SOCIO</span>.
+          Building scalable web platforms, offline-first mobile applications, and resilient
+          real-time infrastructure. Currently shipping production features at{" "}
+          <span className="font-bold text-[#0A0A0A] underline decoration-[#E3000F] decoration-2 underline-offset-4">
+            SOCIO
+          </span>
+          .
         </motion.p>
-
 
         {/* Focus Areas */}
         <motion.div
@@ -161,12 +173,12 @@ export default function Hero() {
           initial="hidden"
           animate="show"
           custom={4}
-          className="flex flex-wrap justify-center gap-2.5 mb-10"
+          className="flex flex-wrap justify-center gap-2 mb-9"
         >
           {focusAreas.map((area) => (
             <span
               key={area}
-              className="border-2 border-[#0A0A0A] bg-white text-[#0A0A0A] px-3 py-1.5 font-mono text-xs font-bold shadow-[3px_3px_0px_#0A0A0A] rounded-none cursor-default"
+              className="border-2 border-[#0A0A0A] bg-white text-[#0A0A0A] px-2.5 py-1 font-mono text-[11px] font-bold uppercase tracking-wide shadow-[2px_2px_0px_#0A0A0A] rounded-none cursor-default"
             >
               {area}
             </span>
@@ -179,36 +191,38 @@ export default function Hero() {
           initial="hidden"
           animate="show"
           custom={5}
-          className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-10"
+          className="flex flex-col sm:flex-row gap-3.5 justify-center items-center mb-9"
         >
           <button
+            type="button"
             id="hero-view-work-btn"
             onClick={() => smoothScrollTo("#projects")}
-            className="group flex items-center gap-2 bg-[#E3000F] text-white border-2 border-[#0A0A0A] font-bold uppercase px-6 py-3.5 shadow-[4px_4px_0px_#0A0A0A] hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[7px_7px_0px_#0A0A0A] rounded-none transition-all cursor-pointer"
+            className="group flex items-center gap-2 bg-[#E3000F] text-white border-2 border-[#0A0A0A] text-sm font-bold uppercase tracking-wider px-6 py-3.5 shadow-[4px_4px_0px_#0A0A0A] hover:bg-[#FF1A1A] hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[6px_6px_0px_#0A0A0A] rounded-none transition-all cursor-pointer"
           >
-            View Projects & Case Studies
+            <span>View Projects</span>
             <ArrowRight size={15} className="group-hover:translate-x-0.5 transition-transform" />
           </button>
-          
+
+          <button
+            type="button"
+            id="hero-contact-btn"
+            onClick={() => smoothScrollTo("#contact")}
+            className="group flex items-center gap-2 bg-white text-[#0A0A0A] border-2 border-[#0A0A0A] text-sm font-bold uppercase tracking-wider px-6 py-3.5 shadow-[4px_4px_0px_#0A0A0A] hover:bg-[#FFF5F5] hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[6px_6px_0px_#0A0A0A] rounded-none transition-all cursor-pointer"
+          >
+            <Mail size={15} />
+            <span>Contact Me</span>
+          </button>
+
           <a
             id="hero-resume-download-btn"
             href="/resume.pdf"
             download="Suryachalam_VM_Resume.pdf"
-            onClick={() => fetch('/api/analytics/download', { method: 'POST' }).catch(() => {})}
-            className="group flex items-center gap-2 bg-white text-[#0A0A0A] border-2 border-[#0A0A0A] font-bold uppercase px-6 py-3.5 shadow-[4px_4px_0px_#0A0A0A] hover:bg-[#FFF5F5] hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[7px_7px_0px_#0A0A0A] rounded-none transition-all"
+            onClick={() => fetch("/api/analytics/download", { method: "POST" }).catch(() => {})}
+            className="group flex items-center gap-2 bg-white text-[#0A0A0A] border-2 border-[#0A0A0A] text-sm font-bold uppercase tracking-wider px-5 py-3.5 shadow-[4px_4px_0px_#0A0A0A] hover:bg-[#FFF5F5] hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[6px_6px_0px_#0A0A0A] rounded-none transition-all"
           >
             <Download size={15} />
-            Download Resume
+            <span>Resume</span>
           </a>
-
-          <button
-            id="hero-contact-btn"
-            onClick={() => smoothScrollTo("#contact")}
-            className="group flex items-center gap-2 bg-white text-[#0A0A0A] border-2 border-[#0A0A0A] font-bold uppercase px-6 py-3.5 shadow-[4px_4px_0px_#0A0A0A] hover:bg-[#FFF5F5] hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[7px_7px_0px_#0A0A0A] rounded-none transition-all cursor-pointer"
-          >
-            <Mail size={15} />
-            Get in Touch
-          </button>
         </motion.div>
 
         {/* Social links */}
@@ -217,7 +231,7 @@ export default function Hero() {
           initial="hidden"
           animate="show"
           custom={6}
-          className="flex items-center justify-center gap-4"
+          className="flex items-center justify-center gap-3"
         >
           {socials.map((s) => (
             <a
@@ -227,7 +241,7 @@ export default function Hero() {
               target={s.href.startsWith("mailto") ? undefined : "_blank"}
               rel="noopener noreferrer"
               aria-label={s.label}
-              className="flex items-center gap-2 border-2 border-[#0A0A0A] p-2 bg-white text-[#0A0A0A] shadow-[3px_3px_0px_#0A0A0A] hover:bg-[#E3000F] hover:text-white hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[5px_5px_0px_#0A0A0A] transition-all rounded-none font-bold text-xs"
+              className="flex items-center gap-2 border-2 border-[#0A0A0A] px-3 py-2 bg-white text-[#0A0A0A] shadow-[3px_3px_0px_#0A0A0A] hover:bg-[#E3000F] hover:text-white hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[5px_5px_0px_#0A0A0A] transition-all rounded-none font-bold text-xs uppercase tracking-wider"
             >
               {s.icon}
               <span>{s.label}</span>

@@ -108,7 +108,7 @@ export default function CaseStudyModal({ study, onClose }: Props) {
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", damping: 30, stiffness: 280 }}
-            className="fixed right-0 top-0 bottom-0 z-[70] w-full max-w-3xl flex flex-col bg-white border-l-4 border-l-[#0A0A0A] shadow-[-8px_0px_0px_rgba(10,10,10,0.15)]"
+            className="fixed right-0 top-0 bottom-0 z-[70] w-full max-w-3xl flex flex-col bg-white border-l-2 border-l-[#0A0A0A] shadow-[-8px_0px_0px_rgba(10,10,10,0.15)]"
           >
             {/* Header */}
             <div className="flex items-start justify-between gap-4 p-6 border-b-2 border-b-[#0A0A0A] shrink-0 bg-[#FFF5F5]">
