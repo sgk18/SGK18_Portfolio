@@ -5,6 +5,7 @@ import Skills from "@/components/sections/Skills";
 import Experience from "@/components/sections/Experience";
 import VolunteerLeadership from "@/components/sections/VolunteerLeadership";
 import Projects from "@/components/sections/Projects";
+import Publications from "@/components/sections/Publications";
 import GitHubStats from "@/components/sections/GitHubStats";
 import Certifications from "@/components/sections/Certifications";
 import Philosophy from "@/components/sections/Philosophy";
@@ -24,6 +25,7 @@ export default function Home() {
       <Experience />
       <VolunteerLeadership />
       <Projects />
+      <Publications />
       <GitHubStats />
       <Certifications />
       <Philosophy />

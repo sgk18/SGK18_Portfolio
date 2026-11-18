@@ -12,6 +12,7 @@ const stats = [
 ];
 
 const achievements = [
+  "Co-author & Presenter — ICSDI 2026, Gulf University, Bahrain (Taylor & Francis proceedings)",
   "Runner-Up — Frontend Frenzy, Xactitude IT Fest 2026",
   "1st Place — Mathematics Premier League (MPL), SEQUENCE 2026",
   "Participant — Madhava Mathematics Competition 2026",

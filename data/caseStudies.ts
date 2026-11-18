@@ -737,4 +737,99 @@ export const caseStudies: Record<string, CaseStudy> = {
     ],
     tags: ['Flutter', 'Riverpod', 'GoRouter', 'Next.js', 'Supabase', 'Prisma', 'Google APIs', 'FCM'],
   },
+  'institutional-intelligence-platform': {
+    id: 'institutional-intelligence-platform',
+    title: 'A Unified AI-Driven Institutional Intelligence Platform for Accreditation, Ranking, and ESG Reporting in Higher Education',
+    tagline:
+      'ICSDI 2026 (Gulf University, Bahrain) · Accepted & Presented · Proceedings with Taylor & Francis to follow',
+    period: 'Nov 2026 · ICSDI 2026',
+    role: 'Co-author & Presenter · CHRIST (Deemed to be University), Bengaluru',
+    problem:
+      'Higher education institutions report to NAAC, NIRF, and ESG frameworks as though they share one dataset. In reality, the same institutional data is requested under differing definitions, scopes, and reporting periods — so one entry rarely satisfies all frameworks (for example, NAAC enrolment excludes Ph.D. students while NIRF includes them).',
+    motivation:
+      'We mapped NAAC 2024 data validation items line by line against NIRF 2025 indicators and framed the platform as a design science study. The goal is to eliminate redundant data collection by storing each institutional fact once with its supporting evidence, then deriving framework-specific outputs via versioned rules.',
+    solution:
+      'A four-layer architecture (Acquire, Validate, Store, Derive) featuring seven acquisition channels, a five-level validation pipeline, confidence labels (verified, needs review, unverified), versioned derivation rules per framework, and a mandatory named human approval step before anything is reported. Quantitative mapping shows 15 of 57 NAAC items share an underlying data element with NIRF (26%), and 10 of 17 NIRF sub-parameters have a NAAC counterpart. An effort-sensitivity model projects ~58% less collection work at full overlap across three frameworks, falling to zero at 12.5% overlap (assuming a 0.25 validation overhead).',
+    architecture: `graph TD
+  subgraph L1[Layer 1: Acquire - 7 Channels]
+    ERP[Institutional ERP / SIS]
+    Forms[Departmental Forms]
+    Docs[Evidence Documents]
+  end
+
+  subgraph L2[Layer 2: Validate - 5 Levels]
+    Schema[Schema & Completeness]
+    Cross[Cross-Source & Consistency]
+    Conf[Confidence Labels: Verified / Needs Review / Unverified]
+  end
+
+  subgraph L3[Layer 3: Store - Single Source of Truth]
+    Facts[(Canonical Fact Store + Evidence)]
+  end
+
+  subgraph L4[Layer 4: Derive & Approve]
+    Rules[Versioned Derivation Rules]
+    Human[Named Human Approver]
+    NAAC[NAAC 2024 Output]
+    NIRF[NIRF 2025 Output]
+    ESG[ESG / Sustainability Output]
+  end
+
+  ERP --> Schema
+  Forms --> Schema
+  Docs --> Schema
+  Schema --> Cross --> Conf --> Facts
+  Facts --> Rules --> Human
+  Human --> NAAC
+  Human --> NIRF
+  Human --> ESG`,
+    databaseDesign: `erDiagram
+  INSTITUTIONAL_FACT ||--o{ EVIDENCE_ITEM : "backed by"
+  INSTITUTIONAL_FACT ||--o{ VALIDATION_RECORD : "checked by"
+  INSTITUTIONAL_FACT }o--o{ DERIVATION_RULE : "inputs"
+  DERIVATION_RULE ||--o{ FRAMEWORK_REPORT : "computes"
+  APPROVER ||--o{ FRAMEWORK_REPORT : "signs off"`,
+    technologiesUsed: [
+      {
+        name: 'Four-Layer Data Architecture',
+        why: 'Separates acquisition (7 channels), validation (5 levels), canonical fact storage with evidence, and versioned rule-based derivation so raw facts never drift across frameworks.',
+      },
+      {
+        name: 'Five-Level Validation Pipeline',
+        why: 'Assigns explicit confidence labels (verified, needs review, unverified) before facts enter the canonical store, preventing unverified estimates from silently propagating into reports.',
+      },
+      {
+        name: 'Versioned Derivation Rules',
+        why: 'Encodes framework-specific definitions (e.g., NAAC vs. NIRF enrolment scope) as versioned rules so historical and current submissions remain reproducible.',
+      },
+      {
+        name: 'Effort-Sensitivity Model',
+        why: 'Models collection effort reduction across three frameworks (~58% reduction at full overlap, breaking even at 12.5% overlap with 0.25 assumed validation overhead).',
+      },
+    ],
+    technicalChallenges: [
+      {
+        challenge: 'Semantic mismatch across NAAC 2024 and NIRF 2025 indicators',
+        resolution:
+          'Conducted a line-by-line indicator mapping from public documents, discovering that only 15 of 57 NAAC items share an underlying data element with NIRF (26%) and 10 of 17 NIRF sub-parameters have a NAAC counterpart — requiring explicit derivation rules rather than naive 1:1 field reuse.',
+      },
+      {
+        challenge: 'Double-blind peer review ("Accepted with Changes")',
+        resolution:
+          'Revised the manuscript through double-blind peer review: rewrote references, added the full indicator mapping table, a risk register, a stakeholder analysis, and a structured comparison against existing systems.',
+      },
+    ],
+    lessonsLearned: [
+      'A design paper without an empirical indicator mapping overstates overlap — mapping NAAC 2024 vs. NIRF 2025 revealed that shared terminology often hides incompatible definitions.',
+      'Human-in-the-loop accountability (named approver sign-off) is essential for institutional compliance when AI or automated derivation rules are involved.',
+    ],
+    futureImprovements: [
+      'This is currently a design paper not yet built or tested with live users; the next step is a production pilot at one institution.',
+      'Validate the 0.25 validation-overhead assumption empirically during the institutional pilot.',
+    ],
+    links: [
+      { label: 'GitHub', url: 'https://github.com/sgk18' },
+    ],
+    tags: ['Research', 'NAAC', 'NIRF', 'ESG', 'Higher Education', 'Data Architecture', 'AI'],
+  },
 };

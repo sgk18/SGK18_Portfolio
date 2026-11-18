@@ -2,7 +2,8 @@ export type ProjectCategory =
   | "Full-Stack"
   | "Mobile & PWA"
   | "Frontend"
-  | "Systems & Graphics";
+  | "Systems & Graphics"
+  | "Research";
 
 export interface Project {
   readonly id: string;
@@ -21,6 +22,19 @@ export interface Project {
 }
 
 export const projects: readonly Project[] = [
+  {
+    id: "institutional-intelligence-platform",
+    title: "Unified Institutional Intelligence Platform (ICSDI 2026)",
+    description:
+      "Colleges report to several accreditation and ranking frameworks as if it were one dataset. We mapped NAAC's 2024 data validation items against NIRF 2025 and found that only 15 of 57 share an underlying data element, and that definitions often differ (e.g., NAAC enrolment excludes Ph.D. students while NIRF includes them). Proposes a four-layer platform that collects each fact once, validates it in five levels, and derives each framework's figure by a versioned rule with named human approval.",
+    category: "Research",
+    previewLabel: "ICSDI 2026 · TAYLOR & FRANCIS",
+    tags: ["Research", "NAAC", "NIRF", "ESG", "Higher Education", "Data Architecture", "AI"],
+    github: "https://github.com/sgk18",
+    live: "#",
+    featured: true,
+    hasCaseStudy: true,
+  },
   {
     id: "atlas-portfolio",
     title: "Atlas — Personal Portfolio & Career OS",

@@ -17,6 +17,7 @@ const CATEGORIES: readonly ("All" | ProjectCategory)[] = [
   "Mobile & PWA",
   "Frontend",
   "Systems & Graphics",
+  "Research",
 ];
 
 function trackProjectView(projectId: string) {
