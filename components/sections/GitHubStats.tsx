@@ -1,9 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
-import { useInView } from "framer-motion";
-import { useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import {
   Github,
@@ -17,6 +14,8 @@ import {
 } from "lucide-react";
 import type { GitHubData } from "@/app/api/github/route";
 import ScrollReveal from "../ui/ScrollReveal";
+import { gsap, ScrollTrigger, useGSAP, NB_EASE } from "@/lib/utils/motion";
+import { useCountUpTimer } from "@/lib/hooks/useCountUpTimer";
 
 // ─── Language colour map ─────────────────────────────────────────────────────
 const LANG_COLORS: Record<string, string> = {
@@ -56,15 +55,25 @@ function MetricCard({
   label,
   value,
   icon,
+  active,
 }: {
   label: string;
-  value: number | string;
+  value: number;
   icon: React.ReactNode;
+  active: boolean;
 }) {
+  const valueRef = useCountUpTimer({
+    target: value,
+    active,
+    duration: 950,
+  });
+
   return (
     <div className="border-2 border-[#0A0A0A] bg-white p-5 flex flex-col gap-2 shadow-[3px_3px_0px_#0A0A0A] hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[5px_5px_0px_#0A0A0A] transition-all rounded-none">
       <div className="text-[#E3000F]">{icon}</div>
-      <p className="text-2xl font-black text-[#0A0A0A] font-mono">{value.toLocaleString()}</p>
+      <p ref={valueRef} className="text-2xl font-black text-[#0A0A0A] font-mono">
+        {value.toLocaleString()}
+      </p>
       <p className="text-xs uppercase font-bold text-[#666666] tracking-wider">{label}</p>
     </div>
   );
@@ -82,11 +91,13 @@ function SkeletonCard() {
 
 // ─── Main component ───────────────────────────────────────────────────────────
 export default function GitHubStats() {
-  const ref = useRef(null);
+  const metricsRef = useRef<HTMLDivElement>(null);
+  const langBarRef = useRef<HTMLDivElement>(null);
 
   const [data, setData] = useState<GitHubData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [metricsActive, setMetricsActive] = useState(false);
 
   useEffect(() => {
     fetch("/api/github")
@@ -98,6 +109,48 @@ export default function GitHubStats() {
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
   }, []);
+
+  useGSAP(
+    () => {
+      if (!data) return;
+
+      const triggers: ScrollTrigger[] = [];
+
+      if (metricsRef.current) {
+        triggers.push(
+          ScrollTrigger.create({
+            trigger: metricsRef.current,
+            start: "top 85%",
+            once: true,
+            onEnter: () => setMetricsActive(true),
+          })
+        );
+      }
+
+      const mm = gsap.matchMedia();
+      mm.add("(prefers-reduced-motion: no-preference)", () => {
+        if (langBarRef.current) {
+          gsap.from(langBarRef.current, {
+            scaleX: 0,
+            duration: 0.7,
+            ease: NB_EASE,
+            transformOrigin: "left center",
+            clearProps: "transform",
+            scrollTrigger: {
+              trigger: langBarRef.current,
+              start: "top 88%",
+              once: true,
+            },
+          });
+        }
+      });
+
+      return () => {
+        triggers.forEach((t) => t.kill());
+      };
+    },
+    { dependencies: [data] }
+  );
 
   return (
     <section id="github" className="section-padding bg-white border-b-2 border-[#0A0A0A]">
@@ -169,15 +222,15 @@ export default function GitHubStats() {
               </div>
 
               {/* Metric cards */}
-              <div className="lg:col-span-8 grid sm:grid-cols-2 md:grid-cols-4 gap-4 content-start">
+              <div ref={metricsRef} className="lg:col-span-8 grid sm:grid-cols-2 md:grid-cols-4 gap-4 content-start">
                 {loading ? (
                   Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)
                 ) : data ? (
                   <>
-                    <MetricCard label="Repositories" value={data.publicRepos} icon={<BookOpen size={18} />} />
-                    <MetricCard label="Stars earned" value={data.totalStars} icon={<Star size={18} />} />
-                    <MetricCard label="Forks" value={data.totalForks} icon={<GitFork size={18} />} />
-                    <MetricCard label="Followers" value={data.followers} icon={<Users size={18} />} />
+                    <MetricCard label="Repositories" value={data.publicRepos} icon={<BookOpen size={18} />} active={metricsActive} />
+                    <MetricCard label="Stars earned" value={data.totalStars} icon={<Star size={18} />} active={metricsActive} />
+                    <MetricCard label="Forks" value={data.totalForks} icon={<GitFork size={18} />} active={metricsActive} />
+                    <MetricCard label="Followers" value={data.followers} icon={<Users size={18} />} active={metricsActive} />
                   </>
                 ) : null}
               </div>
@@ -203,7 +256,7 @@ export default function GitHubStats() {
               ) : data ? (
                 <>
                   {/* Stacked bar */}
-                  <div className="flex h-4 border-2 border-[#0A0A0A] overflow-hidden mb-6 gap-0.5 rounded-none">
+                  <div ref={langBarRef} className="flex h-4 border-2 border-[#0A0A0A] overflow-hidden mb-6 gap-0.5 rounded-none">
                     {data.languageBreakdown.map((lang) => (
                       <div
                         key={lang.name}

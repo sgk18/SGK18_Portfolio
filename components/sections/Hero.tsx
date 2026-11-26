@@ -1,10 +1,12 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { Github, Linkedin, Mail, Download, ArrowRight } from "lucide-react";
 import dynamic from "next/dynamic";
+import { createTimer, type Timer } from "animejs";
 import { smoothScrollTo } from "@/lib/utils/smoothScroll";
+import { prefersReducedMotion } from "@/lib/utils/motion";
 
 const Hyperspeed = dynamic(() => import("../ui/Hyperspeed"), {
   ssr: false,
@@ -90,9 +92,94 @@ const socials = [
 
 export default function Hero() {
   const effectOptions = useMemo(() => hyperspeedOptions, []);
+  const [activeFocusIndex, setActiveFocusIndex] = useState(0);
+  const sectionRef = useRef<HTMLElement>(null);
+  const progressBarRef = useRef<HTMLSpanElement>(null);
+  const timerRef = useRef<Timer | null>(null);
+  const isHoveredRef = useRef(false);
+  const isVisibleRef = useRef(true);
+
+  useEffect(() => {
+    if (prefersReducedMotion()) return;
+
+    const timer = createTimer({
+      duration: 2800,
+      loop: true,
+      autoplay: false,
+      onUpdate: (self) => {
+        if (progressBarRef.current) {
+          progressBarRef.current.style.transform = `scaleX(${self.iterationProgress})`;
+        }
+      },
+      onLoop: () => {
+        setActiveFocusIndex((prev) => (prev + 1) % focusAreas.length);
+      },
+    });
+
+    timerRef.current = timer;
+
+    const syncPlayback = () => {
+      if (!timerRef.current) return;
+      const shouldRun =
+        isVisibleRef.current &&
+        !isHoveredRef.current &&
+        document.visibilityState === "visible";
+      if (shouldRun) {
+        timerRef.current.play();
+      } else {
+        timerRef.current.pause();
+      }
+    };
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        isVisibleRef.current = entry.isIntersecting;
+        syncPlayback();
+      },
+      { threshold: 0.15 }
+    );
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
+
+    document.addEventListener("visibilitychange", syncPlayback);
+    syncPlayback();
+
+    return () => {
+      observer.disconnect();
+      document.removeEventListener("visibilitychange", syncPlayback);
+      timer.cancel();
+      timerRef.current = null;
+    };
+  }, []);
+
+  const handleFocusPause = () => {
+    isHoveredRef.current = true;
+    timerRef.current?.pause();
+  };
+
+  const handleFocusResume = () => {
+    isHoveredRef.current = false;
+    if (isVisibleRef.current && document.visibilityState === "visible") {
+      timerRef.current?.play();
+    }
+  };
+
+  const handleFocusSelect = (idx: number) => {
+    setActiveFocusIndex(idx);
+    if (progressBarRef.current) {
+      progressBarRef.current.style.transform = "scaleX(0)";
+    }
+    timerRef.current?.restart();
+    if (isHoveredRef.current) {
+      timerRef.current?.pause();
+    }
+  };
 
   return (
     <section
+      ref={sectionRef}
       id="hero"
       className="relative min-h-[calc(100vh-4rem)] flex flex-col items-center justify-center px-6 py-20 overflow-hidden bg-white border-b-2 border-[#0A0A0A] mt-16"
     >
@@ -173,16 +260,37 @@ export default function Hero() {
           initial="hidden"
           animate="show"
           custom={4}
+          onMouseEnter={handleFocusPause}
+          onMouseLeave={handleFocusResume}
           className="flex flex-wrap justify-center gap-2 mb-9"
         >
-          {focusAreas.map((area) => (
-            <span
-              key={area}
-              className="border-2 border-[#0A0A0A] bg-white text-[#0A0A0A] px-2.5 py-1 font-mono text-[11px] font-bold uppercase tracking-wide shadow-[2px_2px_0px_#0A0A0A] rounded-none cursor-default"
-            >
-              {area}
-            </span>
-          ))}
+          {focusAreas.map((area, idx) => {
+            const isActive = idx === activeFocusIndex;
+            return (
+              <button
+                key={area}
+                type="button"
+                aria-pressed={isActive}
+                onFocus={handleFocusPause}
+                onBlur={handleFocusResume}
+                onClick={() => handleFocusSelect(idx)}
+                className={`relative overflow-hidden border-2 border-[#0A0A0A] px-2.5 py-1 font-mono text-[11px] font-bold uppercase tracking-wide rounded-none transition-colors duration-200 cursor-pointer ${
+                  isActive
+                    ? "bg-[#0A0A0A] text-white shadow-[3px_3px_0px_#E3000F]"
+                    : "bg-white text-[#0A0A0A] shadow-[2px_2px_0px_#0A0A0A] hover:bg-[#FFF5F5]"
+                }`}
+              >
+                <span>{area}</span>
+                {isActive && (
+                  <span
+                    ref={progressBarRef}
+                    aria-hidden="true"
+                    className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-[#E3000F] origin-left scale-x-0 pointer-events-none"
+                  />
+                )}
+              </button>
+            );
+          })}
         </motion.div>
 
         {/* CTAs */}

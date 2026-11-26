@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, ExternalLink, Github, ChevronRight } from "lucide-react";
 import { CaseStudy } from "@/data/caseStudies";
+import { stopLenis, startLenis } from "@/lib/utils/smoothScroll";
 
 interface Props {
   study: CaseStudy | null;
@@ -76,14 +77,19 @@ export default function CaseStudyModal({ study, onClose }: Props) {
     return () => window.removeEventListener("keydown", handler);
   }, [onClose]);
 
-  // Lock body scroll
+  // Lock body scroll & pause Lenis while modal is open
   useEffect(() => {
     if (study) {
       document.body.style.overflow = "hidden";
+      stopLenis();
     } else {
       document.body.style.overflow = "";
+      startLenis();
     }
-    return () => { document.body.style.overflow = ""; };
+    return () => {
+      document.body.style.overflow = "";
+      startLenis();
+    };
   }, [study]);
 
   return (

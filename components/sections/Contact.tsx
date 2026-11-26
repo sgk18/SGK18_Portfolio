@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useRef, FormEvent } from "react";
-import { motion } from "framer-motion";
-import { useInView } from "framer-motion";
-import { Send, Mail, Phone, Github, Linkedin, CheckCircle, AlertCircle } from "lucide-react";
+import { useState, useRef, useEffect, FormEvent } from "react";
+import { Send, Mail, Phone, Github, Linkedin, AlertCircle } from "lucide-react";
+import { createTimer, type Timer } from "animejs";
 import ScrollReveal from "../ui/ScrollReveal";
+import { prefersReducedMotion } from "@/lib/utils/motion";
 
 type FormState = {
   name: string;
@@ -19,10 +19,9 @@ type FormState = {
 
 type SubmitStatus = "idle" | "loading" | "success" | "error";
 
-export default function Contact() {
-  const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-80px" });
+const RESET_DELAY_MS = 5000;
 
+export default function Contact() {
   const [form, setForm] = useState<FormState>({
     name: "",
     email: "",
@@ -36,6 +35,44 @@ export default function Contact() {
   const [status, setStatus] = useState<SubmitStatus>("idle");
   const [errorMsg, setErrorMsg] = useState("");
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<keyof FormState, string>>>({});
+  const resetBarRef = useRef<HTMLDivElement>(null);
+  const resetSecondsRef = useRef<HTMLSpanElement>(null);
+  const resetTimerRef = useRef<Timer | null>(null);
+
+  useEffect(() => {
+    if (status !== "success") return;
+
+    if (prefersReducedMotion()) {
+      return;
+    }
+
+    const timer = createTimer({
+      duration: RESET_DELAY_MS,
+      autoplay: true,
+      onUpdate: (self) => {
+        if (resetBarRef.current) {
+          resetBarRef.current.style.transform = `scaleX(${Math.max(0, 1 - self.progress)})`;
+        }
+        if (resetSecondsRef.current) {
+          const remaining = Math.max(
+            0,
+            Math.ceil((RESET_DELAY_MS - self.currentTime) / 1000)
+          );
+          resetSecondsRef.current.textContent = `Auto-reset in ${remaining}s`;
+        }
+      },
+      onComplete: () => {
+        setStatus("idle");
+      },
+    });
+
+    resetTimerRef.current = timer;
+
+    return () => {
+      timer.cancel();
+      resetTimerRef.current = null;
+    };
+  }, [status]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -175,7 +212,22 @@ export default function Contact() {
             {/* Right: form */}
             <div className="contact-form">
               {status === "success" ? (
-                <div className="border-2 border-[#0A0A0A] bg-white p-8 sm:p-10 flex flex-col items-center text-center gap-4 shadow-[6px_6px_0px_#0A0A0A] rounded-none animate-in fade-in duration-200">
+                <div
+                  onMouseEnter={() => resetTimerRef.current?.pause()}
+                  onMouseLeave={() => resetTimerRef.current?.play()}
+                  className="relative overflow-hidden border-2 border-[#0A0A0A] bg-white p-8 sm:p-10 flex flex-col items-center text-center gap-4 shadow-[6px_6px_0px_#0A0A0A] rounded-none animate-in fade-in duration-200"
+                >
+                  {/* Anime.js createTimer cooldown progress bar */}
+                  <div
+                    aria-hidden="true"
+                    className="absolute top-0 left-0 right-0 h-1 bg-[#FFF5F5] border-b border-[#0A0A0A]"
+                  >
+                    <div
+                      ref={resetBarRef}
+                      className="h-full w-full bg-[#E3000F] origin-left"
+                    />
+                  </div>
+
                   {/* 2D Sprite Animated Mail Delivery */}
                   <div className="relative p-3 border-2 border-[#0A0A0A] bg-[#FFF5F5] shadow-[4px_4px_0px_#0A0A0A] flex items-center justify-center">
                     <img
@@ -203,9 +255,20 @@ export default function Contact() {
                     Thank you for reaching out! Your message is safely in my inbox, and a confirmation email has been routed to you. I&apos;ll reply shortly.
                   </p>
 
+                  <span
+                    ref={resetSecondsRef}
+                    className="font-mono text-[11px] font-bold uppercase tracking-wider text-[#666666]"
+                  >
+                    Auto-reset in 5s
+                  </span>
+
                   <button
-                    onClick={() => setStatus("idle")}
-                    className="flex items-center gap-2 px-4 py-2 bg-white text-[#0A0A0A] border-2 border-[#0A0A0A] font-mono text-xs font-bold uppercase shadow-[3px_3px_0px_#0A0A0A] hover:bg-[#FFF5F5] hover:text-[#E3000F] hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[5px_5px_0px_#0A0A0A] transition-all cursor-pointer mt-2"
+                    type="button"
+                    onClick={() => {
+                      resetTimerRef.current?.cancel();
+                      setStatus("idle");
+                    }}
+                    className="flex items-center gap-2 px-4 py-2 bg-white text-[#0A0A0A] border-2 border-[#0A0A0A] font-mono text-xs font-bold uppercase shadow-[3px_3px_0px_#0A0A0A] hover:bg-[#FFF5F5] hover:text-[#E3000F] hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[5px_5px_0px_#0A0A0A] transition-all cursor-pointer mt-1"
                   >
                     <span>← Send Another Message</span>
                   </button>

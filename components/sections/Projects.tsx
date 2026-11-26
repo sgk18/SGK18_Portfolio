@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Github, ExternalLink, BookOpen, ArrowRight } from "lucide-react";
@@ -8,6 +8,7 @@ import CaseStudyModal from "../ui/CaseStudyModal";
 import { caseStudies, CaseStudy } from "@/data/caseStudies";
 import { projects } from "@/data/projects";
 import ScrollReveal from "../ui/ScrollReveal";
+import { gsap, useGSAP, NB_EASE } from "@/lib/utils/motion";
 
 function trackProjectView(projectId: string) {
   fetch("/api/analytics/project", {
@@ -20,8 +21,53 @@ function trackProjectView(projectId: string) {
 export default function Projects() {
   const [activeStudy, setActiveStudy] = useState<CaseStudy | null>(null);
   const [showAll, setShowAll] = useState(false);
+  const gridRef = useRef<HTMLDivElement>(null);
 
   const visibleProjects = showAll ? projects : projects.slice(0, 6);
+
+  useGSAP(
+    () => {
+      const mm = gsap.matchMedia();
+      mm.add("(prefers-reduced-motion: no-preference)", () => {
+        gsap.from(".project-card-initial", {
+          opacity: 0,
+          y: 20,
+          duration: 0.4,
+          stagger: 0.06,
+          ease: NB_EASE,
+          clearProps: "transform,opacity",
+          scrollTrigger: {
+            trigger: gridRef.current,
+            start: "top 85%",
+            once: true,
+          },
+        });
+      });
+    },
+    { scope: gridRef }
+  );
+
+  useGSAP(
+    () => {
+      if (!showAll) return;
+      const mm = gsap.matchMedia();
+      mm.add("(prefers-reduced-motion: no-preference)", () => {
+        gsap.fromTo(
+          ".project-card-extra",
+          { opacity: 0, y: 16 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.35,
+            stagger: 0.05,
+            ease: NB_EASE,
+            clearProps: "transform,opacity",
+          }
+        );
+      });
+    },
+    { dependencies: [showAll], scope: gridRef }
+  );
 
   return (
     <>
@@ -52,13 +98,15 @@ export default function Projects() {
               architecture decisions, database design, and technical challenges.
             </p>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {visibleProjects.map((project) => (
+            <div ref={gridRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {visibleProjects.map((project, idx) => (
                 <article
                   key={project.id}
-                  className="bg-white border-2 border-[#0A0A0A] border-t-4 border-t-[#E3000F]
+                  className={`${
+                    idx < 6 ? "project-card-initial" : "project-card-extra"
+                  } bg-white border-2 border-[#0A0A0A] border-t-4 border-t-[#E3000F]
                              shadow-[6px_6px_0px_#0A0A0A] hover:-translate-x-1 hover:-translate-y-1
-                             hover:shadow-[10px_10px_0px_#0A0A0A] transition-all p-5 flex flex-col gap-4 rounded-none"
+                             hover:shadow-[10px_10px_0px_#0A0A0A] transition-all p-5 flex flex-col gap-4 rounded-none`}
                 >
                   {/* Project visual */}
                   <div

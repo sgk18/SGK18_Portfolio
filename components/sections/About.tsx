@@ -1,14 +1,24 @@
 "use client";
 
+import { useRef, useState } from "react";
 import Image from "next/image";
 import { User, MapPin, Coffee, Trophy } from "lucide-react";
 import ScrollReveal from "../ui/ScrollReveal";
+import { ScrollTrigger, useGSAP } from "@/lib/utils/motion";
+import { useCountUpTimer } from "@/lib/hooks/useCountUpTimer";
 
-const stats = [
-  { label: "Year Coding", value: "1+" },
-  { label: "Projects Built", value: "10+" },
-  { label: "Hackathons", value: "3" },
-  { label: "Cups of Coffee", value: "∞" },
+interface StatItem {
+  label: string;
+  value: string;
+  target: number | null;
+  suffix?: string;
+}
+
+const stats: StatItem[] = [
+  { label: "Year Coding", value: "1+", target: 1, suffix: "+" },
+  { label: "Projects Built", value: "10+", target: 10, suffix: "+" },
+  { label: "Hackathons", value: "3", target: 3 },
+  { label: "Cups of Coffee", value: "∞", target: null },
 ];
 
 const achievements = [
@@ -20,7 +30,47 @@ const achievements = [
   "Finisher — 24-Hour Solo Hackathon, CHRIST × Pod.ai (2026)",
 ];
 
+function StatCard({ stat, active }: { stat: StatItem; active: boolean }) {
+  const valueRef = useCountUpTimer({
+    target: stat.target,
+    suffix: stat.suffix ?? "",
+    active,
+    duration: 850,
+  });
+
+  return (
+    <div className="border-2 border-[#0A0A0A] bg-white p-5 shadow-[4px_4px_0px_#0A0A0A] hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[6px_6px_0px_#0A0A0A] rounded-none transition-all">
+      <p
+        ref={stat.target !== null ? valueRef : undefined}
+        className="text-3xl font-black text-[#E3000F] mb-1 font-mono"
+      >
+        {stat.value}
+      </p>
+      <p className="text-[#0A0A0A] font-bold text-xs uppercase tracking-wider">
+        {stat.label}
+      </p>
+    </div>
+  );
+}
+
 export default function About() {
+  const statsGridRef = useRef<HTMLDivElement>(null);
+  const [statsActive, setStatsActive] = useState(false);
+
+  useGSAP(
+    () => {
+      if (!statsGridRef.current) return;
+      const trigger = ScrollTrigger.create({
+        trigger: statsGridRef.current,
+        start: "top 85%",
+        once: true,
+        onEnter: () => setStatsActive(true),
+      });
+      return () => trigger.kill();
+    },
+    { scope: statsGridRef }
+  );
+
   return (
     <section id="about" className="section-padding bg-[#FFF5F5] border-b-2 border-[#0A0A0A]">
       <ScrollReveal>
@@ -82,15 +132,9 @@ export default function About() {
             {/* Stats & Achievements */}
             <div className="col-span-1 md:col-span-12 lg:col-span-4 space-y-8">
               {/* Stats grid */}
-              <div className="grid grid-cols-2 gap-4">
+              <div ref={statsGridRef} className="grid grid-cols-2 gap-4">
                 {stats.map((stat) => (
-                  <div
-                    key={stat.label}
-                    className="border-2 border-[#0A0A0A] bg-white p-5 shadow-[4px_4px_0px_#0A0A0A] hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[6px_6px_0px_#0A0A0A] rounded-none transition-all"
-                  >
-                    <p className="text-3xl font-black text-[#E3000F] mb-1 font-mono">{stat.value}</p>
-                    <p className="text-[#0A0A0A] font-bold text-xs uppercase tracking-wider">{stat.label}</p>
-                  </div>
+                  <StatCard key={stat.label} stat={stat} active={statsActive} />
                 ))}
               </div>
 
@@ -116,4 +160,3 @@ export default function About() {
     </section>
   );
 }
-

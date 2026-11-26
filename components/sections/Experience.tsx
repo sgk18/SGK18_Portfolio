@@ -1,6 +1,8 @@
 "use client";
 
+import { useRef } from "react";
 import ScrollReveal from "../ui/ScrollReveal";
+import { gsap, useGSAP, NB_EASE } from "@/lib/utils/motion";
 
 type Job = {
   title: string;
@@ -41,6 +43,47 @@ const jobs: Job[] = [
 ];
 
 export default function Experience() {
+  const timelineRef = useRef<HTMLDivElement>(null);
+  const railRef = useRef<HTMLDivElement>(null);
+
+  useGSAP(
+    () => {
+      const mm = gsap.matchMedia();
+
+      mm.add("(prefers-reduced-motion: no-preference)", () => {
+        if (railRef.current) {
+          gsap.from(railRef.current, {
+            scaleY: 0,
+            duration: 0.65,
+            ease: NB_EASE,
+            transformOrigin: "top center",
+            clearProps: "transform",
+            scrollTrigger: {
+              trigger: timelineRef.current,
+              start: "top 82%",
+              once: true,
+            },
+          });
+        }
+
+        gsap.from(".exp-card", {
+          opacity: 0,
+          x: -18,
+          duration: 0.45,
+          stagger: 0.14,
+          ease: NB_EASE,
+          clearProps: "transform,opacity",
+          scrollTrigger: {
+            trigger: timelineRef.current,
+            start: "top 82%",
+            once: true,
+          },
+        });
+      });
+    },
+    { scope: timelineRef }
+  );
+
   return (
     <section id="experience" className="section-padding bg-white border-b-2 border-[#0A0A0A]">
       <ScrollReveal>
@@ -52,9 +95,16 @@ export default function Experience() {
           </div>
 
           {/* Timeline container */}
-          <div className="relative border-l-4 border-[#E3000F] pl-6 ml-2 space-y-10">
+          <div ref={timelineRef} className="relative pl-7 ml-2 space-y-10">
+            {/* Animated vertical timeline rail */}
+            <div
+              ref={railRef}
+              aria-hidden="true"
+              className="absolute left-0 top-0 bottom-0 w-1 bg-[#E3000F] origin-top"
+            />
+
             {jobs.map((job, i) => (
-              <div key={i} className="relative">
+              <div key={i} className="relative exp-card">
                 {/* Timeline dot */}
                 <div className="absolute -left-[32px] top-6 w-3 h-3 bg-[#E3000F] border-2 border-[#0A0A0A] rounded-none" />
 

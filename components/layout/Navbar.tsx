@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import { smoothScrollTo } from "@/lib/utils/smoothScroll";
+import { gsap, ScrollTrigger, useGSAP } from "@/lib/utils/motion";
 
 interface NavItem {
   readonly label: string;
@@ -26,27 +27,74 @@ export default function Navbar() {
   const isHome = pathname === "/";
   const [activeSection, setActiveSection] = useState("");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const progressBarRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (!isHome) return;
-
-    const handleScroll = () => {
-      const sections = navItems.map((l) => l.href.slice(1));
-      for (const id of [...sections].reverse()) {
-        const el = document.getElementById(id);
-        if (el && window.scrollY >= el.offsetTop - 120) {
-          setActiveSection(id);
-          return;
-        }
+  useGSAP(
+    () => {
+      if (progressBarRef.current) {
+        gsap.fromTo(
+          progressBarRef.current,
+          { scaleX: 0 },
+          {
+            scaleX: 1,
+            ease: "none",
+            scrollTrigger: {
+              trigger: document.documentElement,
+              start: "top top",
+              end: "bottom bottom",
+              scrub: 0.12,
+            },
+          }
+        );
       }
-      setActiveSection("");
-    };
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll();
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [isHome]);
 
-  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+      if (!isHome) {
+        setActiveSection("");
+        return;
+      }
+
+      const sectionIds = navItems.map((item) => item.href.slice(1));
+      const triggers: ScrollTrigger[] = [];
+
+      sectionIds.forEach((id) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+
+        triggers.push(
+          ScrollTrigger.create({
+            trigger: el,
+            start: "top 35%",
+            end: "bottom 35%",
+            onEnter: () => setActiveSection(id),
+            onEnterBack: () => setActiveSection(id),
+          })
+        );
+      });
+
+      const heroEl = document.getElementById("hero");
+      if (heroEl) {
+        triggers.push(
+          ScrollTrigger.create({
+            trigger: heroEl,
+            start: "top top",
+            end: "bottom 40%",
+            onEnter: () => setActiveSection(""),
+            onEnterBack: () => setActiveSection(""),
+          })
+        );
+      }
+
+      return () => {
+        triggers.forEach((t) => t.kill());
+      };
+    },
+    { dependencies: [isHome, pathname] }
+  );
+
+  const handleNavClick = (
+    e: React.MouseEvent<HTMLAnchorElement>,
+    href: string
+  ) => {
     if (isHome && href.startsWith("#")) {
       e.preventDefault();
       smoothScrollTo(href);
@@ -80,7 +128,10 @@ export default function Navbar() {
         </Link>
 
         {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-6" aria-label="Desktop Navigation">
+        <nav
+          className="hidden md:flex items-center gap-6"
+          aria-label="Desktop Navigation"
+        >
           {navItems.map((item) => {
             const targetHref = isHome ? item.href : `/${item.href}`;
             const isActive = isHome
@@ -128,6 +179,17 @@ export default function Navbar() {
             {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
         </div>
+      </div>
+
+      {/* Scroll-driven reading progress hairline */}
+      <div
+        aria-hidden="true"
+        className="absolute bottom-0 left-0 right-0 h-[3px] bg-transparent pointer-events-none overflow-hidden"
+      >
+        <div
+          ref={progressBarRef}
+          className="h-full w-full bg-[#E3000F] origin-left scale-x-0"
+        />
       </div>
 
       {/* Mobile Menu Panel */}

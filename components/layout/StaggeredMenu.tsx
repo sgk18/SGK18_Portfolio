@@ -2,7 +2,7 @@
 
 import React, { useCallback, useLayoutEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
-import { smoothScrollTo } from '@/lib/utils/smoothScroll';
+import { smoothScrollTo, stopLenis, startLenis } from '@/lib/utils/smoothScroll';
 
 export interface StaggeredMenuItem {
   label: string;
@@ -306,18 +306,11 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
     if (isFixed && open) {
       const originalOverflow = document.body.style.overflow;
       document.body.style.overflow = "hidden";
-      
-      const lenis = (window as any).__lenis;
-      if (lenis && typeof lenis.stop === "function") {
-        lenis.stop();
-      }
+      stopLenis();
 
       return () => {
         document.body.style.overflow = originalOverflow;
-        const lenis = (window as any).__lenis;
-        if (lenis && typeof lenis.start === "function") {
-          lenis.start();
-        }
+        startLenis();
       };
     }
   }, [open, isFixed]);

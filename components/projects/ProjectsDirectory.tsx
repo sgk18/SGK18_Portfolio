@@ -1,11 +1,12 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { BookOpen, ExternalLink, Github, Search, X } from "lucide-react";
 import type { Project, ProjectCategory } from "@/data/projects";
 import { caseStudies } from "@/data/caseStudies";
+import { gsap, useGSAP, NB_EASE } from "@/lib/utils/motion";
 
 interface ProjectsDirectoryProps {
   readonly projects: readonly Project[];
@@ -31,6 +32,7 @@ function trackProjectView(projectId: string) {
 export default function ProjectsDirectory({ projects }: ProjectsDirectoryProps) {
   const [selectedCategory, setSelectedCategory] = useState<"All" | ProjectCategory>("All");
   const [query, setQuery] = useState("");
+  const gridRef = useRef<HTMLDivElement>(null);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -44,6 +46,28 @@ export default function ProjectsDirectory({ projects }: ProjectsDirectoryProps) 
       );
     });
   }, [projects, selectedCategory, query]);
+
+  useGSAP(
+    () => {
+      if (filtered.length === 0) return;
+      const mm = gsap.matchMedia();
+      mm.add("(prefers-reduced-motion: no-preference)", () => {
+        gsap.fromTo(
+          ".directory-card",
+          { opacity: 0, y: 12 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.28,
+            stagger: 0.035,
+            ease: NB_EASE,
+            clearProps: "transform,opacity",
+          }
+        );
+      });
+    },
+    { dependencies: [selectedCategory, query], scope: gridRef }
+  );
 
   return (
     <div className="space-y-8">
@@ -121,11 +145,11 @@ export default function ProjectsDirectory({ projects }: ProjectsDirectoryProps) 
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div ref={gridRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filtered.map((project) => (
             <article
               key={project.id}
-              className="bg-white border-2 border-[#0A0A0A] border-t-4 border-t-[#E3000F]
+              className="directory-card bg-white border-2 border-[#0A0A0A] border-t-4 border-t-[#E3000F]
                          shadow-[6px_6px_0px_#0A0A0A] hover:-translate-x-1 hover:-translate-y-1
                          hover:shadow-[10px_10px_0px_#0A0A0A] transition-all p-5 flex flex-col gap-4 rounded-none"
             >
